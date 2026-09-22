@@ -1,0 +1,31 @@
+schema: spec-driven
+
+context: |
+  BIDACHAT is a web application for managing chatbots embedded in BI-DATA dashboards.
+  Current target: Version 1 MVP. Read SRS.md for requirements and AGENTS.md for implementation rules.
+  SRS.md version 0.1 is a draft pending approval; never present it as an approved baseline.
+  Stack: Next.js, TypeScript, Tailwind CSS; FastAPI, Python, LangChain, Gemini;
+  PostgreSQL with pgvector; independent JavaScript widget; Docker Compose; REST /api/v1.
+  Use logical services within one backend. Do not add microservices or new infrastructure without need.
+  Technical identifiers and code comments are English. User-facing text and review documents are Spanish.
+  Endpoints stay thin; business logic belongs in backend services. Clients access only the API.
+  Preserve chatbot isolation. Keep credentials in backend environment configuration.
+  docs/database-design.md describes the seven-table initial schema applied locally with Docker Compose.
+  PostgreSQL 16.15 and pgvector 0.8.6 were verified. The local vector dimension is 768;
+  the final embedding model must be selected before processing documents.
+  The user requested scaffolding, a justified database design and local Docker database startup.
+  Do not infer approval of database decisions from the presence of generated artifacts.
+
+rules:
+  proposal:
+    - Distinguish user-authorized scaffolding from database decisions awaiting approval.
+    - Cite existing RF, RNF, RS and CA identifiers where applicable; do not invent requirements.
+  design:
+    - Justify entities, cardinalities, constraints, isolation, deletion and transaction boundaries.
+    - Record unresolved decisions explicitly and link to docs/database-design.md.
+  specs:
+    - Use SHALL or MUST and at least one WHEN/THEN scenario for each requirement.
+    - Keep proposed specifications in the change until approved and implemented.
+  tasks:
+    - Separate completed documentation from approval and future implementation tasks.
+    - Database integration tests must use PostgreSQL with pgvector.

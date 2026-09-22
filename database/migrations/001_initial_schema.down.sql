@@ -1,0 +1,13 @@
+BEGIN;
+
+DROP TABLE IF EXISTS queries;
+DROP TABLE IF EXISTS document_chunks;
+DROP TABLE IF EXISTS documents;
+DROP TABLE IF EXISTS chatbots;
+DROP TABLE IF EXISTS llm_models;
+DROP TABLE IF EXISTS auth_sessions;
+DROP TABLE IF EXISTS users;
+DROP FUNCTION IF EXISTS prevent_llm_model_identity_update();
+DROP EXTENSION IF EXISTS vector;
+
+COMMIT;
