@@ -7,7 +7,7 @@ from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import DEFAULT_EMBEDDING_DIMENSIONS, Settings
-from app.models import Document, DocumentChunk
+from app.models import ChatbotDocument, Document, DocumentChunk
 
 
 class DocumentNotFoundError(Exception):
@@ -195,8 +195,9 @@ class RagKnowledgeService:
                 distance,
             )
             .join(Document, Document.id == DocumentChunk.document_id)
+            .join(ChatbotDocument, ChatbotDocument.document_id == Document.id)
             .where(
-                Document.chatbot_id == chatbot_id,
+                ChatbotDocument.chatbot_id == chatbot_id,
                 Document.status == "ready",
                 Document.embedding_model == self.embedding_model,
                 Document.embedding_dimensions == self.embedding_dimensions,

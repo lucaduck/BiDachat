@@ -4,7 +4,7 @@ Definir el comportamiento persistente mínimo del MVP para conservar configuraci
 
 ## ADDED Requirements
 
-La selección futura entre inferencia externa y Ollama local está registrada en el diseño, pendiente de asignación a una versión y formalización en el SRS. Los requisitos de este delta no incorporan todavía esa ampliación al MVP.
+La selección entre inferencia externa y Ollama local está aprobada para Version 1 y formalizada en el SRS. Este delta conserva únicamente su soporte de persistencia; la ejecución funcional se especifica y planifica en el cambio `add-local-ollama-provider`.
 
 ### Requirement: Administrative access can be revoked
 

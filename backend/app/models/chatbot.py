@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import DateTime, ForeignKey, Text, func
+from sqlalchemy import JSON, DateTime, ForeignKey, Text, func
 from sqlalchemy.dialects.postgresql import UUID as PostgreSQLUUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -32,6 +32,15 @@ class Chatbot(Base):
         Text,
         nullable=False,
         server_default="",
+    )
+    widget_settings: Mapped[dict] = mapped_column(
+        JSON,
+        nullable=False,
+        default=lambda: {
+            "primary_color": "#14a8ce",
+            "icon": "bot",
+            "welcome_message": "Hola, ¿en qué puedo ayudarte con este dashboard?",
+        },
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

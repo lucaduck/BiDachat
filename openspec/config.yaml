@@ -2,8 +2,8 @@ schema: spec-driven
 
 context: |
   BIDACHAT is a web application for managing chatbots embedded in BI-DATA dashboards.
-  Current target: Version 1 MVP. Read SRS.md for requirements and AGENTS.md for implementation rules.
-  SRS.md version 0.1 is a draft pending approval; never present it as an approved baseline.
+  Current target: Complete application. Read SRS.md for requirements and AGENTS.md for implementation rules.
+  SRS.md version 0.2 is the current complete-application baseline; user-approved later requirements take precedence over obsolete plans.
   Stack: Next.js, TypeScript, Tailwind CSS; FastAPI, Python, LangChain, Gemini;
   PostgreSQL with pgvector; independent JavaScript widget; Docker Compose; REST /api/v1.
   Use logical services within one backend. Do not add microservices or new infrastructure without need.
@@ -12,9 +12,9 @@ context: |
   Preserve chatbot isolation. Keep credentials in backend environment configuration.
   docs/database-design.md describes the seven-table initial schema applied locally with Docker Compose.
   PostgreSQL 16.15 and pgvector 0.8.6 were verified. The local vector dimension is 768;
-  the final embedding model must be selected before processing documents.
-  The user requested scaffolding, a justified database design and local Docker database startup.
-  Do not infer approval of database decisions from the presence of generated artifacts.
+  local Ollama embeddings and multimodal providers are already implemented.
+  The user authorized the professionalize-frontend-experience plan and its implementation.
+  Existing changes may contain historical MVP wording; preserve history but target the complete application.
 
 rules:
   proposal:

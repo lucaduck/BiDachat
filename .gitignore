@@ -10,7 +10,8 @@ out/
 coverage/
 *.tsbuildinfo
 widget/dist/*
-!widget/dist/.gitkeep
+frontend/public/bidachat-widget.js
+frontend/public/widget-example.html
 
 # Python artifacts
 __pycache__/
@@ -31,3 +32,7 @@ backups/
 .DS_Store
 Thumbs.db
 .idea/
+
+# ext
+glosario.md
+.impeccable/

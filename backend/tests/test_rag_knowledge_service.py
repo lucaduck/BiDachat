@@ -7,7 +7,7 @@ from sqlalchemy import delete, func, select
 
 from app.core.config import Settings
 from app.database.session import Database
-from app.models import Chatbot, Document, DocumentChunk, LlmModel, User
+from app.models import Chatbot, ChatbotDocument, Document, DocumentChunk, LlmModel, User
 from app.services.rag_knowledge_service import (
     ChunkInput,
     ChunkValidationError,
@@ -119,6 +119,13 @@ async def _exercise_rag_lifecycle(settings: Settings) -> None:
                         media_type="application/pdf",
                         size_bytes=100,
                     ),
+                ]
+            )
+            await session.flush()
+            session.add_all(
+                [
+                    ChatbotDocument(chatbot_id=chatbot_a_id, document_id=document_a_id),
+                    ChatbotDocument(chatbot_id=chatbot_b_id, document_id=document_b_id),
                 ]
             )
             await session.commit()

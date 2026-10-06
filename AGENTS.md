@@ -49,7 +49,7 @@ Chatbots        RAG             Metrics
           +------+------+
           |             |
           v             v
- PostgreSQL          Gemini
+ PostgreSQL          Gemini / etc
  + pgvector
           ^
           |
@@ -102,11 +102,11 @@ Do not invent missing requirements.
 
 ## 4. Version strategy
 
-### 4.1 Version 1 — MVP
+### 4.1 Complete application
 
-Version 1 is the current development target.
+The complete application is the current development target.
 
-It must provide a complete end-to-end flow for the thesis:
+It must preserve the end-to-end flow for the thesis:
 
 ```text
 Login
@@ -147,30 +147,9 @@ Return answer
 Record metrics
 ```
 
-Version 1 includes the functional, non-functional and security requirements defined for the MVP in `SRS.md`.
+The complete application includes the functional, non-functional and security requirements defined in `SRS.md`, together with later requirements explicitly approved by the user and recorded in the SRS.
 
-Functionality has priority over advanced customization.
-
-### 4.2 Version 2 — Complete application
-
-Version 2 represents the future evolution of BIDACHAT after the MVP is stable.
-
-Do not implement Version 2 features unless they have been explicitly approved and incorporated into the requirements.
-
-The agent must not assume that a feature belongs to Version 2 simply because it appears useful.
-
-```text
-Version 1
-   |
-   v
-Stable MVP
-   |
-   v
-Approved new requirements
-   |
-   v
-Version 2
-```
+Do not invent features. Advanced functionality still needs a concrete approved requirement.
 
 ---
 
@@ -180,7 +159,7 @@ BIDACHAT uses a **Service-Oriented Architecture (SOA)**.
 
 SOA does not imply microservices.
 
-For Version 1, logical services may live inside a single FastAPI backend.
+For the complete application, logical services may live inside a single FastAPI backend.
 
 Expected logical separation:
 
@@ -262,7 +241,7 @@ This is not a permanent ban. It means that every additional technology must solv
 
 ## 7. Repository structure
 
-Use a single repository for Version 1.
+Use a single repository for the complete application.
 
 ```text
 BIDACHAT/
@@ -533,7 +512,7 @@ Do not create extra endpoints unless they correspond to a requirement or a neces
 
 ## 10. Implementation rules by module
 
-Version 1 is organized around the approved functional areas.
+The complete application is organized around the approved functional areas.
 
 ### Authentication
 
@@ -658,7 +637,7 @@ Return answer
 - LLM integration must be isolated behind backend code.
 - Frontend and widget must not call the LLM provider directly.
 - Model/provider-specific code should remain separated from general application logic.
-- Do not train a custom LLM as part of Version 1.
+- Do not train a custom LLM unless an approved requirement explicitly requires it.
 
 ---
 
@@ -833,7 +812,7 @@ Before considering a feature complete:
 5. run the affected tests;
 6. verify that existing behavior remains functional.
 
-At minimum, Version 1 should test critical flows for:
+At minimum, the complete application should test critical flows for:
 
 - authentication;
 - chatbot CRUD;
@@ -959,7 +938,7 @@ Every coding agent working on BIDACHAT must follow these rules.
 
 1. Read the related requirement in `SRS.md` before implementing a feature.
 2. Do not invent functional requirements.
-3. Do not implement Version 2 features while working on Version 1 unless explicitly requested and approved.
+3. Implement features for the complete application only when they are explicitly approved and incorporated into `SRS.md`.
 4. Do not redesign the architecture without a concrete requirement.
 5. Do not interpret SOA as a requirement for microservices.
 6. Do not add dependencies only because they are common or fashionable.
@@ -986,8 +965,8 @@ Final rule:
 | Build the simplest implementation that correctly satisfies |
 | the approved requirement.                                  |
 |                                                            |
-| Complete Version 1 end-to-end before adding unnecessary    |
-| product expansion.                                         |
+| Complete each approved end-to-end requirement before adding |
+| further product expansion.                                 |
 |                                                            |
 | Do not add complexity without a concrete requirement.      |
 |                                                            |

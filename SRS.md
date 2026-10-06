@@ -4,9 +4,9 @@
 
 **Documento:** Especificación de Requisitos de Software  
 **Sistema:** BIDACHAT  
-**Versión del documento:** 0.1  
-**Alcance:** Version 1 — MVP de la tesis  
-**Estado:** Aprobado por el usuario para la implementación del MVP el 2026-09-22
+**Versión del documento:** 0.2
+**Alcance:** Versión completa de la tesis
+**Estado:** Aprobado por el usuario para la implementación de la versión completa el 2026-09-30
 
 ---
 
@@ -18,19 +18,19 @@ BIDACHAT es una aplicación web para la gestión y configuración de chatbots or
 
 Este SRS será la referencia para:
 
-- desarrollo de la Version 1 o MVP;
+- desarrollo de la versión completa;
 - diseño de casos de uso;
 - definición de criterios de aceptación;
 - planificación de pruebas;
 - trazabilidad entre requisitos e implementación.
 
-La Version 2 no se especifica todavía en este documento porque aún no existe un conjunto formal aprobado de requisitos adicionales para esa versión.
+Los requisitos adicionales de la versión completa se incorporarán a este documento antes de su implementación para conservar la trazabilidad.
 
 ---
 
 ## 2. Alcance del sistema
 
-### 2.1 Incluido en Version 1
+### 2.1 Incluido en la versión completa
 
 BIDACHAT deberá incluir:
 
@@ -132,17 +132,17 @@ Esta normalización deberá reflejarse posteriormente en la fuente de Notion si 
 | **RF-05** | El sistema deberá permitir consultar los chatbots registrados. |
 | **RF-06** | El sistema deberá permitir editar la configuración de un chatbot. |
 | **RF-07** | El sistema deberá permitir eliminar un chatbot. |
-| **RF-08** | El sistema deberá permitir seleccionar el modelo de lenguaje que utilizará cada chatbot. |
-| **RF-09** | El sistema deberá permitir asociar cada chatbot con sus fuentes de conocimiento. |
+| **RF-08** | El sistema deberá permitir seleccionar, para cada chatbot, el proveedor y modelo de lenguaje que utilizará, incluyendo proveedor externo u Ollama local entre las combinaciones admitidas. |
+| **RF-09** | El sistema deberá permitir asociar y quitar fuentes de conocimiento de cada chatbot sin eliminar los archivos compartidos. Una fuente quitada dejará de recuperarse en las consultas de ese chatbot. |
 | **RF-10** | El sistema deberá generar el mecanismo de integración necesario para incorporar un chatbot en un dashboard. |
 | **RF-11** | El sistema deberá permitir definir instrucciones de comportamiento, rol, tono y reglas de respuesta del chatbot. |
-| **RF-12** | El chatbot deberá poder recibir y procesar imágenes o capturas de pantalla proporcionadas por el usuario final para responder consultas relacionadas con lo que observa en pantalla. |
+| **RF-12** | El chatbot deberá poder recibir y procesar imágenes o capturas de pantalla proporcionadas por el usuario final, incluida una imagen pegada en el campo de pregunta desde el portapapeles, para responder consultas relacionadas con lo que observa en pantalla. |
 
 ## 5.3 Procesamiento documental y RAG
 
 | ID | Requisito |
 |---|---|
-| **RF-13** | El sistema deberá permitir cargar documentos asociados a un chatbot. |
+| **RF-13** | El sistema deberá permitir cargar documentos e imágenes PNG, JPEG o WebP como fuentes de conocimiento asociadas a un chatbot. El contenido visual se describirá antes de generar representaciones semánticas. |
 | **RF-14** | El sistema deberá procesar los documentos cargados para generar las representaciones necesarias para su recuperación semántica. |
 | **RF-15** | El sistema deberá almacenar las representaciones vectoriales generadas a partir de los documentos. |
 | **RF-16** | El sistema deberá recuperar información relevante de las fuentes de conocimiento asociadas al chatbot a partir de la consulta del usuario. |
@@ -166,7 +166,14 @@ Esta normalización deberá reflejarse posteriormente en la fuente de Notion si 
 | **RF-24** | El sistema deberá registrar las consultas realizadas a cada chatbot. |
 | **RF-25** | El sistema deberá registrar el tiempo de respuesta de las consultas. |
 | **RF-26** | El sistema deberá asociar las métricas registradas con el chatbot correspondiente. |
-| **RF-27** | El investigador deberá poder consultar las métricas de uso desde la aplicación web. |
+| **RF-27** | El investigador deberá poder consultar las métricas de uso desde la aplicación web mediante gráficos de consultas, tiempos de respuesta y estados, filtrando por chatbot, periodo o fechas personalizadas y estado, con agrupación diaria, semanal o mensual. |
+
+## 5.6 Personalización y vista previa del widget
+
+| ID | Requisito |
+|---|---|
+| **RF-28** | El investigador deberá poder configurar y conservar el color principal, el icono y el mensaje de bienvenida del widget de cada chatbot. |
+| **RF-29** | El investigador deberá poder revisar una vista previa del widget antes de copiar el mecanismo de integración. |
 
 ---
 
@@ -185,6 +192,8 @@ Esta normalización deberá reflejarse posteriormente en la fuente de Notion si 
 | **RNF-09** | Usabilidad | La interfaz deberá proporcionar retroalimentación visual mientras una consulta se encuentre en procesamiento. |
 | **RNF-10** | Adaptabilidad | La aplicación deberá permitir cambiar la configuración del modelo de lenguaje utilizado por un chatbot sin modificar el dashboard donde se encuentra integrado. |
 | **RNF-11** | Adaptabilidad | El componente de inteligencia artificial deberá permitir ser evaluado mediante los criterios de adaptabilidad establecidos para el trabajo de titulación. |
+| **RNF-12** | Usabilidad | El panel y el flujo de configuración deberán adaptarse a escritorio y móvil, mantener contraste legible y permitir navegación por teclado. |
+| **RNF-13** | Usabilidad | Las rutas no encontradas deberán ofrecer una salida clara hacia el panel. |
 
 > **Nota:** `RNF-05` y `RNF-10` expresan condiciones muy similares desde categorías distintas. Se mantienen porque así constan actualmente en la fuente de requisitos. Su posible consolidación deberá aprobarse antes de eliminar cualquiera de los dos.
 
@@ -291,14 +300,18 @@ Los siguientes casos de uso agrupan los requisitos funcionales en flujos compren
 5. Guarda la configuración.
 6. El sistema utiliza posteriormente dicha configuración al atender consultas.
 
-**Requisitos relacionados:** `RF-08`, `RF-09`, `RF-11`, `RNF-05`, `RNF-10`.
+**Requisitos relacionados:** `RF-08`, `RF-09`, `RF-11`, `RF-28`, `RF-29`, `RNF-05`, `RNF-10`, `RNF-12`.
 
 ### Criterios de aceptación
 
 - **CA-UC03-01:** Cuando el investigador selecciona un modelo de lenguaje válido y guarda la configuración, entonces el chatbot queda asociado a ese modelo.
 - **CA-UC03-02:** Cuando el investigador asocia fuentes de conocimiento y guarda los cambios, entonces estas quedan vinculadas al chatbot correspondiente.
+- **CA-UC03-07:** Cuando el investigador quita una fuente del chatbot, esta deja de formar parte de su recuperación RAG y permanece disponible para volver a asociarla.
 - **CA-UC03-03:** Cuando el investigador define instrucciones de comportamiento y guarda la configuración, entonces estas quedan disponibles para el procesamiento de las consultas.
 - **CA-UC03-04:** Cuando se modifica la configuración del modelo de lenguaje del chatbot, entonces no es necesario modificar el código del dashboard donde está integrado.
+- **CA-UC03-05:** Cuando el investigador guarda la apariencia y el saludo, entonces se conservan con el chatbot y se muestran al volver a editarlo.
+- **CA-UC03-06:** Cuando el investigador abre la vista previa, entonces ve el color, icono y saludo configurados antes de publicar el widget.
+- **CA-UC03-08:** El investigador puede seleccionar propuestas de colores e iconos o usar un color personalizado; la selección se refleja en la vista previa y se conserva al guardar (RF-28).
 
 ## UC-04 — Gestionar documentos y conocimiento RAG
 
@@ -331,6 +344,7 @@ Los siguientes casos de uso agrupan los requisitos funcionales en flujos compren
 ### Criterios de aceptación
 
 - **CA-UC04-01:** Cuando el investigador carga un documento permitido, entonces el sistema lo acepta para procesamiento.
+- **CA-UC04-06:** Cuando el investigador carga una imagen PNG, JPEG o WebP permitida, el sistema genera una descripción textual con el modelo visual local antes de crear sus embeddings.
 - **CA-UC04-02:** Cuando un archivo no cumple el tipo o límites permitidos, entonces el sistema rechaza su incorporación al RAG.
 - **CA-UC04-03:** Después de procesar correctamente un documento, entonces sus representaciones quedan disponibles para recuperación semántica.
 - **CA-UC04-04:** Dado contenido conocido dentro de una fuente asociada, cuando se realiza una consulta relacionada, entonces el sistema puede recuperar contexto procedente de esa fuente.
@@ -425,6 +439,7 @@ Los siguientes casos de uso agrupan los requisitos funcionales en flujos compren
 ### Criterios de aceptación
 
 - **CA-UC07-01:** Cuando el usuario proporciona una imagen admitida junto con una pregunta, entonces el sistema acepta ambos elementos para procesamiento.
+- **CA-UC07-06:** Cuando el usuario pega una imagen en el campo de pregunta, el widget la muestra como adjunto revisable y permite quitarla antes de enviar la consulta.
 - **CA-UC07-02:** Cuando la consulta depende de información visual, entonces el sistema incorpora esa información al contexto enviado al modelo.
 - **CA-UC07-03:** Cuando también existe información documental relacionada, entonces el sistema puede combinar el contexto documental con la información visual disponible.
 - **CA-UC07-04:** Cuando el procesamiento finaliza correctamente, entonces la respuesta se muestra en la interfaz conversacional.
@@ -456,6 +471,9 @@ Los siguientes casos de uso agrupan los requisitos funcionales en flujos compren
 - **CA-UC08-02:** Las métricas mostradas deben estar asociadas al chatbot correspondiente.
 - **CA-UC08-03:** El sistema deberá permitir consultar los tiempos de respuesta registrados.
 - **CA-UC08-04:** Un usuario no autorizado no deberá acceder a las métricas administrativas.
+- **CA-UC08-05:** Los gráficos y totales deben usar los mismos registros y filtros; se pueden consultar periodos de 7, 30 o 90 días, historial completo o fechas personalizadas inclusivas en UTC.
+- **CA-UC08-06:** Las agrupaciones diaria, semanal y mensual muestran periodos sin consultas como cero y tiempos sin medición como no disponibles; los filtros se conservan en la URL.
+- **CA-UC08-07:** La interfaz permite recuperar fallos de carga, informa rangos inválidos y ofrece una tabla accesible con los valores de los gráficos.
 
 ---
 
@@ -474,9 +492,9 @@ Los siguientes casos de uso agrupan los requisitos funcionales en flujos compren
 
 ---
 
-# 10. Criterio general de aceptación de Version 1
+# 10. Criterio general de aceptación de la versión completa
 
-La Version 1 o MVP de BIDACHAT se considerará funcional cuando sea posible completar de extremo a extremo el siguiente flujo:
+La versión completa de BIDACHAT se considerará funcional cuando sea posible completar de extremo a extremo el siguiente flujo:
 
 ```text
 Investigador inicia sesión
@@ -533,10 +551,39 @@ Además:
 2. **RNF-05 y RNF-10:** se mantienen separados aunque actualmente son similares.
 3. **Criterios de aceptación:** los criterios `CA-*` fueron derivados de los requisitos existentes para volverlos verificables. La fuente de Notion establece que las historias de usuario deben tener criterios de aceptación, pero no contiene todavía estos criterios detallados.
 4. **Umbrales de rendimiento:** no se establece un tiempo máximo de respuesta porque la fuente actual no define un valor cuantitativo aprobado.
-5. **Version 2:** se documentará en una revisión posterior del SRS cuando sus funcionalidades adicionales hayan sido aprobadas.
+5. **Alcance de la versión completa:** las funcionalidades adicionales aprobadas deberán documentarse en una revisión posterior de este SRS.
 
 ---
 
 ## Estado del documento
 
-Este documento representa una propuesta inicial de especificación para **Version 1 — MVP** y deberá revisarse antes de considerarse la línea base definitiva de requisitos.
+Este documento representa la línea base de especificación para la **versión completa** de BIDACHAT. Cada nuevo requisito aprobado deberá añadirse aquí antes de implementarse.
+
+
+## Criterios de interfaz autorizados — 5 de octubre de 2026
+
+La solicitud «ejecutalo» autoriza el cambio `professionalize-frontend-experience`.
+Estos criterios amplían la aceptación de RF-01 a RF-10, RF-24 a RF-29 y RNF de
+usabilidad; no añaden otro sistema de analítica ni alteran la arquitectura:
+
+- UI-01: La navegación muestra sección, chatbot y paso actual y admite acceso directo, recarga y historial.
+- UI-02: El retorno desde vista previa conserva el editor y la sesión vigente; una reautenticación mantiene un destino interno válido.
+- UI-03: Los borradores requieren confirmación antes de descartarse; las rutas inválidas o eliminadas ofrecen una recuperación válida.
+- UI-04: Ambos temas comparten componentes, estados legibles, foco visible y preferencia persistente; navegación y formularios se adaptan a móvil.
+- UI-05: El resumen compara consultas por chatbot y resultados mediante agregados reales del mismo periodo; no genera series inexistentes.
+- UI-06: La vista visual reutiliza el widget real, distingue apariencia de prueba conversacional y conserva fuentes compartidas al quitar una asociación.
+- UI-07: Enlaces, recursos y script generado se verifican mediante recorridos de navegador e integración externa independiente, incluyendo errores y permisos denegados.
+
+La especificación detallada, escenarios y matriz L01–L18 se conservan en
+`openspec/changes/professionalize-frontend-experience/`.
+
+### Identidad del panel — 6 de octubre de 2026
+
+El usuario aprobó el panel de referencia y el logo
+`docs/brand/Logotipo BC de Circuito Futurista.png` para la identidad administrativa.
+El panel incorpora la marca desvanecida del lateral, el lema «Datos que conversan»
+y el bloque institucional BI-DATA, adaptados a los temas claro y oscuro.
+El listado presenta la actividad acumulada mediante métricas existentes y un
+acceso funcional para crear chatbots; los valores de la maqueta no son datos del sistema.
+
+**Identidad por tema — 6 de octubre de 2026:** El panel usa «Logotipo BC de Circuitos Tecnológicos.png» en modo claro y «Logotipo BC de Circuito Futurista.png» en modo oscuro, incluidos sus usos en la marca BIDACHAT y el bloque BI-DATA. El lema «Datos que conversan» conserva el estilo manuscrito, inclinado, de dos líneas y con subrayado turquesa de la referencia aportada.

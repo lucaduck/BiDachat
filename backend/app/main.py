@@ -3,6 +3,7 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api.router import router
@@ -33,6 +34,18 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         lifespan=lifespan,
     )
     application.state.settings = settings
+    allowed_origins = [
+        origin.strip()
+        for origin in settings.widget_allowed_origins.split(",")
+        if origin.strip()
+    ]
+    if allowed_origins:
+        application.add_middleware(
+            CORSMiddleware,
+            allow_origins=allowed_origins,
+            allow_methods=["POST", "OPTIONS"],
+            allow_headers=["Content-Type"],
+        )
     if settings.database_url is not None:
         application.state.database = Database.from_settings(settings)
     application.include_router(router, prefix="/api/v1")

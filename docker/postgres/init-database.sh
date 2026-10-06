@@ -18,3 +18,18 @@ psql --set ON_ERROR_STOP=1 \
   --username "$POSTGRES_USER" \
   --dbname "$POSTGRES_DB" \
   --file /migrations/001_initial_schema.up.sql
+
+psql --set ON_ERROR_STOP=1 \
+  --username "$POSTGRES_USER" \
+  --dbname "$POSTGRES_DB" \
+  --file /migrations/002_login_attempts.up.sql
+
+psql --set ON_ERROR_STOP=1 \
+  --username "$POSTGRES_USER" \
+  --dbname "$POSTGRES_DB" \
+  --file /migrations/003_widget_settings.up.sql
+
+psql --set ON_ERROR_STOP=1 \
+  --username "$POSTGRES_USER" \
+  --dbname "$POSTGRES_DB" \
+  --file /migrations/004_chatbot_document_associations.up.sql

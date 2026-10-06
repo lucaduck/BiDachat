@@ -97,6 +97,11 @@ async def _exercise_chatbot_crud(settings: Settings) -> None:
                         "description": "Indicadores institucionales",
                         "behavior_instructions": "Responde de forma concisa.",
                         "configured_llm_model_id": str(first_model_id),
+                        "widget_settings": {
+                            "primary_color": "#135bec",
+                            "icon": "chart",
+                            "welcome_message": "Consulta los indicadores financieros.",
+                        },
                     },
                 )
                 assert create_response.status_code == 201
@@ -104,6 +109,7 @@ async def _exercise_chatbot_crud(settings: Settings) -> None:
                 chatbot_id = created["id"]
                 assert created["created_by"] == str(user_id)
                 assert created["configured_llm_model"]["id"] == str(first_model_id)
+                assert created["widget_settings"]["primary_color"] == "#135bec"
 
                 assert (
                     await client.get(f"/api/v1/chatbots/{chatbot_id}/metrics")
@@ -125,6 +131,7 @@ async def _exercise_chatbot_crud(settings: Settings) -> None:
                     headers=headers,
                 )
                 assert get_response.status_code == 200
+                assert get_response.json()["widget_settings"]["icon"] == "chart"
 
                 update_response = await client.put(
                     f"/api/v1/chatbots/{chatbot_id}",
@@ -141,6 +148,48 @@ async def _exercise_chatbot_crud(settings: Settings) -> None:
                 assert updated["id"] == chatbot_id
                 assert updated["name"] == "Dashboard financiero actualizado"
                 assert updated["configured_llm_model"]["id"] == str(second_model_id)
+                assert updated["widget_settings"]["primary_color"] == "#135bec"
+
+                # RF-28: new appearance choices must survive API persistence.
+                for icon in ("book", "sparkles", "headset"):
+                    appearance_response = await client.put(
+                        f"/api/v1/chatbots/{chatbot_id}",
+                        headers=headers,
+                        json={
+                            "name": updated["name"],
+                            "configured_llm_model_id": str(second_model_id),
+                            "widget_settings": {
+                                "primary_color": "#e45756",
+                                "icon": icon,
+                                "welcome_message": "Consulta tus indicadores.",
+                            },
+                        },
+                    )
+                    assert appearance_response.status_code == 200
+                    restored_response = await client.get(
+                        f"/api/v1/chatbots/{chatbot_id}", headers=headers
+                    )
+                    assert restored_response.status_code == 200
+                    assert restored_response.json()["widget_settings"] == {
+                        "primary_color": "#e45756",
+                        "icon": icon,
+                        "welcome_message": "Consulta tus indicadores.",
+                    }
+
+                invalid_color_response = await client.put(
+                    f"/api/v1/chatbots/{chatbot_id}",
+                    headers=headers,
+                    json={
+                        "name": "Dashboard financiero actualizado",
+                        "configured_llm_model_id": str(second_model_id),
+                        "widget_settings": {
+                            "primary_color": "javascript:alert(1)",
+                            "icon": "bot",
+                            "welcome_message": "Hola",
+                        },
+                    },
+                )
+                assert invalid_color_response.status_code == 422
 
                 invalid_model_response = await client.put(
                     f"/api/v1/chatbots/{chatbot_id}",

@@ -4,7 +4,13 @@ Aplicación web para gestionar chatbots que ayudan a interpretar dashboards de B
 
 ## Estado actual
 
-Repositorio inicializado con OpenSpec, estructura del MVP, base PostgreSQL + pgvector y aplicación FastAPI ejecutables en Docker. El esquema inicial de siete tablas está aplicado en el contenedor local. El backend ofrece salud HTTP, documentación API, conexión asíncrona, modelos de persistencia, sesiones administrativas revocables, CRUD/configuración básica de chatbots, carga documental privada, publicación/recuperación RAG aislada por chatbot y métricas administrativas agregadas. Quedan pendientes el flujo conversacional con LLM, el widget, la interfaz web y el borrado coordinado con el volumen. El SRS fue aprobado por el usuario como referencia de implementación del MVP el 2026-09-22.
+El repositorio contiene frontend Next.js, backend FastAPI y PostgreSQL + pgvector
+en Docker Compose. El panel administra chatbots y documentos; el widget público
+envía consultas de texto o captura, recupera contexto por chatbot y responde
+mediante Gemini, Ollama, OpenAI u OpenRouter configurado. Los documentos se procesan al cargarlos.
+Para usarlo hay que configurar credenciales de administrador y al menos un
+proveedor en `.env`. La integración Docker completa requiere Docker Desktop
+activo para verificarse en este equipo.
 
 El documento principal para revisar es [Diseño de base de datos](docs/database-design.md): contiene siete tablas, diagrama de relaciones, diccionario de datos, justificaciones, aislamiento, borrado, métricas y decisiones pendientes.
 
@@ -45,15 +51,45 @@ BIDACHAT/
 └── .agents/skills/openspec-*/
 ```
 
-Los archivos `.gitkeep` conservan en Git las carpetas vacías. Consulta [la responsabilidad de cada carpeta](docs/project-structure.md). `docker-compose.yml` levanta la base de datos y el backend FastAPI.
+Consulta [la responsabilidad de cada carpeta](docs/project-structure.md). `docker-compose.yml` levanta la base de datos, el backend FastAPI, el frontend y Ollama con GPU.
 
 ## API local
+
+Para probar el sistema completo, copia `.env.example` a `.env`, configura
+`POSTGRES_PASSWORD`, `ADMIN_EMAIL` y `ADMIN_PASSWORD`. Para el perfil local,
+descarga primero los modelos de Ollama y arranca:
+
+```powershell
+docker compose up -d ollama
+docker compose exec ollama ollama pull embeddinggemma:300m
+docker compose exec ollama ollama pull qwen3-vl:2b
+docker compose up -d --build
+```
+
+Abre `http://localhost:3000`, inicia sesión, crea un chatbot y copia su script
+de integración. Prueba visualmente el widget en
+`http://localhost:3000/widget-example.html?chatbot_id=UUID` con el UUID creado.
+Si cambias `FRONTEND_PORT`, usa ese puerto. El perfil `EMBEDDING_PROVIDER=ollama` permite documentos y búsqueda semántica
+sin clave Gemini. Consulta [la guía del frontend](frontend/README.md).
+
+Para usar un modelo de consumo mediante OpenRouter, añadir en `.env`:
+
+```text
+OPENROUTER_API_KEY=clave_privada
+OPENROUTER_MODEL=proveedor/modelo
+OPENROUTER_SITE_URL=http://localhost:3000
+```
+
+Después ejecutar `docker compose up -d --build backend`, abrir **Configuración**
+y seleccionar el modelo `openrouter` al crear o editar el chatbot. La clave se
+queda dentro del backend.
 
 ```powershell
 docker compose up -d --build backend
 ```
 
 API: <http://localhost:8000/api/v1/health>. Documentación: <http://localhost:8000/api/v1/docs>. Consulta [configuración, desarrollo y pruebas del backend](backend/README.md).
+El catálogo de rutas está en [docs/api-routes.md](docs/api-routes.md).
 
 En el equipo actual, el `.env` selecciona el puerto **8001** porque 8000 está ocupado: [salud](http://localhost:8001/api/v1/health) y [documentación](http://localhost:8001/api/v1/docs).
 
@@ -103,3 +139,13 @@ La existencia de artefactos o una validación exitosa de OpenSpec verifica estru
 - [desing.md](desing.md): guía visual existente; se conserva su nombre original.
 - [Diseño de base de datos](docs/database-design.md): propuesta técnica pendiente de aprobación.
 - [Revisión de inicialización](docs/initialization-review.md): comprobaciones y límites de esta entrega.
+
+### IA local
+
+Configuración y operación: [Ollama local](docs/local-ollama.md).
+
+### Integración y despliegue
+
+El flujo de GitHub usa `develop` para integración y `production` para publicar
+las imágenes y desplegar una versión aprobada. La configuración del servidor,
+las ramas y los secretos necesarios está en [la guía de GitHub Actions](docs/deployment/github-actions.md).

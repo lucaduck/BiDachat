@@ -38,6 +38,9 @@ def test_document_validation_supports_approved_formats(tmp_path: Path):
         ),
         UploadDocument("report.txt", "text/plain", b"Contenido UTF-8"),
         UploadDocument("report.csv", "text/csv", b"metric,value\nqueries,10\n"),
+        UploadDocument("chart.png", "image/png", b"\x89PNG\r\n\x1a\nimage"),
+        UploadDocument("chart.jpg", "image/jpeg", b"\xff\xd8\xffimage"),
+        UploadDocument("chart.webp", "image/webp", b"RIFFxxxxWEBPimage"),
     ]
 
     for upload in uploads:
@@ -51,11 +54,27 @@ def test_document_validation_supports_approved_formats(tmp_path: Path):
         service._validate_upload(
             UploadDocument("not-a-pdf.pdf", "application/pdf", b"not a pdf")
         )
+    with pytest.raises(DocumentUploadValidationError):
+        service._validate_upload(
+            UploadDocument("not-an-image.png", "image/png", b"not a png")
+        )
+    with pytest.raises(DocumentUploadValidationError):
+        service._validate_upload(
+            UploadDocument(
+                "large.png",
+                "image/png",
+                b"\x89PNG\r\n\x1a\n" + b"x" * (4 * 1024 * 1024),
+            )
+        )
 
 
 @pytest.mark.integration
 def test_document_upload_and_association_are_authenticated_and_isolated(tmp_path: Path):
-    settings = Settings(document_storage_path=tmp_path)
+    settings = Settings(
+        document_storage_path=tmp_path,
+        embedding_provider="gemini",
+        gemini_api_key=None,
+    )
     if settings.database_url is None:
         pytest.skip("DATABASE_URL is not configured")
 
@@ -152,8 +171,25 @@ async def _exercise_document_api(settings: Settings, storage_path: Path) -> None
                 assert accepted.status_code == 201
                 uploaded = accepted.json()
                 assert uploaded["chatbot_id"] == str(chatbot_a_id)
-                assert uploaded["status"] == "pending"
+                assert uploaded["status"] == "failed"
+                assert uploaded["error_code"] == "embedding_not_configured"
                 assert uploaded["original_filename"] == "report.txt"
+                assert len(list(storage_path.iterdir())) == 1
+
+                retry_url = (
+                    f"/api/v1/chatbots/{chatbot_a_id}/documents/"
+                    f"{uploaded['id']}/processing"
+                )
+                assert (await client.post(retry_url)).status_code == 401
+                wrong_chatbot_retry = await client.post(
+                    f"/api/v1/chatbots/{chatbot_b_id}/documents/"
+                    f"{uploaded['id']}/processing",
+                    headers=headers,
+                )
+                assert wrong_chatbot_retry.status_code == 404
+                retried = await client.post(retry_url, headers=headers)
+                assert retried.status_code == 200
+                assert retried.json()["error_code"] == "embedding_not_configured"
                 assert len(list(storage_path.iterdir())) == 1
 
                 oversized = await client.post(
@@ -186,6 +222,28 @@ async def _exercise_document_api(settings: Settings, storage_path: Path) -> None
                 listed = await client.get(upload_url, headers=headers)
                 assert listed.status_code == 200
                 assert [item["id"] for item in listed.json()] == [uploaded["id"]]
+
+                association_url = f"{upload_url}/{uploaded['id']}"
+                assert (await client.delete(association_url)).status_code == 401
+                assert (
+                    await client.delete(association_url, headers=headers)
+                ).status_code == 204
+                assert (await client.get(upload_url, headers=headers)).json() == []
+                assert (
+                    await client.delete(association_url, headers=headers)
+                ).status_code == 404
+                available = await client.get("/api/v1/documents", headers=headers)
+                assert any(item["id"] == uploaded["id"] for item in available.json())
+                reassociated = await client.post(
+                    f"{upload_url}/associations",
+                    headers=headers,
+                    json={"document_ids": [uploaded["id"]]},
+                )
+                assert reassociated.status_code == 200
+                assert [
+                    item["id"]
+                    for item in (await client.get(upload_url, headers=headers)).json()
+                ] == [uploaded["id"]]
         finally:
             async with database.session() as session:
                 await session.execute(

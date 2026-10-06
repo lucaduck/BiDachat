@@ -3,6 +3,12 @@
 El diseño principal está en [docs/database-design.md](../docs/database-design.md). Contiene entidades, relaciones, restricciones, justificación, operación Docker y decisiones aprobadas para el MVP.
 
 - `migrations/`: migración inicial SQL de creación y reversión del esquema.
+
+La migración `003_widget_settings.up.sql` añade la personalización visual del
+widget al chatbot. Los volúmenes nuevos la ejecutan durante la inicialización.
+Para un volumen existente, aplicar una vez el archivo con `psql` antes de
+actualizar el backend; no se debe reiniciar la migración sobre una base ya
+migrada. La migración de reversión elimina esa configuración y sus datos.
 - `seeds/`: inicialización controlada sin secretos ni datos privados versionados.
 - `tests/`: comprobaciones de integridad ejecutadas dentro de PostgreSQL y revertidas al finalizar.
 

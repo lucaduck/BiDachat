@@ -5,7 +5,11 @@ description = "BIDACHAT REST API"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.115,<1",
+    "httpx>=0.28,<1",
+    "langchain-text-splitters>=0.3,<2",
     "pgvector>=0.3,<1",
+    "pypdf>=5,<7",
+    "python-docx>=1.1,<2",
     "pydantic-settings>=2.7,<3",
     "python-multipart>=0.0.20,<1",
     "psycopg[binary]>=3.2,<4",

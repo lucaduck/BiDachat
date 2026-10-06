@@ -28,9 +28,11 @@ def test_all_migration_tables_have_models():
     assert set(User.metadata.tables) == {
         "auth_sessions",
         "chatbots",
+        "chatbot_documents",
         "document_chunks",
         "documents",
         "llm_models",
+        "login_attempts",
         "queries",
         "users",
     }

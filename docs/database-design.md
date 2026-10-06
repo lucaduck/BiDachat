@@ -188,7 +188,7 @@ Las credenciales del proveedor externo y la dirección del servicio Ollama perma
 | `created_at`              | timestamptz | DEFAULT now()                                                        |
 | `updated_at`              | timestamptz | DEFAULT now(); actualización explícita                               |
 
-El modelo generativo seleccionado es independiente del modelo de embeddings. Cambiar `configured_llm_model_id` no modifica el identificador del widget ni obliga por sí mismo a reindexar documentos. Para V1 puede existir inicialmente una combinación Gemini; Ollama se habilitará cuando la versión correspondiente formalice y pruebe esa capacidad.
+El modelo generativo seleccionado es independiente del modelo de embeddings. Cambiar `configured_llm_model_id` no modifica el identificador del widget ni obliga por sí mismo a reindexar documentos. Version 1 admite proveedor externo y Ollama local; su ejecución se formaliza y prueba en el cambio `add-local-ollama-provider`.
 
 El snippet del widget se deriva del identificador y de las URLs de despliegue: no necesita tabla ni token secreto. Conocer este identificador permite llamar al endpoint público; las rutas administrativas siempre requieren sesión y los controles de abuso se aplican en backend.
 
@@ -391,7 +391,7 @@ El usuario aprobó estas decisiones el 2026-09-22. Los documentos son exclusivos
 
 ## 12. Decisión integrada: inferencia seleccionable
 
-**Decisión del usuario:** la inferencia podrá ejecutarse con un proveedor externo de IA o con un modelo local mediante Ollama. Ambas opciones serán seleccionables en la configuración del chatbot. El diseño incorpora `llm_models` para representar las combinaciones admitidas; la habilitación funcional de Ollama en V1 o V2 continúa pendiente de definición.
+**Decisión del usuario:** la inferencia podrá ejecutarse con un proveedor externo de IA o con un modelo local mediante Ollama. Ambas opciones serán seleccionables en la configuración del chatbot durante Version 1. El diseño incorpora `llm_models` para representar las combinaciones admitidas; la implementación se planifica en `add-local-ollama-provider`.
 
 Redacción del requisito para incorporar a la versión correspondiente:
 

@@ -11,7 +11,7 @@ BIDACHAT necesita definir cómo persisten usuarios, configuración, conocimiento
 
 La inicialización de OpenSpec y las carpetas fueron autorizadas por el usuario. El 2026-09-16 también solicitó levantar la base local: el esquema inicial está aplicado en Docker y pasó pruebas SQL. El 2026-09-22 el usuario aprobó el SRS 0.1 como referencia de implementación del MVP y las políticas de documentos, permisos, borrado, retención y métricas; no se declara implementado el MVP completo.
 
-El usuario definió inferencia seleccionable por chatbot entre proveedor externo y Ollama local. El diseño incorpora una tabla `llm_models` con `provider` y `model`; la versión en que Ollama quedará habilitado funcionalmente sigue pendiente.
+El usuario aprobó inferencia seleccionable por chatbot entre proveedor externo y Ollama local para Version 1. El diseño incorpora una tabla `llm_models` con `provider` y `model`; la habilitación funcional se planifica en el cambio `add-local-ollama-provider`.
 
 ## Capabilities
 

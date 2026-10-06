@@ -25,7 +25,7 @@ from app.schemas.chatbot import (
     ChatbotUpdate,
     LlmModelResponse,
 )
-from app.schemas.document import DocumentResponse
+from app.schemas.document import DocumentAssociationCreate, DocumentResponse
 from app.schemas.metrics import MetricsResponse
 from app.services.chatbot_deletion_service import (
     ChatbotDeletionNotFoundError,
@@ -37,6 +37,7 @@ from app.services.chatbot_service import (
     ChatbotService,
     LlmModelNotFoundError,
 )
+from app.services.document_processing_service import DocumentProcessingService
 from app.services.document_service import (
     ChatbotDocumentNotFoundError,
     DocumentService,
@@ -45,11 +46,26 @@ from app.services.document_service import (
 )
 from app.services.metrics_service import (
     ChatbotMetricsNotFoundError,
+    MetricsInterval,
     MetricsPeriodValidationError,
     MetricsService,
+    MetricsStatus,
 )
+from app.services.rag_knowledge_service import DocumentStateError
 
 router = APIRouter(tags=["chatbots"])
+
+
+@router.get("/documents", response_model=list[DocumentResponse])
+async def list_available_documents(
+    request: Request,
+    _: Annotated[CurrentSession, Depends(get_current_session)],
+    session: Annotated[AsyncSession, Depends(get_database_session)],
+) -> list[DocumentResponse]:
+    documents = await DocumentService(
+        request.app.state.settings
+    ).list_available_documents(session)
+    return [DocumentResponse.model_validate(document) for document in documents]
 
 
 @router.get("/llm-models", response_model=list[LlmModelResponse])
@@ -88,6 +104,7 @@ async def create_chatbot(
             name=payload.name,
             description=payload.description,
             behavior_instructions=payload.behavior_instructions,
+            widget_settings=payload.widget_settings.model_dump(),
         )
     except LlmModelNotFoundError as exc:
         raise _llm_model_not_found() from exc
@@ -123,6 +140,11 @@ async def update_chatbot(
             name=payload.name,
             description=payload.description,
             behavior_instructions=payload.behavior_instructions,
+            widget_settings=(
+                payload.widget_settings.model_dump()
+                if payload.widget_settings is not None
+                else None
+            ),
         )
     except ChatbotNotFoundError as exc:
         raise _chatbot_not_found() from exc
@@ -199,7 +221,86 @@ async def upload_document(
             detail="El documento no cumple el tipo, contenido o tamaño permitido.",
         ) from exc
     await session.commit()
-    return DocumentResponse.model_validate(document)
+    processed = await DocumentProcessingService(request.app.state.settings).process(
+        session, document=document, chatbot_id=chatbot_id
+    )
+    return DocumentResponse.model_validate(processed)
+
+
+@router.post(
+    "/chatbots/{chatbot_id}/documents/associations",
+    response_model=list[DocumentResponse],
+)
+async def associate_documents(
+    chatbot_id: UUID,
+    payload: DocumentAssociationCreate,
+    request: Request,
+    _: Annotated[CurrentSession, Depends(get_current_session)],
+    session: Annotated[AsyncSession, Depends(get_database_session)],
+) -> list[DocumentResponse]:
+    try:
+        documents = await DocumentService(
+            request.app.state.settings
+        ).associate_documents(
+            session, chatbot_id=chatbot_id, document_ids=payload.document_ids
+        )
+    except ChatbotDocumentNotFoundError as exc:
+        raise HTTPException(
+            status_code=404, detail="El chatbot o documento no existe."
+        ) from exc
+    await session.commit()
+    return [DocumentResponse.model_validate(document) for document in documents]
+
+
+@router.delete(
+    "/chatbots/{chatbot_id}/documents/{document_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def remove_document_association(
+    chatbot_id: UUID,
+    document_id: UUID,
+    request: Request,
+    _: Annotated[CurrentSession, Depends(get_current_session)],
+    session: Annotated[AsyncSession, Depends(get_database_session)],
+) -> Response:
+    try:
+        await DocumentService(request.app.state.settings).remove_association(
+            session, chatbot_id=chatbot_id, document_id=document_id
+        )
+    except ChatbotDocumentNotFoundError as exc:
+        raise HTTPException(status_code=404, detail="La asociación no existe.") from exc
+    await session.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.post(
+    "/chatbots/{chatbot_id}/documents/{document_id}/processing",
+    response_model=DocumentResponse,
+)
+async def retry_document_processing(
+    chatbot_id: UUID,
+    document_id: UUID,
+    request: Request,
+    _: Annotated[CurrentSession, Depends(get_current_session)],
+    session: Annotated[AsyncSession, Depends(get_database_session)],
+) -> DocumentResponse:
+    try:
+        document = await DocumentService(request.app.state.settings).get_document(
+            session,
+            chatbot_id=chatbot_id,
+            document_id=document_id,
+        )
+        processed = await DocumentProcessingService(request.app.state.settings).process(
+            session, document=document, chatbot_id=chatbot_id
+        )
+    except ChatbotDocumentNotFoundError as exc:
+        raise HTTPException(status_code=404, detail="El documento no existe.") from exc
+    except DocumentStateError as exc:
+        raise HTTPException(
+            status_code=409,
+            detail="Solo se puede reintentar un documento pendiente o fallido.",
+        ) from exc
+    return DocumentResponse.model_validate(processed)
 
 
 @router.get(
@@ -212,6 +313,9 @@ async def get_chatbot_metrics(
     session: Annotated[AsyncSession, Depends(get_database_session)],
     started_at: datetime | None = None,
     ended_at: datetime | None = None,
+    interval: MetricsInterval = "day",
+    query_status: MetricsStatus | None = None,
+    include_series: bool = False,
 ) -> MetricsResponse:
     try:
         metrics = await MetricsService().get_metrics(
@@ -219,13 +323,19 @@ async def get_chatbot_metrics(
             chatbot_id=chatbot_id,
             started_at=started_at,
             ended_at=ended_at,
+            interval=interval,
+            status=query_status,
+            include_series=include_series,
         )
     except ChatbotMetricsNotFoundError as exc:
         raise _chatbot_not_found() from exc
     except MetricsPeriodValidationError as exc:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail="El periodo de mÃ©tricas no es vÃ¡lido.",
+            detail=(
+                "Selecciona fechas con zona horaria, un rango válido "
+                "y una agrupación de hasta 1000 periodos."
+            ),
         ) from exc
     return MetricsResponse.model_validate(metrics, from_attributes=True)
 
@@ -238,6 +348,7 @@ def _to_response(details: ChatbotDetails) -> ChatbotResponse:
         name=chatbot.name,
         description=chatbot.description,
         behavior_instructions=chatbot.behavior_instructions,
+        widget_settings=chatbot.widget_settings,
         configured_llm_model=LlmModelResponse.model_validate(details.llm_model),
         created_at=chatbot.created_at,
         updated_at=chatbot.updated_at,

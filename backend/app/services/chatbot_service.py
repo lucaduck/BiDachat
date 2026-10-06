@@ -65,6 +65,7 @@ class ChatbotService:
         name: str,
         description: str | None,
         behavior_instructions: str,
+        widget_settings: dict,
     ) -> ChatbotDetails:
         llm_model = await self._get_llm_model(session, configured_llm_model_id)
         chatbot = Chatbot(
@@ -73,6 +74,7 @@ class ChatbotService:
             name=name.strip(),
             description=_normalize_optional_text(description),
             behavior_instructions=behavior_instructions.strip(),
+            widget_settings=widget_settings,
         )
         session.add(chatbot)
         await session.flush()
@@ -87,6 +89,7 @@ class ChatbotService:
         name: str,
         description: str | None,
         behavior_instructions: str,
+        widget_settings: dict | None,
     ) -> ChatbotDetails:
         chatbot = await session.get(Chatbot, chatbot_id)
         if chatbot is None:
@@ -97,6 +100,8 @@ class ChatbotService:
         chatbot.name = name.strip()
         chatbot.description = _normalize_optional_text(description)
         chatbot.behavior_instructions = behavior_instructions.strip()
+        if widget_settings is not None:
+            chatbot.widget_settings = widget_settings
         chatbot.updated_at = datetime.now(UTC)
         await session.flush()
         return ChatbotDetails(chatbot=chatbot, llm_model=llm_model)

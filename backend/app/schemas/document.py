@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class DocumentResponse(BaseModel):
@@ -17,3 +17,7 @@ class DocumentResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     processed_at: datetime | None
+
+
+class DocumentAssociationCreate(BaseModel):
+    document_ids: list[UUID] = Field(min_length=1, max_length=100)

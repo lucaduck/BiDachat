@@ -8,7 +8,7 @@
 
 - [x] 2.1 Registrar aprobación o correcciones del SRS y de las decisiones de la sección 11 de docs/database-design.md; verificar constancia explícita del usuario y actualizar propuesta/specs si cambia su alcance. El usuario aprobó el SRS 0.1 y las decisiones el 2026-09-22.
 - [x] 2.2 Seleccionar el modelo de embeddings y comprobar compatibilidad con la dimensión local 768 o migrarla; verificar igualdad de perfil entre vectores documentales y de consulta antes de procesar conocimiento. Se seleccionó `gemini-embedding-2`/768 y el servicio rechaza perfiles documentales o de consulta incompatibles. PostgreSQL 16.15 y pgvector 0.8.6 ya fueron verificados.
-- [ ] 2.3 Registrar en qué versión se incorporará la inferencia seleccionable entre proveedor externo y Ollama local; verificar la decisión del usuario y formalizar requisito, escenarios y tareas en el cambio correspondiente antes de implementar esa ampliación.
+- [x] 2.3 Registrar en qué versión se incorporará la inferencia seleccionable entre proveedor externo y Ollama local; verificar la decisión del usuario y formalizar requisito, escenarios y tareas en el cambio correspondiente antes de implementar esa ampliación. El usuario aprobó Ollama local en Version 1 y se creó `add-local-ollama-provider`.
 
 ## 3. Esquema local y persistencia de aplicación
 

@@ -1,0 +1,227 @@
+.login-page {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding: 28px 40px;
+  background: var(--canvas);
+}
+.login-brand {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.login-theme-toggle {
+  flex: none;
+}
+.login-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 0;
+}
+.login-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  width: 100%;
+  max-width: 1100px;
+  padding: 24px;
+  background: var(--surface);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgb(6 24 38 / 12%);
+}
+.login-card::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: auto auto 0 0;
+  width: 43%;
+  height: 66%;
+  background: var(--primary);
+  border-top-right-radius: 100%;
+}
+.login-card::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0 0 auto auto;
+  width: 110px;
+  height: 110px;
+  background: var(--primary);
+  border-bottom-left-radius: 100%;
+}
+.login-identity {
+  display: grid;
+  place-items: center;
+  align-self: stretch;
+  min-width: 0;
+  background: #071221;
+  border-radius: 8px 160px 8px 8px;
+  overflow: hidden;
+}
+.login-logo {
+  display: block;
+  width: 100%;
+  max-width: 480px;
+  height: auto;
+  object-fit: contain;
+}
+.login-form-panel {
+  align-self: center;
+  min-width: 0;
+  padding: 56px 44px;
+}
+.login-form-panel h1 {
+  font-size: clamp(28px, 2.5vw, 36px);
+  line-height: 1.2;
+}
+.login-form-panel > p {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 14px 0 32px;
+}
+.login-form-panel > .alert {
+  margin-bottom: 20px;
+}
+.login-form-panel .input {
+  min-height: 48px;
+  border-radius: 24px;
+  background: var(--surface-muted);
+  padding-inline: 18px 48px;
+}
+.login-email-field,
+.password-field {
+  position: relative;
+}
+.login-email-field > .icon {
+  position: absolute;
+  right: 16px;
+  bottom: 14px;
+  color: var(--muted);
+  pointer-events: none;
+}
+.password-toggle {
+  position: absolute;
+  right: 6px;
+  bottom: 4px;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+}
+.password-toggle:hover {
+  background: var(--subtle);
+  color: var(--link);
+}
+.login-submit {
+  min-height: 48px;
+  margin-top: 8px;
+  border-radius: 24px;
+  font-size: 14px;
+}
+.login-access-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+  padding-top: 22px;
+  margin-top: 28px;
+}
+.login-access-note .icon {
+  width: 18px;
+  height: 18px;
+}
+.login-description {
+  max-width: 550px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 28px;
+}
+.login-footer {
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+}
+@media (max-width: 1000px) {
+  .login-page {
+    padding: 24px;
+  }
+  .login-form-panel {
+    padding: 40px 28px;
+  }
+  .login-identity {
+    border-top-right-radius: 110px;
+  }
+}
+@media (max-width: 760px) {
+  .login-page {
+    padding: 20px 16px;
+  }
+  .login-brand {
+    font-size: 12px;
+  }
+  .login-theme-toggle {
+    padding-inline: 10px;
+    font-size: 12px;
+  }
+  .login-content {
+    padding: 28px 0;
+  }
+  .login-card {
+    max-width: 480px;
+    grid-template-columns: minmax(0, 1fr);
+    padding: 16px;
+  }
+  .login-card::before {
+    width: 85%;
+    height: 230px;
+    inset: 0 auto auto 0;
+    border-radius: 0 0 100% 0;
+  }
+  .login-card::after {
+    width: 60px;
+    height: 60px;
+  }
+  .login-identity {
+    border-radius: 8px 80px 8px 8px;
+  }
+  .login-logo {
+    width: 200px;
+  }
+  .login-form-panel {
+    padding: 30px 12px 20px;
+  }
+  .login-form-panel > p {
+    margin-bottom: 24px;
+  }
+}
+@media (max-width: 360px) {
+  .login-brand {
+    align-items: flex-start;
+  }
+  .login-brand > span {
+    max-width: 120px;
+    line-height: 1.6;
+  }
+  .login-form-panel {
+    padding-inline: 4px;
+  }
+}

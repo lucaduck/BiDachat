@@ -63,10 +63,10 @@ La inicialización local fue autorizada anteriormente. El perfil de embeddings q
 
 El usuario autorizó continuar con la siguiente tarea y se seleccionó `gemini-embedding-2` con `output_dimensionality=768`, compatible con `vector(768)`. La documentación oficial de Gemini indica que el modelo admite entrada multimodal, dimensiones flexibles entre 128 y 3072, recomienda 768 entre sus tamaños habituales y normaliza automáticamente las salidas truncadas. El servicio rechaza lotes y consultas cuyo modelo o dimensión no coincidan exactamente. [Documentación oficial de embeddings de Gemini](https://ai.google.dev/gemini-api/docs/embeddings).
 
-## Future inference selection
+## Inference selection in Version 1
 
-El usuario definió como evolución la selección por chatbot entre proveedor externo de IA y Ollama local. Su asignación a una versión está pendiente. El detalle se registra en la sección 12 de [docs/database-design.md](../../../docs/database-design.md).
+El usuario aprobó para Version 1 la selección por chatbot entre proveedor externo de IA y Ollama local. El detalle se registra en la sección 12 de [docs/database-design.md](../../../docs/database-design.md) y la implementación se planifica en `add-local-ollama-provider`.
 
-El diseño incorpora `llm_models(id, provider, model)`. `chatbots.configured_llm_model_id` representa la selección actual y `queries.executed_llm_model_id` conserva el modelo usado. Credenciales y conexiones permanecerán en backend. La habilitación funcional de Ollama continúa pendiente de asignación a una versión.
+El diseño incorpora `llm_models(id, provider, model)`. `chatbots.configured_llm_model_id` representa la selección actual y `queries.executed_llm_model_id` conserva el modelo usado. Credenciales y conexiones permanecerán en backend. La habilitación funcional de Ollama pertenece a Version 1.
 
-El perfil de embeddings sigue siendo una decisión independiente: cambiar el motor generativo no obliga a reindexar. La compatibilidad multimodal de las combinaciones admitidas se deberá validar antes de habilitarlas. Estas previsiones no son tareas autorizadas de implementación de V1.
+El perfil de embeddings sigue siendo una decisión independiente: cambiar el motor generativo no obliga a reindexar. La compatibilidad multimodal de las combinaciones admitidas se validará durante la implementación de Version 1.

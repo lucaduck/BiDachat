@@ -12,6 +12,7 @@ from app.api.dependencies import (
 from app.core.config import Settings
 from app.schemas.auth import LoginRequest, SessionResponse
 from app.services.authentication_service import AuthenticationService
+from app.services.login_rate_limit_service import LoginRateLimitService
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
@@ -24,6 +25,15 @@ async def login(
 ) -> SessionResponse:
     settings: Settings = request.app.state.settings
     now = datetime.now(UTC)
+    limiter = LoginRateLimitService()
+    attempts = await limiter.check(session, payload.email, now)
+    if isinstance(attempts, int):
+        await session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Demasiados intentos de inicio de sesión. Inténtalo más tarde.",
+            headers={"Retry-After": str(attempts)},
+        )
     issued_session = await AuthenticationService().login(
         session,
         email=payload.email,
@@ -32,11 +42,14 @@ async def login(
         now=now,
     )
     if issued_session is None:
+        limiter.record_failure(attempts)
+        await session.commit()
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Las credenciales no son válidas.",
         )
 
+    await limiter.clear_account(session, attempts)
     await session.commit()
     return SessionResponse(
         access_token=issued_session.token,
