@@ -67,7 +67,9 @@ jobs:
           POSTGRES_PASSWORD: ci_placeholder
           EMBEDDING_DIMENSIONS: "768"
           IMAGE_TAG: ${{ steps.revision.outputs.value }}
-        run: docker compose -f docker-compose.production.yml config --quiet
+        run: |
+          docker compose -f docker-compose.production.yml config --quiet
+          docker compose -f docker-compose.production.yml -f docker-compose.gpu.yml config --quiet
 
       - name: Sign in to GitHub Container Registry
         uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.5.0

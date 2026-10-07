@@ -59,10 +59,11 @@ servidor final.
    Ese proxy debe reenviar el tráfico a `http://127.0.0.1:3000`, conservar
    `Host` y establecer `X-Forwarded-Proto: https`. El puerto 3000 queda
    accesible solo desde el propio VPS; no se abre PostgreSQL al exterior.
-2. Instalar Docker Engine y Docker Compose. Si se usará Ollama con GPU, instalar
+2. Instalar Docker Engine y Docker Compose. Seleccionar `OLLAMA_ACCELERATION=cpu`
+   para un VPS sin GPU. Para GPU, establecer `OLLAMA_ACCELERATION=gpu`, instalar
    el controlador NVIDIA y NVIDIA Container Toolkit y comprobar que un
-   contenedor puede usar la GPU. La configuración de Compose actual reserva
-   una GPU; un VPS sin ella necesita un perfil de despliegue distinto.
+   contenedor puede usarla. El script de despliegue aplica el complemento GPU
+   solo en ese segundo caso.
 3. Crear un usuario de despliegue con acceso a Docker y acceso SSH por clave.
    Darle permiso de lectura al repositorio privado para que `git fetch` funcione
    desde el VPS. Clonar la rama `production` en la ruta que se pondrá en
@@ -70,7 +71,10 @@ servidor final.
 4. Copiar `.env.example` como `.env` en esa ruta. Configurar al menos
    `POSTGRES_DB`, `POSTGRES_USER`, una contraseña aleatoria fuerte en
    `POSTGRES_PASSWORD`, `EMBEDDING_DIMENSIONS=768`, `ADMIN_EMAIL`,
-   `ADMIN_PASSWORD`, `OLLAMA_MODEL` y los orígenes autorizados del widget.
+   `ADMIN_PASSWORD`, `OLLAMA_ACCELERATION`, `OLLAMA_MODEL` y los orígenes
+   autorizados del widget. Para CPU usar `qwen3:1.7b`,
+   `OLLAMA_MAX_LOADED_MODELS=1` y `OLLAMA_NUM_PARALLEL=1`. Para GPU pueden
+   configurarse los modelos visuales aprobados según la VRAM disponible.
    Mantener el perfil de embeddings (`EMBEDDING_PROVIDER`, `EMBEDDING_MODEL`,
    `EMBEDDING_DIMENSIONS`) constante después de indexar documentos. Configurar
    claves de Gemini, OpenAI u OpenRouter solo si se usarán esos proveedores.
@@ -99,16 +103,21 @@ servidor final.
 
 ## Preparar el servidor
 
-El servidor debe tener Docker Engine, Docker Compose, una GPU NVIDIA con el
-runtime de contenedores si se usará Ollama con GPU, y un clon de la rama
-`production` en `DEPLOY_PATH`. Crear allí un archivo `.env` con las mismas
-variables privadas de `.env.example`; no se sube a GitHub.
+El servidor debe tener Docker Engine, Docker Compose y un clon de la rama
+`production` en `DEPLOY_PATH`. Una GPU NVIDIA y su runtime de contenedores solo
+son necesarios si `.env` selecciona `OLLAMA_ACCELERATION=gpu`. Crear allí un
+archivo `.env` con las mismas variables privadas de `.env.example`; no se sube
+a GitHub.
 
 La aplicación se ejecuta con:
 
 ```bash
-IMAGE_TAG=<sha-validado> docker compose -f docker-compose.production.yml up -d
+IMAGE_TAG=<sha-validado> sh docker/deploy-production.sh
 ```
+
+El script toma `OLLAMA_ACCELERATION` de `.env`. Con `cpu` arranca únicamente
+el Compose base; con `gpu` añade `docker-compose.gpu.yml`, que solicita una GPU
+NVIDIA. Un valor distinto detiene el despliegue antes de actualizar contenedores.
 
 Solo Nginx publica el puerto de la aplicación en `127.0.0.1:3000` (configurable
 con `FRONTEND_PORT`). El frontend, backend y PostgreSQL permanecen dentro de la

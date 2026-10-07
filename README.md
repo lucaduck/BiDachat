@@ -51,7 +51,7 @@ BIDACHAT/
 └── .agents/skills/openspec-*/
 ```
 
-Consulta [la responsabilidad de cada carpeta](docs/project-structure.md). `docker-compose.yml` levanta la base de datos, FastAPI, Next.js, Ollama con GPU y Nginx como punto de entrada. Su flujo y puertos están en [la guía del proxy inverso](docs/deployment/reverse-proxy.md).
+Consulta [la responsabilidad de cada carpeta](docs/project-structure.md). `docker-compose.yml` levanta la base de datos, FastAPI, Next.js, Ollama y Nginx como punto de entrada. En producción, Ollama puede usar CPU o una GPU NVIDIA seleccionada en `.env`; su flujo y puertos están en [la guía del proxy inverso](docs/deployment/reverse-proxy.md).
 
 ## API local
 
@@ -62,9 +62,14 @@ descarga primero los modelos de Ollama y arranca:
 ```powershell
 docker compose up -d ollama
 docker compose exec ollama ollama pull embeddinggemma:300m
-docker compose exec ollama ollama pull qwen3-vl:2b
+docker compose exec ollama ollama pull qwen3:1.7b
 docker compose up -d --build
 ```
+
+En un equipo sin GPU, usar `OLLAMA_ACCELERATION=cpu` y descargar
+`qwen3:1.7b`. Para GPU NVIDIA, establecer `OLLAMA_ACCELERATION=gpu` y ejecutar
+Compose con `-f docker-compose.gpu.yml`; la guía de Ollama describe ambos
+perfiles.
 
 Abre `http://localhost:3000` a través de Nginx, inicia sesión, crea un chatbot y copia su script
 de integración. Prueba visualmente el widget en
