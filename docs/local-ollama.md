@@ -7,11 +7,17 @@ Next.js y el widget llaman exclusivamente a FastAPI. El backend usa el servicio
 para recuperación. URL interna: `http://ollama:11434`. No se publica el puerto de
 Ollama en Windows ni se requieren una instalación o un proceso nativo.
 
-## Equipo y modelos
+## Perfiles de hardware y modelos
 
-Perfil inicial: RTX 3050 Laptop de 4 GB VRAM, 16 GB RAM.
+El perfil se declara con `OLLAMA_ACCELERATION` en `.env`. El Compose base es
+compatible con CPU; `docker-compose.gpu.yml` se añade únicamente en producción
+cuando el despliegue selecciona `gpu`.
 
-- `qwen3-vl:2b-instruct`: respuestas, capturas y descripción de imágenes de conocimiento.
+- CPU: `qwen3:1.7b`, un modelo cargado y una solicitud concurrente. Es el
+  perfil recomendado para VPS sin GPU y para consultas textuales.
+- GPU NVIDIA: `qwen3-vl:2b-instruct`, hasta dos modelos cargados. Permite
+  respuestas, capturas y descripción de imágenes de conocimiento con mejor
+  tiempo de respuesta.
 - `embeddinggemma:300m`: embeddings textuales de 768 dimensiones.
 
 El tamaño de descarga no equivale a VRAM utilizada. Imágenes y contexto consumen
@@ -19,13 +25,24 @@ memoria adicional. El modelo pequeño necesita evaluación con capturas del domi
 
 ## Puesta en marcha
 
-Docker Desktop debe usar WSL 2 y disponer del controlador NVIDIA compatible.
-Compose reserva una GPU para Ollama y persiste los modelos en `ollama_models`.
+El perfil GPU requiere Docker Desktop con WSL 2 y controlador NVIDIA compatible
+en desarrollo, o NVIDIA Container Toolkit en un VPS Linux. El perfil CPU no
+requiere ninguno de esos componentes. Ambos persisten los modelos en
+`ollama_models`.
+
+Para desarrollo con GPU, añadir el complemento explícitamente:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d ollama
+```
+
+En producción no se escribe ese comando manualmente: `deploy-production.sh`
+lee `OLLAMA_ACCELERATION` y selecciona el complemento adecuado.
 
 ```bash
 docker compose up -d ollama
 docker compose exec ollama ollama pull embeddinggemma:300m
-docker compose exec ollama ollama pull qwen3-vl:2b-instruct
+docker compose exec ollama ollama pull qwen3:1.7b
 docker compose exec ollama ollama list
 docker compose up -d --build backend frontend
 ```
@@ -42,7 +59,10 @@ En `.env`, sin credenciales externas para el perfil local:
 EMBEDDING_PROVIDER=ollama
 EMBEDDING_MODEL=embeddinggemma:300m
 EMBEDDING_DIMENSIONS=768
-OLLAMA_MODEL=qwen3-vl:2b-instruct
+OLLAMA_ACCELERATION=cpu
+OLLAMA_MAX_LOADED_MODELS=1
+OLLAMA_NUM_PARALLEL=1
+OLLAMA_MODEL=qwen3:1.7b
 OLLAMA_BASE_URL=http://ollama:11434
 OLLAMA_CONTEXT_LENGTH=2048
 OLLAMA_TIMEOUT_SECONDS=600
@@ -52,7 +72,13 @@ Compose fija la URL interna del backend. Seleccionar `ollama / qwen3-vl:2b-instr
 cada chatbot que deba usar inferencia local; se conservan las selecciones previas
 hasta editarlas. La sección Configuración muestra el proveedor de embeddings.
 
-Ollama limita la ejecución a un modelo cargado y una solicitud por modelo,
+Para un VPS sin GPU, usar `qwen3:1.7b` para texto y no prometer análisis de
+imágenes. Para usar capturas, elegir explícitamente el perfil GPU, instalar el
+modelo `qwen3-vl:2b-instruct`, ajustar `OLLAMA_MODEL` y, si la VRAM lo permite,
+configurar `OLLAMA_MAX_LOADED_MODELS=2`. Cambiar el modelo generativo no
+reindexa los documentos; cambiar embeddings sí exige reindexación.
+
+El perfil CPU limita la ejecución a un modelo cargado y una solicitud por modelo,
 con servicios cloud deshabilitados. El backend usa `keep_alive=0` para liberar
 modelos después de cada operación. Esto reduce VRAM retenida pero aumenta latencia.
 Los documentos se procesan en lotes de hasta 16 fragmentos por carga.
@@ -76,9 +102,14 @@ no requiere migración de columnas mientras se conserven 768 dimensiones.
 
 ```bash
 docker compose ps
-docker compose exec ollama nvidia-smi
 docker compose exec ollama ollama ps
 docker compose logs --tail=50 ollama
+```
+
+En el perfil GPU, comprobar además la VRAM visible:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.gpu.yml exec ollama nvidia-smi
 ```
 
 Consultar `ollama ps` durante una pregunta: con `keep_alive=0` la lista puede quedar

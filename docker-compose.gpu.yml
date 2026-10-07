@@ -1,0 +1,13 @@
+name: bidachat
+
+# Optional production overlay. It is selected only when
+# OLLAMA_ACCELERATION=gpu in the server .env file.
+services:
+  ollama:
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

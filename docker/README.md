@@ -18,8 +18,16 @@ privadas al arrancar.
 Los originales documentales se conservan en el volumen privado
 `bidachat_document_storage`.
 
-## Ollama con GPU
+## Ollama con CPU o GPU
 
-Compose incorpora `ollama` con una GPU NVIDIA y volumen `ollama_models`, sin
-publicar su API al host. FastAPI se conecta a `http://ollama:11434`.
-Instalación de modelos y verificación: [guía local](../docs/local-ollama.md).
+El Compose base incorpora `ollama` y el volumen `ollama_models`, sin publicar
+su API al host. FastAPI se conecta a `http://ollama:11434`.
+
+La producción selecciona el perfil mediante `OLLAMA_ACCELERATION` en `.env`:
+
+- `cpu`: perfil predeterminado, compatible con VPS sin GPU.
+- `gpu`: añade `docker-compose.gpu.yml` y requiere NVIDIA Container Toolkit.
+
+El script `deploy-production.sh` valida el valor y aplica el archivo adicional
+solo para el perfil GPU. Instalación de modelos y verificación:
+[guía local](../docs/local-ollama.md).

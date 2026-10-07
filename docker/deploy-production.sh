@@ -3,10 +3,32 @@ set -eu
 
 : "${IMAGE_TAG:?Set IMAGE_TAG to the validated commit SHA}"
 
+acceleration=${OLLAMA_ACCELERATION:-}
+if [ -z "$acceleration" ] && [ -f .env ]; then
+    acceleration=$(awk -F= '$1 == "OLLAMA_ACCELERATION" { gsub(/\r/, "", $2); print $2; exit }' .env)
+fi
+acceleration=${acceleration:-cpu}
+
+case "$acceleration" in
+    cpu)
+        ;;
+    gpu)
+        ;;
+    *)
+        printf 'OLLAMA_ACCELERATION must be cpu or gpu, received: %s\n' "$acceleration" >&2
+        exit 1
+        ;;
+esac
+
 compose() {
-    docker compose -f docker-compose.production.yml "$@"
+    if [ "$acceleration" = "gpu" ]; then
+        docker compose -f docker-compose.production.yml -f docker-compose.gpu.yml "$@"
+    else
+        docker compose -f docker-compose.production.yml "$@"
+    fi
 }
 
+printf 'Deploying Ollama with %s acceleration\n' "$acceleration"
 compose pull backend frontend nginx
 compose up -d --remove-orphans
 compose exec -T nginx nginx -t
