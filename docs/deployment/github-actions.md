@@ -78,7 +78,7 @@ servidor final.
    Mantener el perfil de embeddings (`EMBEDDING_PROVIDER`, `EMBEDDING_MODEL`,
    `EMBEDDING_DIMENSIONS`) constante después de indexar documentos. Configurar
    claves de Gemini, OpenAI u OpenRouter solo si se usarán esos proveedores.
-   `DATABASE_URL`, `BACKEND_PORT`, `SECRET_KEY` y `DOCUMENT_STORAGE_PATH` del
+   `DATABASE_URL`, `BACKEND_PORT` y `DOCUMENT_STORAGE_PATH` del
    ejemplo no tienen que trasladarse a GitHub Actions: Compose construye la
    conexión interna y monta el volumen documental. `SESSION_TTL_MINUTES` sí
    puede ajustarse en el `.env` del VPS.
