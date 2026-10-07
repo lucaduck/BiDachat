@@ -4,7 +4,7 @@ Aplicación web para gestionar chatbots que ayudan a interpretar dashboards de B
 
 ## Estado actual
 
-El repositorio contiene frontend Next.js, backend FastAPI y PostgreSQL + pgvector
+El repositorio contiene Nginx, frontend Next.js, backend FastAPI y PostgreSQL + pgvector
 en Docker Compose. El panel administra chatbots y documentos; el widget público
 envía consultas de texto o captura, recupera contexto por chatbot y responde
 mediante Gemini, Ollama, OpenAI u OpenRouter configurado. Los documentos se procesan al cargarlos.
@@ -51,7 +51,7 @@ BIDACHAT/
 └── .agents/skills/openspec-*/
 ```
 
-Consulta [la responsabilidad de cada carpeta](docs/project-structure.md). `docker-compose.yml` levanta la base de datos, el backend FastAPI, el frontend y Ollama con GPU.
+Consulta [la responsabilidad de cada carpeta](docs/project-structure.md). `docker-compose.yml` levanta la base de datos, FastAPI, Next.js, Ollama con GPU y Nginx como punto de entrada. Su flujo y puertos están en [la guía del proxy inverso](docs/deployment/reverse-proxy.md).
 
 ## API local
 
@@ -66,7 +66,7 @@ docker compose exec ollama ollama pull qwen3-vl:2b
 docker compose up -d --build
 ```
 
-Abre `http://localhost:3000`, inicia sesión, crea un chatbot y copia su script
+Abre `http://localhost:3000` a través de Nginx, inicia sesión, crea un chatbot y copia su script
 de integración. Prueba visualmente el widget en
 `http://localhost:3000/widget-example.html?chatbot_id=UUID` con el UUID creado.
 Si cambias `FRONTEND_PORT`, usa ese puerto. El perfil `EMBEDDING_PROVIDER=ollama` permite documentos y búsqueda semántica
@@ -136,7 +136,7 @@ La existencia de artefactos o una validación exitosa de OpenSpec verifica estru
 
 - [SRS.md](SRS.md): requisitos y criterios de aceptación, borrador 0.1.
 - [AGENTS.md](AGENTS.md): reglas de implementación.
-- [desing.md](desing.md): guía visual existente; se conserva su nombre original.
+- [Historial de diseño](docs/design-history/desing-before-professionalization.md): guía visual anterior, conservada como referencia histórica.
 - [Diseño de base de datos](docs/database-design.md): propuesta técnica pendiente de aprobación.
 - [Revisión de inicialización](docs/initialization-review.md): comprobaciones y límites de esta entrega.
 

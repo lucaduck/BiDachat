@@ -32,13 +32,13 @@ Dependencia: bloque 2 para pruebas visuales. Las filas con proveedor externo
 requieren credenciales y presupuesto permitido. Salida: matriz por formato/proveedor
 con evidencia real o pendiente explícito (CA-UC04, CA-UC06 y CA-UC07).
 
-- [ ] 3.1 Extender fixtures aislados y ejecutor real: terminar pronto ante error visible y garantizar limpieza aun si falla una prueba; mantener intactos los recursos del usuario.
-- [ ] 3.2 Procesar PDF con texto, DOCX, TXT y CSV con un dato conocido por caso; verificar estado disponible, chunks, vectores de 768 y recuperación del dato.
-- [ ] 3.3 Procesar PNG, JPEG y WebP como fuentes con el modelo general; verificar descripción previa a embeddings y recuperación del contenido visual.
-- [ ] 3.4 Probar archivo corrupto, tipo engañoso, tamaño fuera del límite y PDF sin texto legible; verificar rechazo/fallo honesto sin inventar soporte OCR.
-- [ ] 3.5 Probar asociación compartida y retiro entre dos bots con fuentes textuales y visuales; verificar aislamiento en recuperación y ausencia de borrado del archivo compartido.
-- [ ] 3.6 Ejecutar texto e imagen en cada proveedor externo habilitado según sus capacidades; registrar modelo, resultado, límites de consumo y filas bloqueadas por credenciales sin marcar mocks como aceptación real.
-- [ ] 3.7 Contrastar métricas del periodo contra consultas reales completadas/fallidas y tiempos almacenados; conservar modelo ejecutado al cambiar la configuración de un bot.
+- [x] 3.1 Extender fixtures aislados y ejecutor real: terminar pronto ante error visible y garantizar limpieza aun si falla una prueba; mantener intactos los recursos del usuario.
+- [x] 3.2 Procesar PDF con texto, DOCX, TXT y CSV con un dato conocido por caso; verificar estado disponible, chunks, vectores de 768 y recuperación del dato.
+- [x] 3.3 Procesar PNG, JPEG y WebP como fuentes con el modelo general; verificar descripción previa a embeddings y recuperación del contenido visual.
+- [x] 3.4 Probar archivo corrupto, tipo engañoso, tamaño fuera del límite y PDF sin texto legible; verificar rechazo/fallo honesto sin inventar soporte OCR.
+- [x] 3.5 Probar asociación compartida y retiro entre dos bots con fuentes textuales y visuales; verificar aislamiento en recuperación y ausencia de borrado del archivo compartido.
+- [x] 3.6 Ejecutar texto e imagen en cada proveedor externo habilitado según sus capacidades; registrar modelo, resultado, límites de consumo y filas bloqueadas por credenciales sin marcar mocks como aceptación real.
+- [x] 3.7 Contrastar métricas del periodo contra consultas reales completadas/fallidas y tiempos almacenados; conservar modelo ejecutado al cambiar la configuración de un bot.
 
 ## 4. Rendimiento y recuperación — prioridad media
 

@@ -1,4 +1,4 @@
-import type { Dispatch, SetStateAction } from "react";
+import { useState, type Dispatch, type SetStateAction } from "react";
 import { InputField, SelectField, TextareaField } from "@/components/ui/field";
 import type { ChatbotPayload, LlmModel } from "@/types/api";
 import type { WidgetSettings } from "@/services/widget-settings";
@@ -10,6 +10,12 @@ type Props = {
   settings: WidgetSettings;
   setSettings: Dispatch<SetStateAction<WidgetSettings>>;
   models: LlmModel[];
+};
+const PROVIDER_LABELS: Record<string, string> = {
+  openai: "OpenAI",
+  openrouter: "OpenRouter",
+  ollama: "Ollama",
+  gemini: "Gemini",
 };
 export function GeneralFields({
   draft,
@@ -84,29 +90,60 @@ export function BehaviorFields({
   setSettings,
   models,
 }: Readonly<Props>) {
+  const selectedModel = models.find(
+    (model) => model.id === draft.configured_llm_model_id,
+  );
+  const [providerOverride, setProviderOverride] = useState<string | null>(null);
+  const provider = providerOverride ?? selectedModel?.provider ?? "";
+  const providers = [...new Set(models.map((model) => model.provider))];
+  const providerModels = models.filter((model) => model.provider === provider);
+
   return (
     <>
       <div className="wizard-columns">
         <div className="wizard-card">
-          <SelectField
-            id="wizard-model"
-            label="Modelo de lenguaje"
-            value={draft.configured_llm_model_id}
-            onChange={(event) =>
-              setDraft((value) => ({
-                ...value,
-                configured_llm_model_id: event.target.value,
-              }))
-            }
-            required
-          >
-            <option value="">Selecciona un modelo</option>
-            {models.map((model) => (
-              <option key={model.id} value={model.id}>
-                {model.provider} · {model.model}
+          <div className="wizard-model-fields">
+            <SelectField
+              id="wizard-provider"
+              label="Proveedor de IA"
+              value={provider}
+              onChange={(event) => {
+                setProviderOverride(event.target.value);
+                setDraft((value) => ({ ...value, configured_llm_model_id: "" }));
+              }}
+              required
+            >
+              <option value="">Selecciona un proveedor</option>
+              {providers.map((value) => (
+                <option key={value} value={value}>
+                  {PROVIDER_LABELS[value] ?? value}
+                </option>
+              ))}
+            </SelectField>
+            <SelectField
+              id="wizard-model"
+              label="Modelo de lenguaje"
+              value={draft.configured_llm_model_id}
+              onChange={(event) => {
+                setProviderOverride(null);
+                setDraft((value) => ({
+                  ...value,
+                  configured_llm_model_id: event.target.value,
+                }));
+              }}
+              disabled={!provider}
+              required
+            >
+              <option value="">
+                {provider ? "Selecciona un modelo" : "Elige primero un proveedor"}
               </option>
-            ))}
-          </SelectField>
+              {providerModels.map((model) => (
+                <option key={model.id} value={model.id}>
+                  {model.model}
+                </option>
+              ))}
+            </SelectField>
+          </div>
           <TextareaField
             id="wizard-instructions"
             label="Instrucciones de comportamiento"

@@ -174,6 +174,8 @@ Esta normalización deberá reflejarse posteriormente en la fuente de Notion si 
 |---|---|
 | **RF-28** | El investigador deberá poder configurar y conservar el color principal, el icono y el mensaje de bienvenida del widget de cada chatbot. |
 | **RF-29** | El investigador deberá poder revisar una vista previa del widget antes de copiar el mecanismo de integración. |
+| **RF-30** | El widget deberá presentar las respuestas del asistente con párrafos, listas y énfasis legibles, sin mostrar los marcadores de formato como texto literal ni ejecutar contenido HTML recibido del modelo. |
+| **RF-31** | El widget integrado podrá enviar con cada consulta el texto visible de una región de la página anfitriona indicada en el código de integración, para que el chatbot responda con el contexto actual del dashboard sin rastrear otras páginas. |
 
 ---
 
@@ -181,7 +183,7 @@ Esta normalización deberá reflejarse posteriormente en la fuente de Notion si 
 
 | ID | Categoría | Requisito |
 |---|---|---|
-| **RNF-01** | Interoperabilidad | La comunicación del frontend y de los clientes externos con el backend deberá realizarse mediante la API, sin acceso directo a la base de datos, al motor RAG ni al proveedor del LLM. |
+| **RNF-01** | Interoperabilidad | La comunicación del frontend y de los clientes externos con el backend deberá realizarse mediante la API REST sobre HTTP, sin WebSocket ni acceso directo a la base de datos, al motor RAG o al proveedor del LLM. |
 | **RNF-02** | Interoperabilidad | El mecanismo de integración del chatbot deberá ser independiente de la tecnología utilizada por la aplicación web que contiene el dashboard. |
 | **RNF-03** | Portabilidad | Los componentes necesarios para ejecutar la aplicación deberán poder desplegarse de forma reproducible mediante contenedores Docker. |
 | **RNF-04** | Mantenibilidad | Los componentes principales deberán mantenerse desacoplados de acuerdo con la arquitectura SOA, evitando dependencias innecesarias entre frontend, backend, RAG, almacenamiento y LLM. |
@@ -194,6 +196,8 @@ Esta normalización deberá reflejarse posteriormente en la fuente de Notion si 
 | **RNF-11** | Adaptabilidad | El componente de inteligencia artificial deberá permitir ser evaluado mediante los criterios de adaptabilidad establecidos para el trabajo de titulación. |
 | **RNF-12** | Usabilidad | El panel y el flujo de configuración deberán adaptarse a escritorio y móvil, mantener contraste legible y permitir navegación por teclado. |
 | **RNF-13** | Usabilidad | Las rutas no encontradas deberán ofrecer una salida clara hacia el panel. |
+| **RNF-14** | Despliegue | La aplicación contenedorizada deberá publicar panel, widget y API bajo un único origen mediante Nginx como proxy inverso; frontend y backend permanecerán en la red interna en producción. |
+| **RNF-15** | Despliegue | El backend, PostgreSQL/pgvector, el almacenamiento documental y los servicios locales de RAG e inferencia deberán ejecutarse en infraestructura controlada por BI-DATA; no se utilizarán servicios externos de base de datos ni de backend. Las únicas integraciones externas de ejecución permitidas serán las API de proveedores de IA configurados. |
 
 > **Nota:** `RNF-05` y `RNF-10` expresan condiciones muy similares desde categorías distintas. Se mantienen porque así constan actualmente en la fuente de requisitos. Su posible consolidación deberá aprobarse antes de eliminar cualquiera de los dos.
 
@@ -294,7 +298,7 @@ Los siguientes casos de uso agrupan los requisitos funcionales en flujos compren
 **Flujo principal:**
 
 1. El investigador selecciona un chatbot.
-2. Selecciona el modelo de lenguaje que utilizará.
+2. Selecciona primero el proveedor de IA y después uno de los modelos disponibles para ese proveedor.
 3. Asocia las fuentes de conocimiento correspondientes.
 4. Define las instrucciones de comportamiento, rol, tono y reglas de respuesta.
 5. Guarda la configuración.
@@ -304,7 +308,7 @@ Los siguientes casos de uso agrupan los requisitos funcionales en flujos compren
 
 ### Criterios de aceptación
 
-- **CA-UC03-01:** Cuando el investigador selecciona un modelo de lenguaje válido y guarda la configuración, entonces el chatbot queda asociado a ese modelo.
+- **CA-UC03-01:** Cuando el investigador selecciona un proveedor de IA, el formulario muestra solo sus modelos; al elegir un modelo válido y guardar, el chatbot queda asociado a ese modelo. Al cambiar de proveedor, debe elegir un nuevo modelo antes de guardar.
 - **CA-UC03-02:** Cuando el investigador asocia fuentes de conocimiento y guarda los cambios, entonces estas quedan vinculadas al chatbot correspondiente.
 - **CA-UC03-07:** Cuando el investigador quita una fuente del chatbot, esta deja de formar parte de su recuperación RAG y permanece disponible para volver a asociarla.
 - **CA-UC03-03:** Cuando el investigador define instrucciones de comportamiento y guarda la configuración, entonces estas quedan disponibles para el procesamiento de las consultas.
@@ -395,13 +399,13 @@ Los siguientes casos de uso agrupan los requisitos funcionales en flujos compren
 2. Escribe una pregunta en lenguaje natural.
 3. El sistema identifica el chatbot y su configuración.
 4. El sistema recupera contexto de las fuentes de conocimiento correspondientes.
-5. El sistema construye el contexto para el modelo de lenguaje.
+5. Si el sitio anfitrión configuró una región de contexto, el widget añade el texto visible actual de esa región; el sistema lo trata como datos no confiables y construye el contexto para el modelo de lenguaje.
 6. El sistema envía la información al modelo configurado.
 7. El modelo genera una respuesta.
 8. El sistema muestra la respuesta al usuario.
 9. El sistema registra la consulta y su tiempo de respuesta.
 
-**Requisitos relacionados:** `RF-16`, `RF-18`, `RF-20`, `RF-21`, `RF-22`, `RF-24`, `RF-25`, `RF-26`, `RNF-06`, `RNF-07`, `RNF-08`, `RNF-09`.
+**Requisitos relacionados:** `RF-16`, `RF-18`, `RF-20`, `RF-21`, `RF-22`, `RF-24`, `RF-25`, `RF-26`, `RF-31`, `RNF-06`, `RNF-07`, `RNF-08`, `RNF-09`.
 
 ### Criterios de aceptación
 
@@ -410,6 +414,8 @@ Los siguientes casos de uso agrupan los requisitos funcionales en flujos compren
 - **CA-UC06-03:** Cuando existe contexto documental relacionado, entonces este se incorpora al contexto utilizado para generar la respuesta.
 - **CA-UC06-04:** Cuando el modelo genera una respuesta correctamente, entonces esta se muestra en la interfaz conversacional.
 - **CA-UC06-05:** Después de procesar la consulta, entonces el sistema registra la consulta y el tiempo de respuesta asociados al chatbot.
+- **CA-UC06-06:** Cuando la respuesta incluye listas o énfasis, el widget los presenta con formato legible en ambos temas; el contenido HTML del modelo se muestra como texto y no se ejecuta.
+- **CA-UC06-07:** Cuando el script declara una región de contexto, cada pregunta incluye hasta 6000 caracteres de texto visible actualizado de esa región, sin HTML, formularios ni contenido marcado para excluir; el backend lo distingue del contexto RAG. Si la región no existe o el selector es inválido, la consulta continúa sin contexto de página.
 
 ## UC-07 — Realizar una consulta multimodal con imagen
 
@@ -486,7 +492,7 @@ Los siguientes casos de uso agrupan los requisitos funcionales en flujos compren
 | **UC-03** Configurar chatbot | RF-08, RF-09, RF-11 |
 | **UC-04** Gestionar documentos y RAG | RF-13, RF-14, RF-15, RF-16, RF-17 |
 | **UC-05** Integrar chatbot | RF-10, RF-23 |
-| **UC-06** Consulta conversacional | RF-16, RF-18, RF-20, RF-21, RF-22, RF-24, RF-25, RF-26 |
+| **UC-06** Consulta conversacional | RF-16, RF-18, RF-20, RF-21, RF-22, RF-24, RF-25, RF-26, RF-31 |
 | **UC-07** Consulta multimodal | RF-12, RF-16, RF-18, RF-19, RF-20, RF-21, RF-22, RF-24, RF-25 |
 | **UC-08** Consultar métricas | RF-24, RF-25, RF-26, RF-27 |
 
@@ -587,3 +593,5 @@ El listado presenta la actividad acumulada mediante métricas existentes y un
 acceso funcional para crear chatbots; los valores de la maqueta no son datos del sistema.
 
 **Identidad por tema — 6 de octubre de 2026:** El panel usa «Logotipo BC de Circuitos Tecnológicos.png» en modo claro y «Logotipo BC de Circuito Futurista.png» en modo oscuro, incluidos sus usos en la marca BIDACHAT y el bloque BI-DATA. El lema «Datos que conversan» conserva el estilo manuscrito, inclinado, de dos líneas y con subrayado turquesa de la referencia aportada.
+
+**Identidad del acceso — 7 de octubre de 2026:** La pantalla de inicio de sesión cambia el logo con el tema. En modo oscuro utiliza `docs/brand/logotipo-autenticacion-blanco.png`; en modo claro conserva su variante para fondo claro.

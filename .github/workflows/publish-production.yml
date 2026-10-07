@@ -1,19 +1,13 @@
 name: Publish and deploy production
 
 on:
-  workflow_run:
-    workflows: [Continuous Integration]
+  pull_request:
     branches: [production]
-    types: [completed]
-  workflow_dispatch:
-    inputs:
-      revision:
-        description: Commit SHA from production to publish and deploy
-        required: true
-        type: string
+    types: [closed]
 
 permissions:
   contents: read
+  pull-requests: read
   packages: write
   attestations: write
   id-token: write
@@ -25,25 +19,30 @@ concurrency:
 jobs:
   publish:
     if: >-
-      github.event_name == 'workflow_dispatch' ||
-      (github.event.workflow_run.event == 'push' &&
-      github.event.workflow_run.conclusion == 'success')
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.head.ref == 'develop' &&
+      github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-24.04
     outputs:
       revision: ${{ steps.revision.outputs.value }}
     steps:
-      - name: Select the verified revision
+      - name: Require approval of the merged revision
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/reviews" \
+            --jq '.[] | select(.state == "APPROVED") | .commit_id' \
+            | grep -Fx "$PR_HEAD_SHA" > /dev/null
+
+      - name: Select the merged revision
         id: revision
         env:
-          EVENT_NAME: ${{ github.event_name }}
-          WORKFLOW_SHA: ${{ github.event.workflow_run.head_sha }}
-          INPUT_SHA: ${{ inputs.revision }}
+          MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
         run: |
-          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
-            printf 'value=%s\n' "$INPUT_SHA" >> "$GITHUB_OUTPUT"
-          else
-            printf 'value=%s\n' "$WORKFLOW_SHA" >> "$GITHUB_OUTPUT"
-          fi
+          test -n "$MERGE_SHA"
+          printf 'value=%s\n' "$MERGE_SHA" >> "$GITHUB_OUTPUT"
 
       - name: Check out the verified revision
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -51,16 +50,24 @@ jobs:
           ref: ${{ steps.revision.outputs.value }}
           fetch-depth: 0
 
-      - name: Confirm the revision belongs to production
+      - name: Confirm production still points to this revision
         env:
           RELEASE_SHA: ${{ steps.revision.outputs.value }}
         run: |
           git fetch origin production
-          git rev-parse --verify "$RELEASE_SHA^{commit}"
-          git merge-base --is-ancestor "$RELEASE_SHA" origin/production
+          test "$(git rev-parse origin/production)" = "$RELEASE_SHA"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.0.0
+
+      - name: Validate production Compose configuration
+        env:
+          POSTGRES_DB: bidachat
+          POSTGRES_USER: bidachat
+          POSTGRES_PASSWORD: ci_placeholder
+          EMBEDDING_DIMENSIONS: "768"
+          IMAGE_TAG: ${{ steps.revision.outputs.value }}
+        run: docker compose -f docker-compose.production.yml config --quiet
 
       - name: Sign in to GitHub Container Registry
         uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.5.0
@@ -138,4 +145,4 @@ jobs:
       - name: Update the server and verify its health
         run: |
           ssh -i ~/.ssh/id_ed25519 -o BatchMode=yes "$DEPLOY_USER@$DEPLOY_HOST" \
-            "cd '$DEPLOY_PATH' && git fetch origin production && git checkout production && git pull --ff-only origin production && IMAGE_TAG='$RELEASE_SHA' docker compose -f docker-compose.production.yml pull backend frontend && IMAGE_TAG='$RELEASE_SHA' docker compose -f docker-compose.production.yml up -d --remove-orphans && curl --fail --silent --show-error http://127.0.0.1:\${FRONTEND_PORT:-3000}/api/v1/health"
+            "cd '$DEPLOY_PATH' && git fetch origin production && git checkout production && git pull --ff-only origin production && test \"\$(git rev-parse HEAD)\" = '$RELEASE_SHA' && IMAGE_TAG='$RELEASE_SHA' sh docker/deploy-production.sh"

@@ -215,12 +215,12 @@ components:
     rounded: "{rounded.workspace-brand}"
     padding: "18px 20px"
   login-card:
-    backgroundColor: "{colors.surface}"
+    backgroundColor: "{colors.canvas}"
     rounded: "{rounded.dialog}"
     padding: "24px"
     width: "min(100%, 1100px)"
   login-identity:
-    backgroundColor: "#071221"
+    backgroundColor: "{colors.canvas}"
     rounded: "8px 160px 8px 8px"
   login-input:
     backgroundColor: "{colors.surface-muted}"
@@ -374,7 +374,7 @@ En Apariencia, las propuestas de colores e iconos usan grupos de radio con nombr
 
 Panel `content-panel` como agrupación general, con borde y sin sombra. Tarjetas de chatbot apilan identidad, texto y acciones; los nombres permiten envolver. El grupo de métricas del resumen conserva separadores internos y números tabulares. Los contadores de actividad del listado son cuatro tarjetas independientes con el radio `workspace-brand`; sus cifras también son tabulares. La tarjeta de creación usa borde discontinuo `link`, altura mínima de 300 px y un botón que abre la creación; su hover usa `subtle`. El área vacía ofrece título, explicación y acción disponible, con relleno de 48 px 24 px y borde discontinuo.
 
-La tarjeta de acceso usa `login-card` y la sombra local registrada en Elevation & Depth. Su panel `login-identity` conserva el logo suministrado `docs/brand/Logo BIDACHAT DARK.png` en ambos temas mediante `/brand/logo-bidachat-dark.png`, con máximo de 480 px y ancho de 200 px a 760 px. El título usa `clamp(28px, 2.5vw, 36px)` e interlineado 1.2; campos y envío tienen altura mínima de 48 px con sus variantes locales del frontmatter. Conservan etiquetas, foco, error y carga compartidos; el control de tema está disponible antes de autenticarse y la contraseña puede mostrarse u ocultarse.
+La tarjeta de acceso usa `login-card` y la sombra local registrada en Elevation & Depth. La tarjeta y `login-identity` comparten el color `canvas` del tema. El logo oscuro transparente usa `/brand/logo-bidachat-white.png`; el claro usa `/brand/logo-bidachat-light.png` con mezcla multiplicativa para integrar su fondo blanco en el lienzo. Ambos tienen un máximo de 480 px y se reducen a 280 px a 760 px. El título usa `clamp(28px, 2.5vw, 36px)` e interlineado 1.2; campos y envío tienen altura mínima de 48 px con sus variantes locales del frontmatter. Conservan etiquetas, foco, error y carga compartidos; el control de tema está disponible antes de autenticarse y la contraseña puede mostrarse u ocultarse.
 
 ### Panel signature and circuit branding
 

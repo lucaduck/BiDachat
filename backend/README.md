@@ -14,7 +14,7 @@ docker compose ps
 Invoke-RestMethod http://localhost:8000/api/v1/health
 ```
 
-La respuesta esperada es `{"status":"ok"}`. La documentación interactiva está en <http://localhost:8000/api/v1/docs>. Este endpoint comprueba que la API responde; no comprueba PostgreSQL.
+La respuesta esperada es `{"status":"ok"}`. El puerto 8000 es acceso local de desarrollo. La ruta pública del sistema pasa por Nginx en <http://localhost:3000/api/v1/health>, y la documentación interactiva de desarrollo está en <http://localhost:3000/api/v1/docs>. El endpoint comprueba que la API responde; no comprueba PostgreSQL.
 
 El catálogo completo de rutas, acceso y relación con los requisitos está en
 [Rutas de la API](../docs/api-routes.md). FastAPI genera la pantalla
@@ -42,13 +42,13 @@ configurado en el chatbot. La respuesta incluye texto y tiempo medido.
 
 Todas estas rutas requieren una sesión Bearer válida. `PUT` conserva el identificador del chatbot y permite cambiar nombre, descripción, instrucciones y una combinación ya registrada en `llm_models`. `created_by` conserva trazabilidad; no representa permiso exclusivo. La carga acepta PDF, DOCX, TXT y CSV de hasta 20 MiB, o PNG, JPEG y WebP de hasta 4 MiB. `DELETE /api/v1/chatbots/{chatbot_id}/documents/{document_id}` quita la asociación RAG sin borrar el archivo, que puede volver a asociarse. El original se guarda en un volumen privado con un nombre generado; no se entrega mediante rutas públicas.
 
-En este equipo, el puerto 8000 ya estaba ocupado: el `.env` local usa `BACKEND_PORT=8001`. Acceder a <http://localhost:8001/api/v1/health> y <http://localhost:8001/api/v1/docs>. En nuevos entornos se usa 8000 por defecto; ajustar `NEXT_PUBLIC_API_BASE_URL` al puerto elegido cuando se implemente el frontend.
+Si cambias `BACKEND_PORT`, el puerto de diagnóstico local cambia, pero la ruta del navegador continúa en Nginx mediante `FRONTEND_PORT`. En producción el backend no publica un puerto al host.
 
 ## Configuración
 
 `app/core/config.py` carga `APP_ENV`, `DATABASE_URL`, `EMBEDDING_MODEL`, `EMBEDDING_DIMENSIONS`, `SESSION_TTL_MINUTES`, `DOCUMENT_STORAGE_PATH` y `DOCUMENT_MAX_SIZE_BYTES` mediante Pydantic Settings. Valores admitidos para `APP_ENV`: `development`, `test`, `production`. Las variables del proceso tienen prioridad sobre el `.env` raíz. Las variables de otros componentes se ignoran. `DATABASE_URL` se trata como secreto y no se incluye en mensajes públicos. El perfil RAG global selecciona `EMBEDDING_PROVIDER` (`gemini` u `ollama`), modelo y 768 dimensiones; la recuperación rechaza perfiles incompatibles. El límite documental aprobado es 20 MiB. `SESSION_TTL_MINUTES` vale 480 por defecto y puede configurarse entre 1 y 10 080 minutos. `debug` permanece desactivado; en producción también se desactivan Swagger y OpenAPI.
 
-Compose pasa explícitamente `APP_ENV` al backend y usa `BACKEND_PORT` para publicar el puerto local (8000 por defecto). El `.env` no se copia a la imagen. El proceso del contenedor corre con un usuario sin privilegios. Los errores inesperados devuelven un mensaje genérico; las trazas quedan en los registros internos del backend. La publicación en `127.0.0.1` está destinada al desarrollo local.
+Compose pasa explícitamente `APP_ENV` al backend y usa `BACKEND_PORT` para diagnóstico local (8000 por defecto). El `.env` no se copia a la imagen. El proceso del contenedor corre con un usuario sin privilegios. Los errores inesperados devuelven un mensaje genérico; las trazas quedan en los registros internos del backend. En producción, el backend solo recibe solicitudes por la red interna desde Nginx.
 
 ### Proveedor OpenAI
 

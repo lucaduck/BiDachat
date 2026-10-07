@@ -1,0 +1,56 @@
+{
+  "requirement": "RNF-15",
+  "result": "verified-in-compose-config",
+  "environments": {
+    "development": {
+      "database_host": "database:5432",
+      "backend_origin": "backend:8000",
+      "ollama_origin": "ollama:11434",
+      "published_ports": {
+        "database": [
+          {
+            "host_ip": "127.0.0.1",
+            "published": "5433"
+          }
+        ],
+        "backend": [
+          {
+            "host_ip": "127.0.0.1",
+            "published": "8000"
+          }
+        ],
+        "frontend": [],
+        "ollama": [],
+        "nginx": [
+          {
+            "host_ip": "127.0.0.1",
+            "published": "3000"
+          }
+        ]
+      }
+    },
+    "production": {
+      "database_host": "database:5432",
+      "backend_origin": "backend:8000",
+      "ollama_origin": "ollama:11434",
+      "published_ports": {
+        "database": [],
+        "backend": [],
+        "frontend": [],
+        "ollama": [],
+        "nginx": [
+          {
+            "host_ip": "127.0.0.1",
+            "published": "3000"
+          }
+        ]
+      }
+    }
+  },
+  "external_runtime_apis": [
+    "Gemini",
+    "OpenAI",
+    "OpenRouter"
+  ],
+  "limit": "Future deployment host, firewall and runtime egress have not been verified."
+}

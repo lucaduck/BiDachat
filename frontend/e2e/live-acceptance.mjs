@@ -28,6 +28,16 @@ try {
   await page.locator("#widget-color").fill("#225577");
   await page.getByLabel("Análisis", { exact: true }).check();
   await page.getByRole("button", { name: "Siguiente paso" }).click();
+  const modelsResponse = await page.request.get(`${api}/llm-models`, {
+    headers: {
+      Authorization: `Bearer ${await page.evaluate(() => JSON.parse(localStorage.getItem("bidachat-session")).accessToken)}`,
+    },
+  });
+  const selectedModel = (await modelsResponse.json()).find(
+    (model) => model.id === credentials.modelId,
+  );
+  if (!selectedModel) throw new Error("Configured QA model is unavailable");
+  await page.getByLabel("Proveedor de IA").selectOption(selectedModel.provider);
   await page.getByLabel("Modelo de lenguaje").selectOption(credentials.modelId);
   await page
     .getByLabel("Instrucciones de comportamiento")

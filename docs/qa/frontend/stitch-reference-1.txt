@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BI-DATA Analytics | Widget Autenticador Dashboard</title>
+<!-- Tailwind CSS v3 CDN with forms & container-queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#F0F9FC',
+              100: '#E0F3F9',
+              500: '#14A8CE',
+              600: '#0E8CAB',
+              700: '#0B6F88',
+            },
+          },
+          boxShadow: {
+            'floating-chat': '0 20px 40px -15px rgba(14, 140, 171, 0.18), 0 0 25px 0 rgba(0, 0, 0, 0.05)',
+          }
+        }
+      }
+    }
+  </script>
+<!-- BEGIN: Custom Styles -->
+<style data-purpose="scrollbar-and-general">
+    /* Custom sleek scrollbar for conversational area */
+    .custom-scroll::-webkit-scrollbar {
+      width: 5px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 9999px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb:hover {
+      background: #94A3B8;
+    }
+  </style>
+<!-- END: Custom Styles -->
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col relative overflow-x-hidden selection:bg-brand-500 selection:text-white">
+<!-- BEGIN: HostDashboardHeader -->
+<header class="bg-white border-b border-slate-200 sticky top-0 z-20 shadow-sm" data-purpose="top-navigation">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+<div class="flex items-center space-x-3">
+<!-- BI-DATA Logo & Breadcrumb -->
+<div class="w-9 h-9 rounded-lg bg-gradient-to-br from-brand-500 to-cyan-700 flex items-center justify-center text-white shadow-sm shadow-brand-500/30">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"></path>
+</svg>
+</div>
+<div class="flex items-center space-x-2">
+<span class="font-bold text-slate-900 tracking-tight text-base">BI-DATA ANALYTICS</span>
+<span class="text-slate-300">/</span>
+<span class="text-xs sm:text-sm font-medium text-slate-500">Tablero de Gestión Estratégica (Anfitrión)</span>
+</div>
+</div>
+<!-- Top controls & filter badges -->
+<div class="flex items-center space-x-3">
+<div class="hidden md:flex items-center px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium border border-emerald-200">
+<span class="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-pulse"></span>
+          Filtro activo: Trimestre actual
+        </div>
+<div class="hidden sm:inline-block px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-xs font-medium border border-slate-200">
+          Unidad: Análisis Operativo
+        </div>
+<button aria-label="Notificaciones" class="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100" type="button">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+</div>
+</header>
+<!-- END: HostDashboardHeader -->
+<!-- BEGIN: HostDashboardContent -->
+<main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6" data-purpose="host-analytical-content">
+<!-- Top KPI Cards Row -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- KPI 1 -->
+<div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm relative overflow-hidden">
+<div class="flex justify-between items-start mb-2">
+<span class="text-xs font-medium text-slate-500 uppercase tracking-wider">Rendimiento Operativo</span>
+<span class="text-xs font-semibold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">IND-01</span>
+</div>
+<div class="flex items-baseline space-x-2">
+<span class="text-2xl font-bold text-slate-900">89.4%</span>
+<span class="text-xs font-medium text-emerald-600 flex items-center">
+<svg class="w-3.5 h-3.5 mr-0.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M5 10l7-7m0 0l7 7m-7-7v18" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+            +3.4%
+          </span>
+</div>
+<div class="w-full bg-slate-100 rounded-full h-1.5 mt-3">
+<div class="bg-brand-500 h-1.5 rounded-full" style="width: 89%"></div>
+</div>
+</div>
+<!-- KPI 2 (Destacado con foco de consulta) -->
+<div class="bg-white rounded-xl p-4 border border-amber-300 ring-2 ring-amber-100 shadow-sm relative">
+<div class="flex justify-between items-start mb-2">
+<span class="text-xs font-medium text-slate-600 uppercase tracking-wider">Ejecución Trimestral</span>
+<span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">Foco de consulta</span>
+</div>
+<div class="flex items-baseline space-x-2">
+<span class="text-2xl font-bold text-slate-900">74.2%</span>
+<span class="text-xs font-medium text-rose-500 flex items-center">
+<svg class="w-3.5 h-3.5 mr-0.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M19 14l-7 7m0 0l-7-7m7 7V3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+            -8.2%
+          </span>
+</div>
+<div class="w-full bg-slate-100 rounded-full h-1.5 mt-3">
+<div class="bg-amber-500 h-1.5 rounded-full" style="width: 74%"></div>
+</div>
+</div>
+<!-- KPI 3 -->
+<div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+<div class="flex justify-between items-start mb-2">
+<span class="text-xs font-medium text-slate-500 uppercase tracking-wider">Cumplimiento de Metas</span>
+<span class="text-xs font-semibold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">IND-03</span>
+</div>
+<div class="flex items-baseline space-x-2">
+<span class="text-2xl font-bold text-slate-900">92.0%</span>
+<span class="text-xs font-medium text-slate-500">Estable</span>
+</div>
+<div class="w-full bg-slate-100 rounded-full h-1.5 mt-3">
+<div class="bg-teal-500 h-1.5 rounded-full" style="width: 92%"></div>
+</div>
+</div>
+<!-- KPI 4 -->
+<div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+<div class="flex justify-between items-start mb-2">
+<span class="text-xs font-medium text-slate-500 uppercase tracking-wider">Distribución de Carga</span>
+<span class="text-xs font-semibold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">IND-04</span>
+</div>
+<div class="flex items-baseline space-x-2">
+<span class="text-2xl font-bold text-slate-900">Normal</span>
+<span class="text-xs font-medium text-cyan-600">Balanceado</span>
+</div>
+<div class="w-full bg-slate-100 rounded-full h-1.5 mt-3">
+<div class="bg-sky-500 h-1.5 rounded-full" style="width: 60%"></div>
+</div>
+</div>
+</div>
+<!-- Analytical Charts Section -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Main Chart (Tendencia) -->
+<div class="lg:col-span-2 bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-slate-100 gap-2">
+<div>
+<h3 class="text-base font-semibold text-slate-900">Tendencia de Ejecución vs. Programación</h3>
+<p class="text-xs text-slate-500">Visualización de seguimiento temporal en el cuadro de mando institucional</p>
+</div>
+<div class="flex items-center space-x-4 text-xs font-medium">
+<span class="inline-flex items-center text-slate-600">
+<span class="w-2.5 h-2.5 rounded-sm bg-brand-500 mr-1.5"></span> Programado
+            </span>
+<span class="inline-flex items-center text-slate-600">
+<span class="w-2.5 h-2.5 rounded-sm bg-amber-400 mr-1.5"></span> Real (con desvío)
+            </span>
+</div>
+</div>
+<!-- Simulated Bar Chart in Light Theme -->
+<div class="h-64 mt-6 flex items-end justify-between gap-3 px-2 pt-4">
+<!-- Sem 1 -->
+<div class="flex-1 flex flex-col items-center gap-2 h-full justify-end">
+<div class="w-full max-w-[42px] bg-sky-200 rounded-t-md hover:bg-sky-300 transition-colors" style="height: 60%;"></div>
+<span class="text-[11px] font-medium text-slate-400">Sem 1</span>
+</div>
+<!-- Sem 2 -->
+<div class="flex-1 flex flex-col items-center gap-2 h-full justify-end">
+<div class="w-full max-w-[42px] bg-sky-200 rounded-t-md hover:bg-sky-300 transition-colors" style="height: 75%;"></div>
+<span class="text-[11px] font-medium text-slate-400">Sem 2</span>
+</div>
+<!-- Sem 3 -->
+<div class="flex-1 flex flex-col items-center gap-2 h-full justify-end">
+<div class="w-full max-w-[42px] bg-sky-200 rounded-t-md hover:bg-sky-300 transition-colors" style="height: 68%;"></div>
+<span class="text-[11px] font-medium text-slate-400">Sem 3</span>
+</div>
+<!-- Sem 4 -->
+<div class="flex-1 flex flex-col items-center gap-2 h-full justify-end">
+<div class="w-full max-w-[42px] bg-brand-500 rounded-t-md hover:bg-brand-600 transition-colors" style="height: 90%;"></div>
+<span class="text-[11px] font-medium text-slate-400">Sem 4</span>
+</div>
+<!-- Sem 5 (Target of AI Query) -->
+<div class="flex-1 flex flex-col items-center gap-2 h-full justify-end relative">
+<div class="absolute -top-6 px-2 py-0.5 bg-amber-100 text-amber-800 text-[10px] font-bold rounded shadow-xs border border-amber-200">
+              -8.2%
+            </div>
+<div class="w-full max-w-[42px] bg-amber-400 rounded-t-md ring-2 ring-amber-300 transition-colors" style="height: 48%;"></div>
+<span class="text-[11px] font-bold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded">Sem 5</span>
+</div>
+<!-- Sem 6 -->
+<div class="flex-1 flex flex-col items-center gap-2 h-full justify-end">
+<div class="w-full max-w-[42px] bg-amber-300 rounded-t-md hover:bg-amber-400 transition-colors" style="height: 56%;"></div>
+<span class="text-[11px] font-medium text-slate-400">Sem 6</span>
+</div>
+<!-- Sem 7 -->
+<div class="flex-1 flex flex-col items-center gap-2 h-full justify-end">
+<div class="w-full max-w-[42px] bg-sky-300 rounded-t-md hover:bg-sky-400 transition-colors" style="height: 65%;"></div>
+<span class="text-[11px] font-medium text-slate-400">Sem 7</span>
+</div>
+</div>
+</div>
+<!-- Secondary Panel: Factores de Impacto -->
+<div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col justify-between">
+<div>
+<h3 class="text-base font-semibold text-slate-900">Factores de Impacto</h3>
+<p class="text-xs text-slate-500 mb-4">Categorías documentadas en repositorio de actas</p>
+<div class="space-y-4">
+<div>
+<div class="flex justify-between text-xs font-medium mb-1">
+<span class="text-slate-700">Retrasos en Contratación de Serv.</span>
+<span class="text-slate-900 font-semibold">42%</span>
+</div>
+<div class="w-full bg-slate-100 rounded-full h-2">
+<div class="bg-rose-500 h-2 rounded-full" style="width: 42%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-xs font-medium mb-1">
+<span class="text-slate-700">Reasignación Presupuestaria</span>
+<span class="text-slate-900 font-semibold">31%</span>
+</div>
+<div class="w-full bg-slate-100 rounded-full h-2">
+<div class="bg-brand-500 h-2 rounded-full" style="width: 31%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-xs font-medium mb-1">
+<span class="text-slate-700">Aprobaciones de Comité</span>
+<span class="text-slate-900 font-semibold">18%</span>
+</div>
+<div class="w-full bg-slate-100 rounded-full h-2">
+<div class="bg-amber-500 h-2 rounded-full" style="width: 18%"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-6 pt-4 border-t border-slate-100 bg-slate-50 -mx-6 -mb-6 p-4 rounded-b-2xl">
+<div class="flex items-center text-xs text-slate-500">
+<svg class="w-4 h-4 text-brand-500 mr-2 shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+            Sincronizado con Acta 258 y Documentación Oficial ESPOCH.
+          </div>
+</div>
+</div>
+</div>
+</main>
+<!-- END: HostDashboardContent -->
+<!-- BEGIN: ConversationalWidgetModal -->
+<!-- Floating conversational assistant panel styled completely in White / Light Mode -->
+<aside class="fixed bottom-5 right-5 sm:right-8 w-[calc(100vw-2.5rem)] sm:w-[420px] bg-white rounded-2xl border border-slate-200 shadow-floating-chat z-50 flex flex-col overflow-hidden transition-all duration-300" data-purpose="conversational-assistant-widget" id="bidachat-widget" style="max-height: 640px; height: 90vh;">
+<!-- Widget Header: Light & Professional -->
+<header class="bg-gradient-to-r from-slate-50 via-sky-50/50 to-white px-5 py-3.5 border-b border-slate-200/80 flex items-center justify-between shrink-0" data-purpose="widget-header">
+<div class="flex items-center space-x-3">
+<!-- Assistant Avatar -->
+<div class="w-10 h-10 rounded-xl bg-brand-50 border border-brand-100 text-brand-600 flex items-center justify-center shadow-xs">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<div>
+<div class="flex items-center space-x-2">
+<h2 class="text-sm font-bold text-slate-900 leading-tight">Autenticador Dashboard</h2>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 animate-pulse"></span>
+              En línea
+            </span>
+</div>
+<p class="text-[11px] text-slate-500 leading-tight mt-0.5">Asistente del dashboard • BI-DATA RAG</p>
+</div>
+</div>
+<!-- Action buttons (Minimize & Close) -->
+<div class="flex items-center space-x-1">
+<button class="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors" title="Minimizar" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M20 12H4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<button class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors" title="Cerrar widget" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+</header>
+<!-- Widget Message Area (Scrollable with high readability) -->
+<div class="flex-1 overflow-y-auto p-4 space-y-4 custom-scroll bg-slate-50/40" data-purpose="chat-messages-container">
+<!-- Timestamp divider -->
+<div class="flex items-center justify-center my-1">
+<span class="text-[11px] font-medium text-slate-400 bg-white px-2.5 py-0.5 rounded-full border border-slate-200/60 shadow-2xs">
+          Hoy, 10:42 AM
+        </span>
+</div>
+<!-- Assistant Message Bubble: ESPOCH Commission & Acta 258 citation -->
+<div class="flex items-start space-x-2.5" data-purpose="assistant-response">
+<div class="w-6 h-6 rounded-lg bg-brand-500 text-white flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold shadow-xs">
+          AI
+        </div>
+<div class="flex-1 space-y-2">
+<div class="bg-white text-slate-800 text-xs sm:text-[13px] leading-relaxed p-4 rounded-2xl rounded-tl-sm border border-slate-200/90 shadow-xs">
+<p class="font-medium text-slate-900 mb-2.5">
+              La Comisión de Titulación de la Carrera de Software de la ESPOCH está conformada por:
+            </p>
+<ul class="space-y-1.5 my-3 pl-1 text-slate-700">
+<li class="flex items-center space-x-2">
+<span class="w-1.5 h-1.5 rounded-full bg-brand-500"></span>
+<span><strong class="font-semibold text-slate-900">Ing. Lorena Aguirre</strong> — Presidenta</span>
+</li>
+<li class="flex items-center space-x-2">
+<span class="w-1.5 h-1.5 rounded-full bg-brand-500"></span>
+<span><strong class="font-semibold text-slate-900">Ing. Ivonne Rodríguez</strong> — Miembro</span>
+</li>
+<li class="flex items-center space-x-2">
+<span class="w-1.5 h-1.5 rounded-full bg-brand-500"></span>
+<span><strong class="font-semibold text-slate-900">Ing. Danilo Pástor</strong> — Miembro</span>
+</li>
+<li class="flex items-center space-x-2">
+<span class="w-1.5 h-1.5 rounded-full bg-brand-500"></span>
+<span><strong class="font-semibold text-slate-900">Ing. Julio Guallo</strong> — Miembro</span>
+</li>
+</ul>
+<div class="pt-2.5 mt-2 border-t border-slate-100 text-slate-600 text-xs">
+              Esta información corresponde al <strong class="font-semibold text-slate-900">Acta 258</strong>, de la sesión del <strong class="font-semibold text-slate-900">21 de septiembre de 2026</strong>.
+            </div>
+</div>
+<!-- Document reference pill (RAG Metadata) -->
+<div class="flex items-center space-x-2">
+<span class="inline-flex items-center px-2.5 py-1 rounded-md bg-white border border-slate-200 text-[11px] font-medium text-slate-600 hover:text-brand-600 hover:border-brand-200 cursor-pointer shadow-2xs transition-all">
+<svg class="w-3.5 h-3.5 mr-1.5 text-brand-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+              Acta_258_Comision.pdf <span class="text-slate-400 ml-1">(pág. 3)</span>
+</span>
+</div>
+</div>
+</div>
+</div>
+<!-- BEGIN: RadicalRedesignedInputSection -->
+<!-- Rediseño radical en modo claro eliminando el input nativo "Choose file" tosco y gris -->
+<footer class="bg-white border-t border-slate-200 p-3.5 space-y-2.5 shrink-0" data-purpose="redesigned-composer-zone">
+<!-- Elegant Attachment Chip Preview (Replaces ugly native browser input) -->
+<div class="flex items-center justify-between px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs" data-purpose="active-attachment-chip">
+<div class="flex items-center space-x-2 truncate">
+<div class="w-6 h-6 rounded bg-brand-50 border border-brand-200 text-brand-600 flex items-center justify-center shrink-0">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<span class="font-medium text-slate-700 truncate max-w-[190px]">captura_semana_5_kpi.png</span>
+<span class="text-[11px] text-slate-400 font-mono shrink-0">340 KB</span>
+</div>
+<button class="text-slate-400 hover:text-rose-500 p-1 rounded-md hover:bg-white transition-colors" title="Quitar captura" type="button">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+<!-- Main Input & Action Buttons Bar -->
+<form class="relative flex items-center gap-1.5" data-purpose="chat-input-form" onsubmit="event.preventDefault();">
+<!-- Redesigned Smart Screenshot Button -->
+<button class="flex items-center justify-center h-10 px-2.5 rounded-xl border border-slate-200 text-slate-600 hover:text-brand-600 hover:border-brand-300 hover:bg-brand-50/50 transition-all shrink-0 group" data-purpose="capture-screen-action" title="Capturar pantalla o zona del dashboard" type="button">
+<svg class="w-4 h-4 mr-1 text-slate-500 group-hover:text-brand-500 transition-colors" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+<path d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="text-xs font-medium hidden sm:inline">Capturar</span>
+</button>
+<!-- Modern Clean Text Input -->
+<div class="relative flex-1">
+<input class="w-full h-10 pl-3 pr-3 text-xs sm:text-sm bg-slate-50/80 hover:bg-slate-50 focus:bg-white text-slate-800 placeholder-slate-400 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all" placeholder="Escribe una pregunta sobre este dashboard..." type="text" value="¿Cuál es la causa de la caída en la Semana 5?"/>
+</div>
+<!-- Sleek Ergonomic Send Button with BI-DATA Teal Brand Color -->
+<button class="h-10 px-3.5 bg-brand-500 hover:bg-brand-600 text-white rounded-xl flex items-center justify-center shadow-xs shadow-brand-500/30 transition-all hover:scale-[1.02] active:scale-[0.98] shrink-0 font-medium text-xs sm:text-sm space-x-1.5" data-purpose="send-message-button" title="Enviar consulta" type="submit">
+<span>Enviar</span>
+<svg class="w-4 h-4 rotate-90" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M12 19V5m-7 7l7-7 7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</form>
+<!-- Micro Disclaimer -->
+<div class="flex items-center justify-between text-[10px] text-slate-400 px-1 pt-0.5">
+<span>Soporte RAG Multimodal activo</span>
+<span>Las respuestas verifican información institucional</span>
+</div>
+</footer>
+<!-- END: RadicalRedesignedInputSection -->
+</aside>
+<!-- END: ConversationalWidgetModal -->
+</body></html>

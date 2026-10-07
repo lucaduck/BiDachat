@@ -1,0 +1,24 @@
+{
+  "capturedAt": "2026-10-06T04:07:53.568966+00:00",
+  "widgetCopiesMatch": true,
+  "resources": {
+    "bidachat-widget.js": {
+      "status": 200,
+      "contentType": "application/javascript; charset=UTF-8",
+      "bytes": 20621,
+      "sha256": "320440dd0925e8c16dc9942ce4a42cd6790e7ad7ed48bc41881cd793088bbfb1"
+    },
+    "fonts/inter-variable.woff2": {
+      "status": 200,
+      "contentType": "font/woff2",
+      "bytes": 352240,
+      "sha256": "693b77d4f32ee9b8bfc995589b5fad5e99adf2832738661f5402f9978429a8e3"
+    },
+    "icon.svg": {
+      "status": 200,
+      "contentType": "image/svg+xml",
+      "bytes": 374,
+      "sha256": "e426774fec1cc2b9d278824ee791bf58cc2f546fb7f1e99df1809a45415f9078"
+    }
+  }
+}

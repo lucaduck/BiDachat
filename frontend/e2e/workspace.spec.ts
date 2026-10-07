@@ -1,10 +1,87 @@
 import { test, expect } from "@playwright/test";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import AxeBuilder from "@axe-core/playwright";
 // @ts-expect-error JavaScript fixture shared with the baseline capture.
 import { prepare, ids, bots } from "./fixtures.mjs";
 const edit = (id = ids[0], step = 0) => `/?view=Chatbots&edit=${id}&step=${step}`;
 test.beforeEach(async ({ page }) => {
   await prepare(page);
+});
+test("external host sends only current selected visible page context", async ({
+  page,
+  baseURL,
+}) => {
+  const requests: Array<Record<string, string>> = [];
+  const widgetSource = readFileSync(
+    resolve(process.cwd(), "../widget/src/bidachat-widget.js"),
+    "utf8",
+  );
+  await page.route("**/bidachat-widget.js", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/javascript",
+      body: widgetSource,
+    }),
+  );
+  await page.route(`**/api/v1/chatbots/${ids[0]}/queries`, async (route) => {
+    if (route.request().method() === "OPTIONS") {
+      await route.fulfill({
+        status: 204,
+        headers: {
+          "access-control-allow-origin": "http://127.0.0.1:4173",
+          "access-control-allow-methods": "POST, OPTIONS",
+          "access-control-allow-headers": "content-type",
+        },
+      });
+      return;
+    }
+    requests.push(route.request().postDataJSON());
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      headers: { "access-control-allow-origin": "http://127.0.0.1:4173" },
+      body: JSON.stringify({ answer: "Respuesta", response_time_ms: 10 }),
+    });
+  });
+  await page.route("http://127.0.0.1:4173/", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "text/html",
+      body: `<!doctype html><html><body><main id="dashboard"><h1>Panel externo</h1><p id="metric">Ventas 42</p><p hidden>Dato oculto</p><p data-bidachat-ignore>Dato excluido</p><form><label>Clave privada<input value="secreto"></label></form><button>Acción privada</button></main><script src="${baseURL}/bidachat-widget.js" data-chatbot-id="${ids[0]}" data-context-selector="#dashboard"></script></body></html>`,
+    }),
+  );
+  await page.goto("http://127.0.0.1:4173/");
+  await page.locator("bidachat-widget .launcher").click();
+  await page.locator("bidachat-widget .question").fill("¿Cuánto?");
+  await page.locator("bidachat-widget .send").click();
+  await expect.poll(() => requests.length).toBe(1);
+  expect(requests[0].page_context).toContain("Ventas 42");
+  expect(requests[0].page_context).not.toMatch(/oculto|excluido|privada|secreto/i);
+  await page.locator("#metric").evaluate((element) => {
+    element.textContent = "Ventas 57";
+  });
+  await page.locator("bidachat-widget .question").fill("¿Y ahora?");
+  await page.locator("bidachat-widget .send").click();
+  await expect.poll(() => requests.length).toBe(2);
+  expect(requests[1].page_context).toContain("Ventas 57");
+  expect(requests[1].page_context).not.toContain("Ventas 42");
+  await page.locator("#metric").evaluate((element) => {
+    element.textContent = "Valor " + "7".repeat(7000);
+  });
+  await page.locator("bidachat-widget .question").fill("¿Límite?");
+  await page.locator("bidachat-widget .send").click();
+  await expect.poll(() => requests.length).toBe(3);
+  expect(requests[2].page_context.length).toBe(6000);
+  await page.locator("bidachat-widget").evaluate(() => {
+    document.querySelector<HTMLScriptElement>(
+      "script[data-context-selector]",
+    )!.dataset.contextSelector = "##invalid";
+  });
+  await page.locator("bidachat-widget .question").fill("¿Sin región?");
+  await page.locator("bidachat-widget .send").click();
+  await expect.poll(() => requests.length).toBe(4);
+  expect(requests[3].page_context).toBeUndefined();
 });
 test("navigation, history, deep link, refresh, editor close and preview return", async ({
   page,
@@ -98,6 +175,32 @@ test("create, personalize, save and reopen", async ({ page }) => {
   await page.getByRole("button", { name: "Finalizar" }).click();
   await expect(page.getByRole("heading", { name: "Asistente QA" })).toBeVisible();
 });
+test("provider filters models and changing it requires a new model", async ({
+  page,
+}) => {
+  await page.goto(edit(ids[0], 2));
+  await expect(page.getByLabel("Proveedor de IA")).toHaveValue("ollama");
+  await expect(page.getByLabel("Modelo de lenguaje")).toHaveValue(
+    bots[0].configured_llm_model.id,
+  );
+  await expect(page.locator("#wizard-model option")).toHaveCount(2);
+  await page.getByLabel("Proveedor de IA").selectOption("openai");
+  await expect(page.getByLabel("Modelo de lenguaje")).toHaveValue("");
+  await expect(page.locator("#wizard-model option")).toHaveCount(2);
+  await expect(page.locator("#wizard-model option").last()).toHaveText("gpt-5.6-luna");
+  await page.getByRole("button", { name: "Guardar y continuar" }).click();
+  await expect(page).toHaveURL(/step=2/);
+  await page
+    .getByLabel("Modelo de lenguaje")
+    .selectOption("77777777-7777-4777-8777-777777777777");
+  await page.getByRole("button", { name: "Guardar y continuar" }).click();
+  await expect(page).toHaveURL(/step=3/);
+  await page.goto(edit(ids[0], 2));
+  await expect(page.getByLabel("Proveedor de IA")).toHaveValue("openai");
+  await expect(page.getByLabel("Modelo de lenguaje")).toHaveValue(
+    "77777777-7777-4777-8777-777777777777",
+  );
+});
 test("shared source can be removed and associated without changing the other bot", async ({
   page,
 }) => {
@@ -165,8 +268,12 @@ test("long conversation scrolls inside the widget and appearance preview makes n
   page,
 }) => {
   let queries = 0;
+  let querySockets = 0;
   page.on("request", (request) => {
     if (new URL(request.url()).pathname.endsWith("/queries")) queries++;
+  });
+  page.on("websocket", (socket) => {
+    if (socket.url().endsWith("/queries/ws")) querySockets++;
   });
   await page.goto(edit(ids[0], 1));
   await page.locator("#widget-color").fill("#225577");
@@ -192,6 +299,8 @@ test("long conversation scrolls inside the widget and appearance preview makes n
     await page.getByRole("button", { name: "Enviar consulta" }).click();
     await expect(page.locator("bidachat-widget .message-assistant")).toHaveCount(i + 2);
   }
+  expect(queries).toBe(4);
+  expect(querySockets).toBe(0);
   const log = page.getByRole("log", { name: "Conversación" });
   expect(
     await log.evaluate((el) => el.scrollHeight > el.clientHeight && el.scrollTop > 0),
@@ -203,6 +312,32 @@ test("long conversation scrolls inside the widget and appearance preview makes n
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
   ).toBeTruthy();
+});
+
+test("assistant answers render readable lists without exposing markup", async ({
+  page,
+}) => {
+  await page.route("**/queries", (route) =>
+    route.fulfill({
+      json: {
+        answer:
+          "Estos documentos están disponibles:\n\n1. **Marco teórico**\n2. **SciTE**\n\nConsulta <script>alert('x')</script> para más detalles.",
+        status: "completed",
+        query_id: "66666666-6666-4666-8666-666666666666",
+        response_time_ms: 1200,
+      },
+    }),
+  );
+  await page.goto(`/preview?chatbot_id=${ids[0]}`);
+  await page.getByRole("button", { name: "Abrir asistente BIDACHAT" }).click();
+  await page.getByRole("textbox", { name: "Pregunta" }).fill("¿Qué documentos tienes?");
+  await page.getByRole("button", { name: "Enviar consulta" }).click();
+  const answer = page.locator("bidachat-widget .message-assistant").last();
+  await expect(answer.locator("ol li")).toHaveCount(2);
+  await expect(answer.locator("strong").first()).toHaveText("Marco teórico");
+  await expect(answer).not.toContainText("**");
+  await expect(answer.locator("script")).toHaveCount(0);
+  await expect(answer).toContainText("<script>alert('x')</script>");
 });
 
 test("administrative API failures show errors and recover on reload", async ({

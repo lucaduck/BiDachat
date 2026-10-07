@@ -1,3 +1,4 @@
+from datetime import UTC, datetime
 from uuid import UUID
 
 from sqlalchemy import select
@@ -25,6 +26,7 @@ class ConversationService:
         question: str,
         image: bytes | None,
         image_mime_type: str | None,
+        page_context: str | None = None,
     ):
         query = await self.queries.start_query(
             session,
@@ -38,6 +40,13 @@ class ConversationService:
             .where(Chatbot.id == chatbot_id)
         )
         instructions, provider, model = result.one()
+        presentation_rules = (
+            "Presenta la respuesta en español con párrafos breves. Si enumeras "
+            "elementos sin orden, usa viñetas; reserva la numeración para pasos. "
+            "Resalta solo términos cortos en negrita. Evita tablas Markdown, "
+            "HTML y símbolos decorativos."
+        )
+        instructions = f"{instructions.strip()}\n\n{presentation_rules}".strip()
         query_id = query.id
         await session.commit()
         try:
@@ -68,6 +77,7 @@ class ConversationService:
                 question=question.strip(),
                 instructions=instructions,
                 context=context,
+                page_context=page_context or "",
                 image=image,
                 image_mime_type=image_mime_type,
             )
@@ -82,7 +92,7 @@ class ConversationService:
                 session,
                 query_id=query_id,
                 error_code="provider_error",
-                completed_at=None,
+                completed_at=datetime.now(UTC),
             )
             await session.commit()
             raise

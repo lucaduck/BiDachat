@@ -1,0 +1,583 @@
+{
+  "capturedAt": "2026-10-06T04:23:23.824846+00:00",
+  "matrix": [
+    {
+      "file": "light-1440-summary.png",
+      "width": 1440,
+      "height": 1084,
+      "bytes": 81713,
+      "sha256": "ac3e07bf7661e3c71b913f2ee2f50342237587181a02cd147e60608ef041af98"
+    },
+    {
+      "file": "light-1440-chatbots.png",
+      "width": 1440,
+      "height": 1000,
+      "bytes": 73663,
+      "sha256": "4dd17c796d5c5d57bd6cbe314e6f4cea1ccd53040fca69f53273201cb4f4d499"
+    },
+    {
+      "file": "light-1440-documents.png",
+      "width": 1440,
+      "height": 1000,
+      "bytes": 76375,
+      "sha256": "f36f05593c094364bba34dee8745b18cadc3ac2295e71796799a36a051442841"
+    },
+    {
+      "file": "light-1440-metrics.png",
+      "width": 1440,
+      "height": 1000,
+      "bytes": 63984,
+      "sha256": "86310591ac3220b41949f1a4046fa2b421e894f1c0335c90ba83565bd3be0c75"
+    },
+    {
+      "file": "light-1440-settings.png",
+      "width": 1440,
+      "height": 1883,
+      "bytes": 146772,
+      "sha256": "665d8e0c5a7b02e3240cf0829c59383343871f865beb4110d3c315d6dfbeb269"
+    },
+    {
+      "file": "light-1440-editor.png",
+      "width": 1440,
+      "height": 1191,
+      "bytes": 96572,
+      "sha256": "c8f77a6a5526fd37957777b7a2b371dedcf6a2755ac03a452c120e5b03cb2cd7"
+    },
+    {
+      "file": "light-1440-knowledge.png",
+      "width": 1440,
+      "height": 1030,
+      "bytes": 86380,
+      "sha256": "5e513a0f7c3c6425f05dfcf9b515dbcdd651a4314e522b9a64c46a27887631a3"
+    },
+    {
+      "file": "light-1440-preview.png",
+      "width": 1440,
+      "height": 1000,
+      "bytes": 73789,
+      "sha256": "39996e916cefece8c91f69571652d2c3f9c7a38bcf063858704b8c5ce7b4e699"
+    },
+    {
+      "file": "light-1089-summary.png",
+      "width": 1089,
+      "height": 1299,
+      "bytes": 82006,
+      "sha256": "af6f550c1253cc6f64806c11585ddaee0f49a87804c78524fd93a2be528ab2f5"
+    },
+    {
+      "file": "light-1089-chatbots.png",
+      "width": 1089,
+      "height": 1000,
+      "bytes": 73631,
+      "sha256": "6b5f2d38a6dc5173dff170177e46b2655c5695fb0dd925ee001874cdf1ea02f1"
+    },
+    {
+      "file": "light-1089-documents.png",
+      "width": 1089,
+      "height": 1000,
+      "bytes": 71277,
+      "sha256": "cadc5fff1328743174ebf0e80ce8f3fd9225b069e5a733a2b9e53d561e43348b"
+    },
+    {
+      "file": "light-1089-metrics.png",
+      "width": 1089,
+      "height": 1000,
+      "bytes": 60968,
+      "sha256": "093d73841570cb0f46e08397f55caba7719ef9ecf3edbb3880ec6dbbabab8541"
+    },
+    {
+      "file": "light-1089-settings.png",
+      "width": 1089,
+      "height": 1846,
+      "bytes": 142695,
+      "sha256": "6feeb9aae02ab13a4e421acb2683b06d61e0f6a95eaa41c2bf3386c2354e65b8"
+    },
+    {
+      "file": "light-1089-editor.png",
+      "width": 1089,
+      "height": 1198,
+      "bytes": 91920,
+      "sha256": "544f79c7af362c73bb0907881be613782ecfaf5c2b332d687190d153a118ae34"
+    },
+    {
+      "file": "light-1089-knowledge.png",
+      "width": 1089,
+      "height": 1020,
+      "bytes": 81549,
+      "sha256": "ecbae00a24683189461e8e6ebd1d938996c79a63baad9665ec8ad66fed2d8499"
+    },
+    {
+      "file": "light-1089-preview.png",
+      "width": 1089,
+      "height": 1000,
+      "bytes": 68149,
+      "sha256": "ac39a40c3d172fac0ae768f2685df0d540a654714d722865a2dc2ea2431e7791"
+    },
+    {
+      "file": "light-768-summary.png",
+      "width": 768,
+      "height": 1402,
+      "bytes": 71341,
+      "sha256": "85a932c7a29031efbc1e99a148ea8f7a7563e63af6ff3c85bb6281c790d9fac7"
+    },
+    {
+      "file": "light-768-chatbots.png",
+      "width": 768,
+      "height": 1009,
+      "bytes": 60775,
+      "sha256": "498d975d927bdfff18bca70544b49f19feb9d44bed1d6e68725a51a2d7686ce3"
+    },
+    {
+      "file": "light-768-documents.png",
+      "width": 768,
+      "height": 1000,
+      "bytes": 55684,
+      "sha256": "29d6d2927af3b75fc7fbb8ae48458200e62904a8bc38f931e36cf45965a9b53d"
+    },
+    {
+      "file": "light-768-metrics.png",
+      "width": 768,
+      "height": 1000,
+      "bytes": 46351,
+      "sha256": "85d5c5525d21b9882981bd0894da9e69336301139a580075b99e2c6337530d21"
+    },
+    {
+      "file": "light-768-settings.png",
+      "width": 768,
+      "height": 1914,
+      "bytes": 125896,
+      "sha256": "40b628e54ff0cddfad0044c72e812ffebb05d7932f5bef272be470ff4f65801e"
+    },
+    {
+      "file": "light-768-editor.png",
+      "width": 768,
+      "height": 1475,
+      "bytes": 77933,
+      "sha256": "ec62858833c29c0159bbb1b2a911007c2f18ecf4285102daddb05e0c1c1fa190"
+    },
+    {
+      "file": "light-768-knowledge.png",
+      "width": 768,
+      "height": 1088,
+      "bytes": 66349,
+      "sha256": "c740a3abe234304c5d86727e5f919e2b9fa9dc7f295f73518bba55d6361881d8"
+    },
+    {
+      "file": "light-768-preview.png",
+      "width": 768,
+      "height": 1000,
+      "bytes": 66469,
+      "sha256": "692c831c3d00c8a0f5b0aa4287cab1c4db37791f1ad715d78b71cc725ba9b3dd"
+    },
+    {
+      "file": "light-390-summary.png",
+      "width": 390,
+      "height": 1650,
+      "bytes": 70197,
+      "sha256": "6044fcd32ad956791500f5a6630ef1409b76ea4eaf3f5031b6e7a0f75d53c042"
+    },
+    {
+      "file": "light-390-chatbots.png",
+      "width": 390,
+      "height": 1237,
+      "bytes": 58334,
+      "sha256": "cebc8c2984e18ab9711d2f82f7412d216e3f0b3c2ace7059aedae906f05f8455"
+    },
+    {
+      "file": "light-390-documents.png",
+      "width": 390,
+      "height": 1106,
+      "bytes": 54444,
+      "sha256": "631049779bd3da0e7d29bfa8edb0d1296503e742406865baf096070ade303a46"
+    },
+    {
+      "file": "light-390-metrics.png",
+      "width": 390,
+      "height": 1125,
+      "bytes": 46523,
+      "sha256": "74a30b9f8636cf659bf65aabe658730357cf81556af39c35e4e510a26fcae2b4"
+    },
+    {
+      "file": "light-390-settings.png",
+      "width": 390,
+      "height": 2439,
+      "bytes": 121572,
+      "sha256": "447a715bd628d0a96c42d5c957ac951032191fe19e460b59aaf96f619b96c5c6"
+    },
+    {
+      "file": "light-390-editor.png",
+      "width": 390,
+      "height": 1632,
+      "bytes": 74138,
+      "sha256": "fc9147958eec0c270a86d3940b9d8b5fd6b0c2a5b8e6c8c52df55385a3522538"
+    },
+    {
+      "file": "light-390-knowledge.png",
+      "width": 390,
+      "height": 1329,
+      "bytes": 63835,
+      "sha256": "f111a4b7e6cf9a6eea6e53257a76b80a80ae06b019c7abd7cf3672acf311c0a5"
+    },
+    {
+      "file": "light-390-preview.png",
+      "width": 390,
+      "height": 1398,
+      "bytes": 51333,
+      "sha256": "cce731e9811918f0b508885247ee76614e62c9f2cdc069f70ae94ab643b8cbdc"
+    },
+    {
+      "file": "light-320-summary.png",
+      "width": 320,
+      "height": 1724,
+      "bytes": 70030,
+      "sha256": "85e5fb77c92ced0e5c9418d8b50388b6768e8381e2811d1c306649a2ce8db6ff"
+    },
+    {
+      "file": "light-320-chatbots.png",
+      "width": 320,
+      "height": 1352,
+      "bytes": 58215,
+      "sha256": "bf4cce2f95d57abd2725ff21467855ee00cb114c6f8e13be895b531ec661e4b8"
+    },
+    {
+      "file": "light-320-documents.png",
+      "width": 320,
+      "height": 1151,
+      "bytes": 54464,
+      "sha256": "aab057192459aaac5864289d44de6d88c01f3d3e9f201a633754cae7ef997cf1"
+    },
+    {
+      "file": "light-320-metrics.png",
+      "width": 320,
+      "height": 1125,
+      "bytes": 45654,
+      "sha256": "42542a85eef80dcfbfa2a26eb817c6c0e7a85e3de19ac4ead64c4f94e1f7adcd"
+    },
+    {
+      "file": "light-320-settings.png",
+      "width": 320,
+      "height": 2530,
+      "bytes": 115261,
+      "sha256": "44ce018d54a946aef1e2a4d79b11185618571a8f2b244aff6dbe81927b405236"
+    },
+    {
+      "file": "light-320-editor.png",
+      "width": 320,
+      "height": 1632,
+      "bytes": 72716,
+      "sha256": "5aaacbd2b0ae73f3760fb6e6a354163f63a84ba7350b7ce6abce2faa254380f4"
+    },
+    {
+      "file": "light-320-knowledge.png",
+      "width": 320,
+      "height": 1347,
+      "bytes": 61382,
+      "sha256": "08487df02166686103c8a7cbaeb839850439f0b84a53b8e572ac19b82ec8b40f"
+    },
+    {
+      "file": "light-320-preview.png",
+      "width": 320,
+      "height": 1398,
+      "bytes": 49771,
+      "sha256": "1365f68eabd3cdc326b8e39ad26f5c624cebc0972d09a5887b65e96694a38a10"
+    },
+    {
+      "file": "dark-1440-summary.png",
+      "width": 1440,
+      "height": 1084,
+      "bytes": 82857,
+      "sha256": "99a753b919b47b36c32d90a9abbf2f3995bbffd04daf41b4fb4e4f85a862909c"
+    },
+    {
+      "file": "dark-1440-chatbots.png",
+      "width": 1440,
+      "height": 1000,
+      "bytes": 74659,
+      "sha256": "9a4bc093d0ef52f4fc95967ba5a2fc4c164db7694a1a5923aa68f73579bd85e9"
+    },
+    {
+      "file": "dark-1440-documents.png",
+      "width": 1440,
+      "height": 1000,
+      "bytes": 78095,
+      "sha256": "a22ca35a3d9af7c5ee53d45391efb189f66b19ecb08f145a8ae5cbc7bc39741e"
+    },
+    {
+      "file": "dark-1440-metrics.png",
+      "width": 1440,
+      "height": 1000,
+      "bytes": 64532,
+      "sha256": "53d41e771936f0a953a6466dc796ef1847df3968218a8dfa5711f230c8c78fc5"
+    },
+    {
+      "file": "dark-1440-settings.png",
+      "width": 1440,
+      "height": 1883,
+      "bytes": 148392,
+      "sha256": "43f43eb370511c9d855146154b59fa1a7778a2cc152f18d8ad00cc36d753e343"
+    },
+    {
+      "file": "dark-1440-editor.png",
+      "width": 1440,
+      "height": 1191,
+      "bytes": 97891,
+      "sha256": "fb1af92178e026d7d88d7f5d19734f447f33fc94e4b7264735a5c6e4e1eec866"
+    },
+    {
+      "file": "dark-1440-knowledge.png",
+      "width": 1440,
+      "height": 1030,
+      "bytes": 87882,
+      "sha256": "0afded82f057b1b96dc20676bffb801f19f894f131105921c350e4148833cb9e"
+    },
+    {
+      "file": "dark-1440-preview.png",
+      "width": 1440,
+      "height": 1000,
+      "bytes": 72190,
+      "sha256": "cb4794ac7c592ea37a67cb203f0322f2cf71c7919b4fde4ef2ddd0e441b44e0c"
+    },
+    {
+      "file": "dark-1089-summary.png",
+      "width": 1089,
+      "height": 1299,
+      "bytes": 83131,
+      "sha256": "89175a9dddf975886ef12f43289e265887cb32608fe5305360d7621ba900c278"
+    },
+    {
+      "file": "dark-1089-chatbots.png",
+      "width": 1089,
+      "height": 1000,
+      "bytes": 74539,
+      "sha256": "af751589213621aa0d321d70697d71537f82c618d2561455454ea42a62926517"
+    },
+    {
+      "file": "dark-1089-documents.png",
+      "width": 1089,
+      "height": 1000,
+      "bytes": 72823,
+      "sha256": "14cff1fd7a7a02ced4dd360fc609764b0f0c90722fed4961a1ac5f1e48980361"
+    },
+    {
+      "file": "dark-1089-metrics.png",
+      "width": 1089,
+      "height": 1000,
+      "bytes": 61370,
+      "sha256": "b5f3818d9ca804e047fdb9a10348a194786a26e124b4a12c0fdd406ecf7411b7"
+    },
+    {
+      "file": "dark-1089-settings.png",
+      "width": 1089,
+      "height": 1846,
+      "bytes": 143952,
+      "sha256": "d409bf932bba4ca9ecfd350889aaf1b3173e915b40ca78a58f05351b6fabec7c"
+    },
+    {
+      "file": "dark-1089-editor.png",
+      "width": 1089,
+      "height": 1198,
+      "bytes": 93166,
+      "sha256": "4e720c36566033c3e70d37790d0ab5494466ed082a30c71ecf4270c6f0dba53e"
+    },
+    {
+      "file": "dark-1089-knowledge.png",
+      "width": 1089,
+      "height": 1020,
+      "bytes": 83213,
+      "sha256": "ab4cd7244c8eb77f344f1f6caf978098ada16caef25b945731e61e40d30e5c69"
+    },
+    {
+      "file": "dark-1089-preview.png",
+      "width": 1089,
+      "height": 1000,
+      "bytes": 66664,
+      "sha256": "44961253aef1c354170cd6e2f50cfecfd149ec4b67fcca2e920ae8787a34f1a9"
+    },
+    {
+      "file": "dark-768-summary.png",
+      "width": 768,
+      "height": 1402,
+      "bytes": 72272,
+      "sha256": "d38af8588f29f29e8277f71790256ff8443b0bdeb95ea09bc392c06e15d784de"
+    },
+    {
+      "file": "dark-768-chatbots.png",
+      "width": 768,
+      "height": 1009,
+      "bytes": 61734,
+      "sha256": "0659152c430e2685f5d6e373e5fe3b953581720946e92895a460cd6b483a18b0"
+    },
+    {
+      "file": "dark-768-documents.png",
+      "width": 768,
+      "height": 1000,
+      "bytes": 57003,
+      "sha256": "0a49b4d039b1f9421fd006041fecce5b86ecb282a26fa243fc34547c70c14755"
+    },
+    {
+      "file": "dark-768-metrics.png",
+      "width": 768,
+      "height": 1000,
+      "bytes": 46588,
+      "sha256": "9447b61950a634fdf3782ed005a98dd19043a2ed04ff45f6892220935231b625"
+    },
+    {
+      "file": "dark-768-settings.png",
+      "width": 768,
+      "height": 1914,
+      "bytes": 127143,
+      "sha256": "a953602f383d966d0b193f7ddf76a249da993945705d1abb7c17d0e4c81083a9"
+    },
+    {
+      "file": "dark-768-editor.png",
+      "width": 768,
+      "height": 1475,
+      "bytes": 79210,
+      "sha256": "1c0a73df8baa49d94ccfe679d946aebf72f3836201a14be2e3ad7b4fe9a65317"
+    },
+    {
+      "file": "dark-768-knowledge.png",
+      "width": 768,
+      "height": 1088,
+      "bytes": 67565,
+      "sha256": "8c79d866e479832698f13fcc813ba9e8b41573fb51fcf32659a9e0d25bbefd27"
+    },
+    {
+      "file": "dark-768-preview.png",
+      "width": 768,
+      "height": 1000,
+      "bytes": 65414,
+      "sha256": "1ca991e2d11f4268343c288e0c4e51ebaa9d6fc26f4a676e911d167648971aec"
+    },
+    {
+      "file": "dark-390-summary.png",
+      "width": 390,
+      "height": 1650,
+      "bytes": 71726,
+      "sha256": "e4404aa7df726e486bec305d8484ca83d0c47db44a3ff2a72cb02f7385f0c3d0"
+    },
+    {
+      "file": "dark-390-chatbots.png",
+      "width": 390,
+      "height": 1237,
+      "bytes": 59423,
+      "sha256": "ef5234af7ff5ed34d3511bb96c81f0baad8642963ee879d1b5f0f5e2ebab86e8"
+    },
+    {
+      "file": "dark-390-documents.png",
+      "width": 390,
+      "height": 1106,
+      "bytes": 55180,
+      "sha256": "a2071e9a4e78cd60200a5bc6c85931921e76ad19943d0828fe2fe107aadf8bfd"
+    },
+    {
+      "file": "dark-390-metrics.png",
+      "width": 390,
+      "height": 1125,
+      "bytes": 46504,
+      "sha256": "052c1a9bdb226a113f4a599ab5ed2badcf228eee446cb3f7721da53d5eba40e9"
+    },
+    {
+      "file": "dark-390-settings.png",
+      "width": 390,
+      "height": 2439,
+      "bytes": 123258,
+      "sha256": "af89802bf3fa5511c340a1b06e35d70660c40b283c3f7e884d39084f3b2b0427"
+    },
+    {
+      "file": "dark-390-editor.png",
+      "width": 390,
+      "height": 1632,
+      "bytes": 75138,
+      "sha256": "7ababd88c74224362c88dda03c230410c71c327d6b52cb6155b84c8627cd0579"
+    },
+    {
+      "file": "dark-390-knowledge.png",
+      "width": 390,
+      "height": 1329,
+      "bytes": 64899,
+      "sha256": "fbace9b552f966e0d5684d00b2f0a6a23c2e5ee63818f1fb8db194516717e0d8"
+    },
+    {
+      "file": "dark-390-preview.png",
+      "width": 390,
+      "height": 1398,
+      "bytes": 50252,
+      "sha256": "1b65959ab527d6acd793f6b3ab70858e6b6d46bf9d4cf778bdd6e644271644ab"
+    },
+    {
+      "file": "dark-320-summary.png",
+      "width": 320,
+      "height": 1724,
+      "bytes": 71533,
+      "sha256": "a34deb1b7b226959b62888b2c6f973a48e42af34a9414124292dbf3c5025ce43"
+    },
+    {
+      "file": "dark-320-chatbots.png",
+      "width": 320,
+      "height": 1352,
+      "bytes": 59125,
+      "sha256": "bde851577a1601fad03a275241072a706e6b9caec042f36b573ae9c9faceb925"
+    },
+    {
+      "file": "dark-320-documents.png",
+      "width": 320,
+      "height": 1151,
+      "bytes": 55678,
+      "sha256": "9c109bcf70dee25945a765a4caf974298c97153684f4966d8dd95bdbf6c06d48"
+    },
+    {
+      "file": "dark-320-metrics.png",
+      "width": 320,
+      "height": 1125,
+      "bytes": 46078,
+      "sha256": "c0cc485a69c38180bd4b290eb992cfb19820a080c3d5b3cef8183061c4a9c9b0"
+    },
+    {
+      "file": "dark-320-settings.png",
+      "width": 320,
+      "height": 2530,
+      "bytes": 116957,
+      "sha256": "aeaeccc3e7f9318505c0c3325fa2a9b324adbb2aa6f204e42c7d3966214474d0"
+    },
+    {
+      "file": "dark-320-editor.png",
+      "width": 320,
+      "height": 1632,
+      "bytes": 74152,
+      "sha256": "0d929a9a9e1f80eacda536875a6c134e59a5d3ca11696fb01808b08689b2902a"
+    },
+    {
+      "file": "dark-320-knowledge.png",
+      "width": 320,
+      "height": 1347,
+      "bytes": 62550,
+      "sha256": "e9e5b8636079d1dd6545f2365dc50a1ce25d5eff31e439925afabad424da0b08"
+    },
+    {
+      "file": "dark-320-preview.png",
+      "width": 320,
+      "height": 1398,
+      "bytes": 48733,
+      "sha256": "f8cb04df4c302b857978721e76edd06f0bcc157f69f63fb2bc33e267a285d812"
+    }
+  ],
+  "requiredReviewCaptures": [
+    "desktop",
+    "mobile",
+    "user-1089",
+    "tablet-768",
+    "narrow-320",
+    "dark-desktop",
+    "dark-mobile",
+    "dark-narrow-320",
+    "editor",
+    "documents",
+    "chatbots",
+    "metrics",
+    "preview",
+    "dark-preview",
+    "login",
+    "dark-login"
+  ]
+}

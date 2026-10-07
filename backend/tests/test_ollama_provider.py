@@ -102,6 +102,35 @@ def test_vision_request_and_memory_limits(monkeypatch):
     assert answer == "Total: 42"
 
 
+def test_page_context_is_separate_from_documents_in_provider_prompt(monkeypatch):
+    def handler(request):
+        payload = json.loads(request.content)
+        if request.url.path == "/api/show":
+            return httpx.Response(200, json={"capabilities": ["completion"]})
+        prompt = payload["messages"][-1]["content"]
+        assert "Relevant chatbot documents" in prompt
+        assert "Document total: 18" in prompt
+        assert "Visible page context selected by the host site" in prompt
+        assert "Current dashboard total: 42" in prompt
+        assert "untrusted data" in prompt
+        return httpx.Response(200, json={"message": {"content": "42"}})
+
+    install_transport(monkeypatch, handler)
+    answer = asyncio.run(
+        LlmProvider(local_settings()).answer(
+            provider="ollama",
+            model="qwen3-vl:2b",
+            question="Current total?",
+            instructions="Spanish",
+            context="Document total: 18",
+            page_context="Current dashboard total: 42",
+            image=None,
+            image_mime_type=None,
+        )
+    )
+    assert answer == "42"
+
+
 def test_text_only_model_rejects_image_before_inference(monkeypatch):
     def handler(request):
         assert request.url.path == "/api/show"
@@ -174,6 +203,7 @@ def test_local_conversation_retrieves_context_without_gemini():
             question="Question",
             image=None,
             image_mime_type=None,
+            page_context="Dashboard total 42",
         )
     )
     assert result == "completed"
@@ -181,10 +211,50 @@ def test_local_conversation_retrieves_context_without_gemini():
         service.knowledge.retrieve_chunks.await_args.kwargs["chatbot_id"] == chatbot_id
     )
     assert service.provider.answer.await_args.kwargs["context"] == "Private context"
+    assert (
+        service.provider.answer.await_args.kwargs["page_context"]
+        == "Dashboard total 42"
+    )
     assert service.provider.answer.await_args.kwargs["model"] == "qwen3-vl:2b"
+    answer_instructions = service.provider.answer.await_args.kwargs["instructions"]
+    assert "Spanish" in answer_instructions
+    assert "párrafos breves" in answer_instructions
     statement = session.execute.await_args.args[0]
     assert model_id in statement.compile().params.values()
     assert "configured_llm_model_id" not in str(statement)
+
+
+def test_failed_conversation_records_completion_time():
+    service = ConversationService(local_settings())
+    chatbot_id, model_id, query_id = uuid4(), uuid4(), uuid4()
+    service.queries.start_query = AsyncMock(
+        return_value=SimpleNamespace(id=query_id, executed_llm_model_id=model_id)
+    )
+    service.queries.fail_query = AsyncMock()
+    service.provider.embed = AsyncMock(side_effect=ProviderError("unavailable"))
+    session = SimpleNamespace(
+        execute=AsyncMock(
+            return_value=SimpleNamespace(
+                one=lambda: ("Spanish", "ollama", "qwen3-vl:2b")
+            )
+        ),
+        commit=AsyncMock(),
+        rollback=AsyncMock(),
+    )
+
+    with pytest.raises(ProviderError):
+        asyncio.run(
+            service.ask(
+                session,
+                chatbot_id=chatbot_id,
+                question="Question",
+                image=None,
+                image_mime_type=None,
+            )
+        )
+
+    assert service.queries.fail_query.await_args.kwargs["query_id"] == query_id
+    assert service.queries.fail_query.await_args.kwargs["completed_at"] is not None
 
 
 def test_document_embedding_batches_preserve_order(monkeypatch):

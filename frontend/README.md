@@ -17,7 +17,7 @@ npm run dev
 
 La aplicación queda disponible en `http://localhost:3000`. Los servicios cliente vivirán en `services/` y solo consumirán la API FastAPI; nunca deben contener secretos, credenciales ni acceso directo a bases de datos o proveedores LLM.
 
-El panel envía `/api/v1/*` a FastAPI mediante un rewrite de Next.js. En desarrollo se usa `http://127.0.0.1:8000`; si el backend corre en otra dirección, configura `BACKEND_API_ORIGIN` en el entorno de Next.js (sin la ruta `/api/v1`). Esta variable se usa solo en el servidor. La sesión administrativa se conserva en el almacenamiento local del navegador hasta su expiración o cierre de sesión, por lo que una recarga o una vista previa en otra pestaña mantiene el acceso.
+En Docker, Nginx envía `/api/v1/*` a FastAPI y las demás rutas a Next.js bajo el mismo origen. Al ejecutar Next.js fuera de Compose, su rewrite envía `/api/v1/*` al backend indicado por `BACKEND_API_ORIGIN` (`http://127.0.0.1:8000` por defecto). Esta variable se usa solo en el servidor. La sesión administrativa se conserva en el almacenamiento local del navegador hasta su expiración o cierre de sesión, por lo que una recarga o una vista previa en otra pestaña mantiene el acceso.
 
 Referencia visual vigente: [DESIGN.md](../DESIGN.md).
 
@@ -27,9 +27,9 @@ Desde la raíz, configura `.env` con `POSTGRES_PASSWORD`, `ADMIN_EMAIL`,
 `ADMIN_PASSWORD` y las credenciales del proveedor. Para OpenAI configura
 `OPENAI_API_KEY` y `OPENAI_MODEL`; para Gemini, `GEMINI_API_KEY`.
 Después ejecuta `docker compose up -d --build`.
-El panel queda en `http://localhost:3000` (o `FRONTEND_PORT`), y la página de
-prueba del widget en `/widget-example.html`. Compose arranca PostgreSQL, FastAPI
-y Next.js; el frontend usa `http://backend:8000` dentro de la red Docker.
+Nginx publica el panel en `http://localhost:3000` (o `FRONTEND_PORT`), y la página de
+prueba del widget en `/widget-example.html`. Compose arranca PostgreSQL, FastAPI,
+Next.js y Nginx; este envía la API directamente a `backend:8000` dentro de la red Docker.
 El backend crea el primer administrador y registra los modelos configurados al arrancar.
 `OLLAMA_MODEL` registra el modelo descargado en el servicio Docker `ollama`.
 Sigue [la guía de Ollama](../docs/local-ollama.md) antes del primer arranque.

@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field, model_validator
 
 class QueryRequest(BaseModel):
     question: str = Field(min_length=1, max_length=4000)
+    page_context: str | None = Field(default=None, max_length=6000)
     image_base64: str | None = Field(default=None, max_length=5_600_000)
     image_mime_type: str | None = None
 
@@ -15,6 +16,8 @@ class QueryRequest(BaseModel):
     def validate_image(self) -> "QueryRequest":
         if not self.question.strip():
             raise ValueError("Question must not be blank")
+        if self.page_context is not None:
+            self.page_context = " ".join(self.page_context.split()) or None
         if self.image_base64 is None:
             if self.image_mime_type is not None:
                 raise ValueError("Image MIME type requires image data")

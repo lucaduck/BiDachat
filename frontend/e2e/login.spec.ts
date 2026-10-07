@@ -10,6 +10,10 @@ for (const theme of ["light", "dark"] as const) {
     await expect(page.getByRole("heading", { name: "Iniciar sesión" })).toBeVisible();
     const logo = page.getByRole("img", { name: /BIDACHAT.*Gestor de chatbots/ });
     await expect(logo).toBeVisible();
+    await expect(logo).toHaveAttribute(
+      "src",
+      new RegExp(theme === "dark" ? "login-logo-dark" : "logo-bidachat-light"),
+    );
     await expect
       .poll(() => logo.evaluate((image) => (image as HTMLImageElement).naturalWidth))
       .toBeGreaterThan(0);

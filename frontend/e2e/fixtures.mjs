@@ -117,7 +117,15 @@ export async function prepare(
         expires_at: new Date(Date.now() + 3600000).toISOString(),
       };
     else if (path === "/auth/logout") return route.fulfill({ status: 204 });
-    else if (path === "/llm-models") body = [model];
+    else if (path === "/llm-models")
+      body = [
+        model,
+        {
+          id: "77777777-7777-4777-8777-777777777777",
+          provider: "openai",
+          model: "gpt-5.6-luna",
+        },
+      ];
     else if (path === "/settings")
       body = {
         gemini_configured: false,
@@ -168,6 +176,15 @@ export async function prepare(
         return route.fulfill({ status: 204 });
       } else if (method === "PUT") {
         Object.assign(b, req.postDataJSON());
+        b.configured_llm_model =
+          [
+            model,
+            {
+              id: "77777777-7777-4777-8777-777777777777",
+              provider: "openai",
+              model: "gpt-5.6-luna",
+            },
+          ].find((item) => item.id === b.configured_llm_model_id) ?? model;
         body = b;
       } else if (b) body = b;
       else return route.fulfill({ status: 404, json: { detail: "No encontrado" } });

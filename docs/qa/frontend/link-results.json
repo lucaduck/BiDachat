@@ -1,0 +1,20 @@
+{
+  "checkedAt": "2026-10-06T04:25:25.183638+00:00",
+  "localLinksChecked": 25,
+  "remoteReferencesChecked": [
+    {
+      "url": "https://uupm.cc/",
+      "directHttpStatus": 200,
+      "contentRetrievedViaWebTool": true,
+      "classification": "reachable"
+    },
+    {
+      "url": "https://www.w3.org/TR/WCAG22/",
+      "directHttpStatus": 200,
+      "contentRetrievedViaWebTool": true,
+      "classification": "reachable"
+    }
+  ],
+  "brokenLocalLinks": [],
+  "historicalDesignPreserved": true
+}

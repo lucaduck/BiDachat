@@ -16,17 +16,9 @@ router = APIRouter(tags=["queries"])
 _requests: dict[str, deque[float]] = defaultdict(deque)
 
 
-@router.post("/chatbots/{chatbot_id}/queries", response_model=QueryResponse)
-async def create_query(
-    chatbot_id: UUID,
-    payload: QueryRequest,
-    request: Request,
-    session: Annotated[AsyncSession, Depends(get_database_session)],
-) -> QueryResponse:
-    client = request.client.host if request.client else "unknown"
-    key = client
+def _check_query_limit(client: str) -> None:
     now = monotonic()
-    recent = _requests[key]
+    recent = _requests[client]
     while recent and now - recent[0] > 60:
         recent.popleft()
     if len(recent) >= 10:
@@ -34,11 +26,22 @@ async def create_query(
             status_code=429, detail="Demasiadas consultas. Inténtalo en un minuto."
         )
     recent.append(now)
+
+
+@router.post("/chatbots/{chatbot_id}/queries", response_model=QueryResponse)
+async def create_query(
+    chatbot_id: UUID,
+    payload: QueryRequest,
+    request: Request,
+    session: Annotated[AsyncSession, Depends(get_database_session)],
+) -> QueryResponse:
+    _check_query_limit(request.client.host if request.client else "unknown")
     try:
         query = await ConversationService(request.app.state.settings).ask(
             session,
             chatbot_id=chatbot_id,
             question=payload.question,
+            page_context=payload.page_context,
             image=payload.image_bytes(),
             image_mime_type=payload.image_mime_type,
         )

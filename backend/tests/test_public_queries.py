@@ -26,6 +26,13 @@ def test_query_image_validation_rejects_type_mismatch() -> None:
         )
 
 
+def test_page_context_is_bounded_and_normalized() -> None:
+    payload = QueryRequest(question="Indicador?", page_context="  Ventas\n  42  ")
+    assert payload.page_context == "Ventas 42"
+    with pytest.raises(ValueError):
+        QueryRequest(question="Indicador?", page_context="x" * 6001)
+
+
 def test_embedding_request_uses_embedding_two_task_prefix(monkeypatch):
     provider = LlmProvider(
         Settings(embedding_provider="gemini", gemini_api_key="test-key")
@@ -58,6 +65,7 @@ def test_public_query_endpoint_returns_answer_without_admin_token(monkeypatch):
     async def fake_ask(self, session, **kwargs):
         assert kwargs["chatbot_id"] == chatbot_id
         assert kwargs["question"] == "Hola"
+        assert kwargs["page_context"] == "Ventas 42"
         return SimpleNamespace(
             id=uuid4(),
             answer="Respuesta de prueba",
@@ -69,7 +77,8 @@ def test_public_query_endpoint_returns_answer_without_admin_token(monkeypatch):
     monkeypatch.setattr(ConversationService, "ask", fake_ask)
     with TestClient(app) as client:
         response = client.post(
-            f"/api/v1/chatbots/{chatbot_id}/queries", json={"question": "Hola"}
+            f"/api/v1/chatbots/{chatbot_id}/queries",
+            json={"question": "Hola", "page_context": "Ventas\n42"},
         )
     assert response.status_code == 200
     assert response.json()["answer"] == "Respuesta de prueba"

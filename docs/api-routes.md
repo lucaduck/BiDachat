@@ -7,8 +7,8 @@ campos, límites de tamaño, rutas y respuestas: son parte del contrato técnico
 que consumen el panel administrativo y el widget.
 
 Las rutas administrativas requieren `Authorization: Bearer <token>`. El token
-se obtiene con el inicio de sesión. La única ruta pública es la consulta del
-widget; tiene límite de solicitudes por cliente. La documentación interactiva
+se obtiene con el inicio de sesión. Las rutas públicas de conversación
+pertenecen al widget y limitan las solicitudes por cliente. La documentación interactiva
 solo se habilita en desarrollo y pruebas; en producción se desactiva junto con
 el documento OpenAPI.
 
@@ -32,6 +32,12 @@ el documento OpenAPI.
 | `POST /api/v1/chatbots/{chatbot_id}/documents/{document_id}/processing` | Administrativo | Reintenta procesar una fuente fallida o pendiente. |
 | `GET /api/v1/chatbots/{chatbot_id}/metrics` | Administrativo | Consulta consultas, tiempos y estados, con filtros y agrupación. |
 | `POST /api/v1/chatbots/{chatbot_id}/queries` | Público, con límite | Recibe la pregunta y una imagen opcional del widget; recupera contexto y devuelve la respuesta. |
+
+El widget envía cada consulta por HTTP `POST` a la API REST. No mantiene una
+conexión WebSocket.
+El cuerpo de la consulta acepta `page_context` opcional, texto plano de hasta
+6000 caracteres extraído de la región visible que el sitio anfitrión declara.
+Se procesa solo para la respuesta actual y no se guarda en las métricas.
 
 ## De dónde salen las descripciones
 

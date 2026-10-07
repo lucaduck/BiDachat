@@ -33,6 +33,9 @@ describe("widget settings", () => {
     expect(integrationScript("https://example.org", "chatbot-id", settings)).toContain(
       'data-primary-color="#135bec"',
     );
+    expect(integrationScript("https://example.org", "chatbot-id", settings)).toContain(
+      'data-context-selector="main"',
+    );
   });
 
   it("escapes the greeting before placing it in an HTML attribute", () => {

@@ -54,21 +54,6 @@ async def _exercise_rag_lifecycle(settings: Settings) -> None:
 
     try:
         async with database.session() as session:
-            stale_user_ids = select(User.id).where(
-                User.email.like("rag-%@bidachat.test")
-            )
-            await session.execute(
-                delete(Chatbot).where(Chatbot.created_by.in_(stale_user_ids))
-            )
-            await session.execute(
-                delete(User).where(User.email.like("rag-%@bidachat.test"))
-            )
-            await session.execute(
-                delete(LlmModel).where(
-                    LlmModel.provider == "test-provider",
-                    LlmModel.model.like("rag-model-%"),
-                )
-            )
             session.add_all(
                 [
                     User(

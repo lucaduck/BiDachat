@@ -16,6 +16,7 @@
   const icon = ["bot", "chat", "chart", "book", "sparkles", "headset"].includes(script.dataset.icon) ? script.dataset.icon : "bot";
   const IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp"];
   const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
+  const MAX_PAGE_CONTEXT_CHARACTERS = 6000;
   const symbols = {
     bot: '<rect x="5" y="7" width="14" height="12" rx="3"/><path d="M12 4v3M9 12h.01M15 12h.01M9 16h6"/>',
     chat: '<path d="M4 5h16v12H8l-4 3V5Z"/><path d="M8 9h8M8 13h5"/>',
@@ -67,8 +68,23 @@
       .message-row { display: flex; align-items: flex-start; gap: 8px; max-width: 100%; }
       .message-row-user { justify-content: flex-end; }
       .message-avatar { display: grid; place-items: center; width: 25px; height: 25px; flex: none; margin-top: 2px; border-radius: 7px; background: var(--widget-accent); color: var(--widget-on-accent); font-size: 10px; font-weight: 800; }
-      .message { max-width: 88%; margin: 0; padding: 10px 12px; border: 1px solid var(--w-border); border-radius: 13px 13px 13px 3px; background: var(--w-surface); color: var(--w-text); white-space: pre-wrap; overflow-wrap: anywhere; box-shadow: 0 2px 6px rgb(22 52 71 / .035); }
+      .message { max-width: 88%; margin: 0; padding: 10px 12px; border: 1px solid var(--w-border); border-radius: 13px 13px 13px 3px; background: var(--w-surface); color: var(--w-text); overflow-wrap: anywhere; box-shadow: 0 2px 6px rgb(22 52 71 / .035); }
       .message-user { border-color: transparent; border-radius: 13px 13px 3px 13px; background: var(--widget-accent); color: var(--widget-on-accent); }
+      .message-user .message-text { white-space: pre-wrap; }
+      .message-rich { line-height: 1.6; }
+      .message-rich p, .message-rich ul, .message-rich ol, .message-rich pre { margin: 0; }
+      .message-rich > :not(:first-child) { margin-top: 10px; }
+      .message-rich ul, .message-rich ol { padding-left: 20px; }
+      .message-rich li { padding-left: 2px; }
+      .message-rich li + li { margin-top: 6px; }
+      .message-rich li::marker { color: var(--widget-accent); font-weight: 700; }
+      .message-rich strong, .message-rich .message-heading { font-weight: 700; color: var(--w-text); }
+      .message-rich .message-heading { margin-bottom: 2px; font-size: 14px; }
+      .message-rich a { color: var(--w-link); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+      .message-rich code, .message-rich pre { border-radius: 5px; background: var(--w-canvas); font: 12px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; }
+      .message-rich code { padding: 1px 3px; }
+      .message-rich pre { padding: 8px; overflow-x: auto; white-space: pre; }
+      .message-rich hr { border: 0; border-top: 1px solid var(--w-border); }
       .message img { display: block; max-width: 190px; max-height: 145px; margin-bottom: 8px; border-radius: 7px; object-fit: contain; }
       .feedback { align-self: flex-start; max-width: 95%; padding: 9px 11px; border: 1px solid #d5e9ef; border-radius: 9px; background: #eef8fb; color: #24586c; font-size: 12px; }
       .feedback-error { border-color: var(--w-border); background: var(--w-danger-bg); color: var(--w-danger); }
@@ -142,9 +158,129 @@
     (open ? questionInput : launcher).focus();
   }
 
+  async function sendQuery(payload) {
+    const response = await fetch(`${apiBase.replace(/\/$/, "")}/chatbots/${chatbotId}/queries`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+      const failure = await response.json().catch(() => null);
+      throw new Error(typeof failure?.detail === "string" ? failure.detail : `Error ${response.status}`);
+    }
+    return response.json();
+  }
+
+  function collectPageContext() {
+    const selector = script.dataset.contextSelector?.trim();
+    if (!selector) return "";
+    let root;
+    try {
+      root = document.querySelector(selector);
+    } catch {
+      return "";
+    }
+    if (!root) return "";
+    const ignored = "script, style, noscript, template, form, input, textarea, select, option, button, [contenteditable], [data-bidachat-ignore], [aria-hidden='true']";
+    const text = [];
+    let length = 0;
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    let node;
+    while ((node = walker.nextNode())) {
+      const parent = node.parentElement;
+      if (!parent || parent.closest(ignored)) continue;
+      const style = getComputedStyle(parent);
+      if (style.display === "none" || style.visibility === "hidden" || !parent.getClientRects().length) continue;
+      const value = node.textContent?.replace(/\s+/g, " ").trim();
+      if (!value) continue;
+      const remaining = MAX_PAGE_CONTEXT_CHARACTERS - length - (text.length ? 1 : 0);
+      if (remaining <= 0) break;
+      const clipped = value.slice(0, remaining);
+      text.push(clipped);
+      length += clipped.length + (text.length > 1 ? 1 : 0);
+      if (clipped.length < value.length) break;
+    }
+    return text.join(" ").slice(0, MAX_PAGE_CONTEXT_CHARACTERS);
+  }
+
   function setStatus(message) {
     status.textContent = message;
     status.hidden = !message;
+  }
+
+  function appendInlineText(parent, content) {
+    const tokens = /(\*\*([^*]+)\*\*|__([^_]+)__|`([^`]+)`|\[([^\]]+)\]\((https?:\/\/[^\s)]+)\))/g;
+    let offset = 0;
+    for (const match of content.matchAll(tokens)) {
+      parent.append(document.createTextNode(content.slice(offset, match.index)));
+      const element = document.createElement(match[2] || match[3] ? "strong" : match[4] ? "code" : "a");
+      element.textContent = match[2] || match[3] || match[4] || match[5];
+      if (match[6]) {
+        element.href = match[6];
+        element.target = "_blank";
+        element.rel = "noopener noreferrer";
+      }
+      parent.append(element);
+      offset = match.index + match[0].length;
+    }
+    parent.append(document.createTextNode(content.slice(offset)));
+  }
+
+  function renderAssistantText(container, content) {
+    const lines = String(content).replace(/\r\n?/g, "\n").trim().split("\n");
+    const listItem = (line) => /^(?:\s*([-*•])\s+|\s*(\d+)[.)]\s+)(.+)$/.exec(line);
+    let index = 0;
+    while (index < lines.length) {
+      const line = lines[index].trim();
+      if (!line) { index += 1; continue; }
+      if (line.startsWith("```")) {
+        const code = [];
+        index += 1;
+        while (index < lines.length && !lines[index].trim().startsWith("```")) code.push(lines[index++]);
+        if (index < lines.length) index += 1;
+        const block = document.createElement("pre");
+        block.textContent = code.join("\n");
+        container.append(block);
+        continue;
+      }
+      const item = listItem(line);
+      if (item) {
+        const ordered = Boolean(item[2]);
+        const list = document.createElement(ordered ? "ol" : "ul");
+        if (ordered && Number(item[2]) > 1) list.start = Number(item[2]);
+        while (index < lines.length) {
+          const next = listItem(lines[index]);
+          if (!next || Boolean(next[2]) !== ordered) break;
+          const entry = document.createElement("li");
+          appendInlineText(entry, next[3]);
+          list.append(entry);
+          index += 1;
+        }
+        container.append(list);
+        continue;
+      }
+      const heading = /^#{1,3}\s+(.+)$/.exec(line);
+      if (heading) {
+        const element = document.createElement("p");
+        element.className = "message-heading";
+        appendInlineText(element, heading[1]);
+        container.append(element);
+        index += 1;
+        continue;
+      }
+      if (/^(-{3,}|\*{3,})$/.test(line)) {
+        container.append(document.createElement("hr"));
+        index += 1;
+        continue;
+      }
+      const paragraph = document.createElement("p");
+      while (index < lines.length && lines[index].trim() && !listItem(lines[index]) && !/^#{1,3}\s|^```|^(-{3,}|\*{3,})$/.test(lines[index].trim())) {
+        if (paragraph.childNodes.length) paragraph.append(document.createElement("br"));
+        appendInlineText(paragraph, lines[index].trim());
+        index += 1;
+      }
+      container.append(paragraph);
+    }
   }
 
   function addMessage(content, kind, imageFile = null) {
@@ -167,8 +303,10 @@
       image.alt = "Imagen enviada";
       bubble.appendChild(image);
     }
-    const text = document.createElement("span");
-    text.textContent = content;
+    const text = document.createElement(kind === "assistant" ? "div" : "span");
+    text.className = kind === "assistant" ? "message-rich" : "message-text";
+    if (kind === "assistant") renderAssistantText(text, content);
+    else text.textContent = content;
     bubble.appendChild(text);
     row.appendChild(bubble);
     messages.appendChild(row);
@@ -289,20 +427,13 @@
     messages.scrollTop = messages.scrollHeight;
     try {
       const payload = { question };
+      const pageContext = collectPageContext();
+      if (pageContext) payload.page_context = pageContext;
       if (image) {
         payload.image_base64 = await readImage(image);
         payload.image_mime_type = image.type;
       }
-      const response = await fetch(`${apiBase.replace(/\/$/, "")}/chatbots/${chatbotId}/queries`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!response.ok) {
-        const failure = await response.json().catch(() => null);
-        throw new Error(typeof failure?.detail === "string" ? failure.detail : `Error ${response.status}`);
-      }
-      const result = await response.json();
+      const result = await sendQuery(payload);
       feedback.remove();
       addMessage(result.answer, "assistant");
       if (attachment === image) clearAttachment();

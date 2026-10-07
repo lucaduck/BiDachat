@@ -226,6 +226,13 @@ export function SettingsPanel({
               Si cambias la apariencia del chatbot, reemplaza el script en los
               dashboards integrados.
             </p>
+            <p className="field-hint">
+              El widget lee el texto visible de <code>main</code> al enviar cada
+              pregunta. Si tu dashboard usa otra sección, cambia
+              <code> data-context-selector=&quot;main&quot;</code> por su selector CSS;
+              usa
+              <code> data-bidachat-ignore</code> en bloques que deban excluirse.
+            </p>
           </>
         ) : (
           <p>Crea un chatbot desde «Chatbots» para obtener su código de integración.</p>

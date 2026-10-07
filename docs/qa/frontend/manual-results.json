@@ -1,0 +1,15 @@
+{
+  "capturedAt": "2026-10-06T04:15:22.536760+00:00",
+  "nativeCapture": {
+    "status": "passed",
+    "evidence": "User confirmed twice in current session: Aparece la captura como adjunto",
+    "scope": "Native picker and image attachment; subsequent captured-image inference was not separately reported"
+  },
+  "screenReaderListening": {
+    "status": "not-executed"
+  },
+  "zoom200": {
+    "status": "partial",
+    "evidence": "Responsive layout verified at 720CSSpx equivalent to 1440px/200%; actual browser zoom remains manual"
+  }
+}

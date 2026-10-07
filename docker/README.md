@@ -10,9 +10,11 @@ comprueba `/api/v1/health` y espera a PostgreSQL antes de iniciarla.
 `.dockerignore` limita el contexto de construcción a código y dependencias,
 excluyendo secretos y archivos locales.
 
-`frontend.Dockerfile` compila Next.js y publica el panel, el widget y la página
-de ejemplo. Compose incluye `frontend` en el puerto local 3000. El backend
-inicializa el administrador y los modelos desde variables privadas al arrancar.
+`frontend.Dockerfile` compila Next.js, el widget y la página de ejemplo.
+`nginx/default.conf` dirige `/api/v1/*` al backend y el resto al frontend.
+Compose publica Nginx en el puerto local 3000; el frontend queda en la red
+interna. El backend inicializa el administrador y los modelos desde variables
+privadas al arrancar.
 Los originales documentales se conservan en el volumen privado
 `bidachat_document_storage`.
 

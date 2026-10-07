@@ -51,7 +51,7 @@ export function integrationScript(
   chatbotName = "BIDACHAT",
 ) {
   const script = new URL("/bidachat-widget.js", origin).href;
-  return `<script src="${script}" data-chatbot-id="${chatbotId}" data-title="${escapeAttribute(chatbotName)}" data-primary-color="${settings.primaryColor}" data-icon="${settings.icon}" data-welcome-message="${escapeAttribute(settings.welcomeMessage)}"></script>`;
+  return `<script src="${script}" data-chatbot-id="${chatbotId}" data-title="${escapeAttribute(chatbotName)}" data-primary-color="${settings.primaryColor}" data-icon="${settings.icon}" data-welcome-message="${escapeAttribute(settings.welcomeMessage)}" data-context-selector="main"></script>`;
 }
 
 export function contrastTextColor(hex: string) {

@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+
+<html lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base { html, body { margin: 0; padding: 0; } body { overscroll-behavior: none; } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } } ::-webkit-scrollbar { display: none; }</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "on-secondary-fixed": "#001d32", "on-primary-container": "#003847", "tertiary-fixed-dim": "#abc7ff", "brand-turquoise-dark": "#0E93B7", "on-secondary": "#ffffff", "secondary-fixed-dim": "#aec9e7", "primary-fixed": "#b8eaff", "status-warning": "#F07942", "surface-container": "#e5eeff", "text-body": "#475569", "on-tertiary-fixed-variant": "#00458f", "secondary-container": "#c4e0fe", "secondary-fixed": "#cee5ff", "primary-container": "#14a8ce", "surface-container-high": "#dce9ff", "surface-bright": "#f8f9ff", "on-tertiary-container": "#003169", "on-surface": "#0b1c30", "on-error": "#ffffff", "surface-container-highest": "#d3e4fe", "surface-subtle": "#F1F5F9", "inverse-primary": "#5cd5fc", "primary-fixed-dim": "#5cd5fc", "surface-canvas": "#F8FAFC", "surface-variant": "#d3e4fe", "tertiary-fixed": "#d7e3ff", "institutional-navy": "#0B1F33", "on-secondary-container": "#49637d", "surface-card": "#FFFFFF", "outline": "#6d797e", "on-surface-variant": "#3d484d", "on-primary": "#ffffff", "tertiary-container": "#6d9bea", "error": "#ba1a1a", "on-primary-fixed": "#001f28", "error-container": "#ffdad6", "surface-container-lowest": "#ffffff", "on-secondary-fixed-variant": "#2e4962", "text-muted": "#94A3B8", "inverse-on-surface": "#eaf1ff", "on-tertiary-fixed": "#001b3f", "on-primary-fixed-variant": "#004d61", "border-strong": "#CBD5E1", "border-hairline": "#E2E8F0", "primary": "#006780", "surface": "#f8f9ff", "tertiary": "#2a5da9", "status-danger": "#DC2626", "brand-cyan-light": "#6CC1CF", "background": "#f8f9ff", "secondary": "#46617b", "outline-variant": "#bdc8ce", "surface-container-low": "#eff4ff", "on-error-container": "#93000a", "surface-tint": "#006780", "surface-accent": "#EDF2F7", "text-display": "#0F172A", "inverse-surface": "#213145", "on-background": "#0b1c30", "status-success": "#10B981", "on-tertiary": "#ffffff", "surface-dim": "#cbdbf5" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "space-xl": "1.5rem", "gutter-desktop": "1.5rem", "space-sm": "0.5rem", "space-xs": "0.25rem", "space-2xl": "2rem", "gutter": "1rem", "space-lg": "1rem", "space-md": "0.75rem", "margin": "1rem", "margin-desktop": "2rem" }, fontFamily: { "body-md": ["Inter"], "headline-md": ["Inter"], "metric-display": ["Inter"], "caption": ["Inter"], "headline-xl": ["Inter"], "body-sm": ["Inter"], "body-lg": ["Inter"], "headline-xl-mobile": ["Inter"], "headline-lg": ["Inter"], "label-md": ["Inter"], "label-sm": ["Inter"] }, fontSize: { "body-md": ["15px", { "lineHeight": "22px", "letterSpacing": "0", "fontWeight": "400" }], "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "metric-display": ["30px", { "lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "caption": ["11px", { "lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "500" }], "headline-xl": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.025em", "fontWeight": "700" }], "body-sm": ["14px", { "lineHeight": "20px", "letterSpacing": "0", "fontWeight": "400" }], "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0", "fontWeight": "400" }], "headline-xl-mobile": ["26px", { "lineHeight": "34px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }], "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }] } } } };</script></head><body class="bg-surface-canvas font-body-md text-body antialiased"><aside class="fixed left-0 top-0 h-full w-64 bg-surface-card z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(15,23,42,0.04)]"><div class="flex flex-col"><div class="h-16 px-space-xl flex items-center gap-space-sm bg-surface-card"><div class="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center"><span class="material-symbols-outlined text-surface-card text-[20px]">smart_toy</span></div><div class="flex flex-col"><div class="flex items-center gap-1"><span class="font-headline-md text-headline-md font-bold text-institutional-navy tracking-tight">BIDA</span><span class="font-headline-md text-headline-md font-bold text-primary-container tracking-tight">CHAT</span></div><span class="font-caption text-caption uppercase text-text-muted tracking-widest -mt-1">By BI-DATA</span></div></div><div class="px-space-md py-space-sm"><span class="px-space-md font-caption text-caption uppercase tracking-wider text-text-muted font-semibold">Plataforma Analítica</span><nav class="mt-space-sm flex flex-col gap-1" data-active-classes="bg-secondary-container text-on-secondary-fixed font-semibold rounded-xl"><a class="flex items-center gap-space-md px-space-md py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all" data-path="mis-bots" href="#"><span class="material-symbols-outlined text-[20px]">neurology</span><span>Mis Bots</span></a><a class="flex items-center gap-space-md px-space-md py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all" data-path="analitica-metricas" href="#"><span class="material-symbols-outlined text-[20px]">monitoring</span><span>Analítica &amp; Métricas</span></a><a class="flex items-center gap-space-md px-space-md py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all" data-path="documentos-rag" href="#"><span class="material-symbols-outlined text-[20px]">folder_data</span><span>Documentos &amp; RAG</span></a><a class="flex items-center gap-space-md px-space-md py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all" data-path="configuracion" href="#"><span class="material-symbols-outlined text-[20px]">tune</span><span>Configuración</span></a><a class="flex items-center gap-space-md px-space-md py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all" data-path="documentacion" href="#"><span class="material-symbols-outlined text-[20px]">menu_book</span><span>Documentación</span></a></nav></div></div><div class="p-space-md m-space-md bg-surface-subtle rounded-xl flex flex-col gap-space-sm"><div class="flex items-center justify-between"><div class="flex items-center gap-space-sm"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div><div class="flex flex-col"><span class="font-label-sm text-label-sm font-semibold text-text-display">Alex Rivera</span><span class="font-caption text-caption text-text-muted">Plan Pro Enterprise</span></div></div><a class="w-7 h-7 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="login" href="#" title="Cerrar Sesión"><span class="material-symbols-outlined text-[18px]">logout</span></a></div></div></aside><div class="pl-64"><header class="fixed top-0 left-64 right-0 h-16 bg-surface-card/90 backdrop-blur-md shadow-[0_1px_8px_rgba(15,23,42,0.04)] z-40 flex items-center justify-between px-space-xl"><div class="flex items-center gap-space-sm"><span class="font-label-sm text-label-sm text-text-muted">Panel Operativo</span><span class="material-symbols-outlined text-text-muted text-[16px]">chevron_right</span><span class="font-label-sm text-label-sm font-semibold text-institutional-navy">BIDACHAT</span></div><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-xs px-2.5 py-1 rounded-full bg-surface-container-low"><span class="w-2 h-2 rounded-full bg-status-success animate-pulse"></span><span class="font-caption text-caption font-semibold text-institutional-navy">Sistema Operativo</span></div><button class="relative p-1.5 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-1 right-1 w-2 h-2 bg-primary-container rounded-full"></span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></header><main class="relative pt-16 w-full min-h-screen bg-surface-canvas"><div class="flex flex-col w-full">
+<div class="px-space-xl py-space-2xl max-w-[1440px] mx-auto w-full flex flex-col gap-space-2xl">
+<!-- Top Action / Header Area -->
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-lg">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-surface-container-high text-primary font-caption text-caption font-semibold uppercase tracking-wider">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+            Base de Conocimiento
+          </span>
+<span class="text-text-muted font-caption text-caption font-medium">•</span>
+<span class="font-caption text-caption font-semibold tracking-wide text-text-muted uppercase">RF-15 Ingesta Vectorial</span>
+</div>
+<h1 class="font-headline-xl text-headline-xl text-text-display tracking-tight mt-1">Documentos &amp; RAG</h1>
+<p class="font-body-md text-body-md text-text-body max-w-3xl">
+          Gestión de fuentes documentales, partición en fragmentos (chunks) e indexación vectorial aislada por espacio analítico.
+        </p>
+</div>
+<div class="flex items-center gap-space-md self-start lg:self-center">
+<!-- Collection Dropdown -->
+<div class="relative inline-flex items-center">
+<div class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-surface-card shadow-sm text-text-display font-label-md text-label-md cursor-pointer hover:bg-surface-subtle transition-all">
+<span class="material-symbols-outlined text-[18px] text-primary-container">layers</span>
+<div class="flex flex-col text-left leading-none">
+<span class="font-caption text-caption text-text-muted">Colección Activa</span>
+<span class="font-semibold text-text-display mt-0.5">Colección ECDC 2024</span>
+</div>
+<span class="material-symbols-outlined text-text-muted text-[18px] ml-1">expand_more</span>
+</div>
+</div>
+<!-- Primary Action Button -->
+<button class="h-10 px-5 rounded-xl bg-primary-container hover:bg-brand-turquoise-dark text-on-primary font-label-md text-label-md font-semibold inline-flex items-center gap-2 shadow-sm transition-all focus:outline-none" type="button">
+<span class="material-symbols-outlined text-[20px]">add_circle</span>
+<span>+ Cargar Documento</span>
+</button>
+</div>
+</div>
+<!-- 3 KPI / Stat Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-lg">
+<!-- Card 1: Total Docs -->
+<div class="relative overflow-hidden bg-surface-card rounded-xl p-space-xl shadow-sm flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<span class="font-caption text-caption font-semibold tracking-wider text-text-muted uppercase">Total Documentos</span>
+<span class="font-metric-display text-metric-display text-text-display mt-1">38 archivos</span>
+</div>
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container-low text-status-success font-caption text-caption font-semibold">
+<span class="material-symbols-outlined text-[14px]">arrow_upward</span>
+            +4 este mes
+          </span>
+</div>
+<div class="mt-4 flex items-end justify-between">
+<span class="font-body-sm text-body-sm text-text-muted">Espacio: 88.4 MB / 500 MB</span>
+<!-- Inline Sparkline / Wave Graphic -->
+<svg class="w-24 h-8 text-primary-container/40" fill="none" viewbox="0 0 96 32">
+<path d="M1 28C10 28 15 12 25 18C35 24 45 4 55 10C65 16 75 2 95 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+<path d="M1 28C10 28 15 12 25 18C35 24 45 4 55 10C65 16 75 2 95 6V32H1V28Z" fill="currentColor" fill-opacity="0.1"></path>
+</svg>
+</div>
+</div>
+<!-- Card 2: Chunks -->
+<div class="bg-surface-card rounded-xl p-space-xl shadow-sm flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<span class="font-caption text-caption font-semibold tracking-wider text-text-muted uppercase">Total Chunks / Fragmentos</span>
+<span class="font-metric-display text-metric-display text-text-display mt-1">4,912</span>
+</div>
+<div class="w-9 h-9 rounded-xl bg-surface-subtle flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">dataset</span>
+</div>
+</div>
+<div class="mt-4 flex items-center justify-between">
+<div class="flex items-center gap-1.5 font-body-sm text-body-sm text-text-muted">
+<span class="material-symbols-outlined text-[16px] text-text-muted">token</span>
+<span>~512 tokens prom.</span>
+</div>
+<span class="font-caption text-caption font-semibold text-primary-container bg-surface-container-low px-2 py-0.5 rounded">Tokens: ~2.51M</span>
+</div>
+</div>
+<!-- Card 3: Vector Engine -->
+<div class="bg-surface-card rounded-xl p-space-xl shadow-sm flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<span class="font-caption text-caption font-semibold tracking-wider text-text-muted uppercase">Motor Vectorial</span>
+<div class="flex items-center gap-2 mt-1">
+<span class="font-headline-md text-headline-md font-bold text-text-display">ChromaDB Conectado</span>
+</div>
+</div>
+<div class="w-9 h-9 rounded-xl bg-surface-container-low flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-[20px]">hub</span>
+</div>
+</div>
+<div class="mt-4 flex flex-col gap-1.5">
+<div class="flex items-center gap-1.5 font-label-sm text-label-sm text-status-success font-semibold">
+<span class="w-2 h-2 rounded-full bg-status-success"></span>
+<span>Saludable • Latencia 14ms</span>
+</div>
+<div class="flex items-center gap-3 font-caption text-caption text-text-muted">
+<span>Dimensión: 1536</span>
+<span>•</span>
+<span>Colección HNSW</span>
+<span>•</span>
+<span>Cosine metric</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Drag & Drop Zone Card -->
+<div class="bg-surface-card rounded-xl shadow-sm overflow-hidden flex flex-col">
+<div class="p-space-2xl m-4 rounded-xl bg-surface-canvas/60 flex flex-col items-center justify-center text-center transition-all hover:bg-surface-subtle group cursor-pointer" style="outline: 2px dashed #cbd5e1; outline-offset: -2px;">
+<div class="w-16 h-16 rounded-full bg-surface-container-low flex items-center justify-center text-primary-container mb-space-md group-hover:scale-105 transition-transform shadow-sm">
+<span class="material-symbols-outlined text-[32px]">cloud_upload</span>
+</div>
+<span class="font-headline-md text-headline-md text-text-display">Arrastra archivos PDF, CSV, XLSX o TXT aquí o haz clic para explorar</span>
+<p class="font-body-md text-body-md text-text-body mt-1 max-w-xl">
+          Soporte multiformato para balances, índices macroeconómicos, series de tiempo o normativas institucionales.
+        </p>
+<div class="mt-space-lg flex items-center gap-space-md">
+<button class="h-10 px-4 rounded-xl bg-surface-card hover:bg-surface-subtle text-text-display font-label-md text-label-md font-medium shadow-sm transition-all inline-flex items-center gap-2" type="button">
+<span class="material-symbols-outlined text-[18px] text-text-muted">attach_file</span>
+<span>Explorar archivos del equipo</span>
+</button>
+<span class="font-caption text-caption text-text-muted">Hasta 50MB por archivo</span>
+</div>
+</div>
+<!-- Bottom Bar inside Card -->
+<div class="bg-surface-subtle px-space-xl py-space-md flex flex-col sm:flex-row sm:items-center justify-between gap-space-md">
+<div class="flex items-center gap-2 text-text-body font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[18px] text-primary-container">info</span>
+<span>Los fragmentos generados se asociarán automáticamente a los bots vinculados a la colección activa.</span>
+</div>
+<button class="h-10 px-5 rounded-xl bg-primary-container hover:bg-brand-turquoise-dark text-on-primary font-label-md text-label-md font-semibold inline-flex items-center justify-center gap-2 shadow-sm transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">publish</span>
+<span>Subir e Indexar Chunks</span>
+</button>
+</div>
+</div>
+<!-- Documents Table Section -->
+<div class="bg-surface-card rounded-xl shadow-sm flex flex-col overflow-hidden">
+<!-- Filter Bar -->
+<div class="p-space-lg bg-surface-card flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<!-- Search Input -->
+<div class="relative flex-1 max-w-md">
+<span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[18px] text-text-muted">search</span>
+<input class="w-full h-10 pl-10 pr-4 rounded-xl bg-surface-subtle text-text-display placeholder-text-muted font-body-sm text-body-sm focus:outline-none focus:bg-surface-card transition-all" placeholder="Buscar documento por nombre, formato o bot..." type="text"/>
+</div>
+<!-- Filter Pills -->
+<div class="flex items-center gap-1.5 flex-wrap">
+<button class="px-3.5 py-1.5 rounded-full bg-primary-container text-on-primary font-label-sm text-label-sm font-semibold shadow-sm transition-all" type="button">
+            Todos (38)
+          </button>
+<button class="px-3.5 py-1.5 rounded-full bg-surface-subtle hover:bg-surface-container-high text-text-body font-label-sm text-label-sm font-medium transition-all" type="button">
+            Indexados (35)
+          </button>
+<button class="px-3.5 py-1.5 rounded-full bg-surface-subtle hover:bg-surface-container-high text-text-body font-label-sm text-label-sm font-medium transition-all" type="button">
+            En Proceso (2)
+          </button>
+<button class="px-3.5 py-1.5 rounded-full bg-surface-subtle hover:bg-surface-container-high text-text-body font-label-sm text-label-sm font-medium transition-all" type="button">
+            Error (1)
+          </button>
+</div>
+</div>
+<!-- Data Table -->
+<div class="overflow-x-auto w-full">
+<table class="w-full text-left font-body-sm text-body-sm">
+<thead>
+<tr class="bg-surface-subtle text-text-body uppercase font-caption text-caption tracking-wider">
+<th class="py-3 px-space-xl font-semibold" scope="col">Documento</th>
+<th class="py-3 px-space-lg font-semibold" scope="col">Bot Asignado</th>
+<th class="py-3 px-space-lg font-semibold text-right" scope="col">Chunks</th>
+<th class="py-3 px-space-lg font-semibold text-right" scope="col">Tamaño</th>
+<th class="py-3 px-space-lg font-semibold" scope="col">Fecha de Ingesta</th>
+<th class="py-3 px-space-lg font-semibold" scope="col">Estado</th>
+<th class="py-3 px-space-xl font-semibold text-right" scope="col">Acciones</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-subtle">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-subtle/50 transition-colors">
+<td class="py-3.5 px-space-xl">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-error-container text-error flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[18px]">picture_as_pdf</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md font-semibold text-text-display truncate">informe_economico_ecdc_2024.pdf</span>
+<span class="font-caption text-caption text-text-muted">Colección ECDC 2024</span>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-space-lg">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high text-institutional-navy font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[14px] text-primary-container">smart_toy</span>
+                  MacroBot ECDC
+                </span>
+</td>
+<td class="py-3.5 px-space-lg text-right font-medium text-text-display">1,420</td>
+<td class="py-3.5 px-space-lg text-right text-text-body font-mono text-[13px]">14.2 MB</td>
+<td class="py-3.5 px-space-lg text-text-muted font-body-sm text-body-sm">18 Oct 2024 10:14</td>
+<td class="py-3.5 px-space-lg">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-container-low text-status-success font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-status-success"></span>
+                  Indexado
+                </span>
+</td>
+<td class="py-3.5 px-space-xl text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1.5 rounded-lg text-text-muted hover:text-text-display hover:bg-surface-subtle transition-all" title="Ver Chunks" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+<button class="p-1.5 rounded-lg text-text-muted hover:text-error hover:bg-surface-subtle transition-all" title="Eliminar" type="button">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-subtle/50 transition-colors">
+<td class="py-3.5 px-space-xl">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-surface-container-low text-status-success flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[18px]">table_view</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md font-semibold text-text-display truncate">serie_historica_ipp_dn_sept.xlsx</span>
+<span class="font-caption text-caption text-text-muted">Colección IPP-DN</span>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-space-lg">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high text-institutional-navy font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[14px] text-primary-container">smart_toy</span>
+                  Analista Precios
+                </span>
+</td>
+<td class="py-3.5 px-space-lg text-right font-medium text-text-display">840</td>
+<td class="py-3.5 px-space-lg text-right text-text-body font-mono text-[13px]">8.6 MB</td>
+<td class="py-3.5 px-space-lg text-text-muted font-body-sm text-body-sm">Hoy 14:22</td>
+<td class="py-3.5 px-space-lg">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-secondary-container text-on-secondary-fixed font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container animate-ping"></span>
+                  Procesando (68%)
+                </span>
+</td>
+<td class="py-3.5 px-space-xl text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1.5 rounded-lg text-text-muted hover:text-text-display hover:bg-surface-subtle transition-all" title="Ver Chunks" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+<button class="p-1.5 rounded-lg text-text-muted hover:text-error hover:bg-surface-subtle transition-all" title="Detener" type="button">
+<span class="material-symbols-outlined text-[18px]">cancel</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-subtle/50 transition-colors">
+<td class="py-3.5 px-space-xl">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-error-container text-error flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[18px]">picture_as_pdf</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md font-semibold text-text-display truncate">canasta_basica_alimentaria_q3.pdf</span>
+<span class="font-caption text-caption text-text-muted">General BI-DATA</span>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-space-lg">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high text-institutional-navy font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[14px] text-primary-container">smart_toy</span>
+                  MacroBot ECDC
+                </span>
+</td>
+<td class="py-3.5 px-space-lg text-right font-medium text-text-display">612</td>
+<td class="py-3.5 px-space-lg text-right text-text-body font-mono text-[13px]">4.1 MB</td>
+<td class="py-3.5 px-space-lg text-text-muted font-body-sm text-body-sm">12 Oct 2024</td>
+<td class="py-3.5 px-space-lg">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-container-low text-status-success font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-status-success"></span>
+                  Indexado
+                </span>
+</td>
+<td class="py-3.5 px-space-xl text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1.5 rounded-lg text-text-muted hover:text-text-display hover:bg-surface-subtle transition-all" title="Ver Chunks" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+<button class="p-1.5 rounded-lg text-text-muted hover:text-error hover:bg-surface-subtle transition-all" title="Eliminar" type="button">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-subtle/50 transition-colors">
+<td class="py-3.5 px-space-xl">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[18px]">description</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md font-semibold text-text-display truncate">metodologia_ponderacion_bienes.csv</span>
+<span class="font-caption text-caption text-text-muted">Colección ECDC 2024</span>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-space-lg">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high text-institutional-navy font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[14px] text-primary-container">smart_toy</span>
+                  Observatorio Inflación
+                </span>
+</td>
+<td class="py-3.5 px-space-lg text-right font-medium text-text-display">315</td>
+<td class="py-3.5 px-space-lg text-right text-text-body font-mono text-[13px]">1.8 MB</td>
+<td class="py-3.5 px-space-lg text-text-muted font-body-sm text-body-sm">05 Oct 2024</td>
+<td class="py-3.5 px-space-lg">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-container-low text-status-success font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-status-success"></span>
+                  Indexado
+                </span>
+</td>
+<td class="py-3.5 px-space-xl text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1.5 rounded-lg text-text-muted hover:text-text-display hover:bg-surface-subtle transition-all" title="Ver Chunks" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+<button class="p-1.5 rounded-lg text-text-muted hover:text-error hover:bg-surface-subtle transition-all" title="Eliminar" type="button">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="hover:bg-surface-subtle/50 transition-colors">
+<td class="py-3.5 px-space-xl">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-error-container text-error flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[18px]">warning</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md font-semibold text-text-display truncate">censo_precios_sectorial_corrupto.pdf</span>
+<span class="font-caption text-caption text-error">Sin asignar • Error en codificación</span>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-space-lg">
+<span class="font-body-sm text-body-sm text-text-muted italic">Sin asignar</span>
+</td>
+<td class="py-3.5 px-space-lg text-right font-medium text-text-muted">0</td>
+<td class="py-3.5 px-space-lg text-right text-text-body font-mono text-[13px]">22.4 MB</td>
+<td class="py-3.5 px-space-lg text-text-muted font-body-sm text-body-sm">02 Oct 2024</td>
+<td class="py-3.5 px-space-lg">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-error-container text-error font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+                  Error Parsing
+                </span>
+</td>
+<td class="py-3.5 px-space-xl text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1.5 rounded-lg text-primary-container hover:bg-surface-container-low transition-all" title="Reintentar" type="button">
+<span class="material-symbols-outlined text-[18px]">refresh</span>
+</button>
+<button class="p-1.5 rounded-lg text-text-muted hover:text-error hover:bg-surface-subtle transition-all" title="Eliminar" type="button">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Footer / Pagination -->
+<div class="p-space-lg bg-surface-card flex flex-col sm:flex-row sm:items-center justify-between gap-space-md">
+<span class="font-body-sm text-body-sm text-text-muted">
+          Mostrando <span class="font-semibold text-text-display">1 - 5</span> de <span class="font-semibold text-text-display">38</span> documentos registrados
+        </span>
+<div class="flex items-center gap-1">
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-text-muted hover:bg-surface-subtle transition-all" disabled="" type="button">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<button class="w-8 h-8 rounded-lg bg-primary-container text-on-primary font-label-sm text-label-sm font-semibold shadow-sm" type="button">1</button>
+<button class="w-8 h-8 rounded-lg text-text-body hover:bg-surface-subtle font-label-sm text-label-sm font-medium transition-all" type="button">2</button>
+<button class="w-8 h-8 rounded-lg text-text-body hover:bg-surface-subtle font-label-sm text-label-sm font-medium transition-all" type="button">3</button>
+<span class="px-1 text-text-muted">…</span>
+<button class="w-8 h-8 rounded-lg text-text-body hover:bg-surface-subtle font-label-sm text-label-sm font-medium transition-all" type="button">8</button>
+<button class="px-2.5 h-8 rounded-lg flex items-center gap-1 text-text-body hover:bg-surface-subtle font-label-sm text-label-sm font-medium transition-all" type="button">
+<span>Siguiente</span>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Bottom Section: Chunking Parameters -->
+<div class="bg-surface-card rounded-xl p-space-xl shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-space-xl">
+<div class="flex flex-col gap-1 max-w-2xl">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px] text-primary-container">tune</span>
+<h2 class="font-headline-md text-headline-md text-text-display">Parámetros de Fragmentación (Chunking)</h2>
+</div>
+<p class="font-body-md text-body-md text-text-body">
+          Ajustes globales de pre-procesamiento vectorial para la colección seleccionada. Afecta el contexto recuperado en cada turno de chat.
+        </p>
+<!-- 3 Clean Stat Badges -->
+<div class="flex flex-wrap items-center gap-2.5 mt-space-md">
+<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-subtle font-caption text-caption font-semibold text-text-display">
+<span class="text-text-muted">CHUNK SIZE:</span>
+<span class="text-primary-container font-mono">512 tokens</span>
+</span>
+<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-subtle font-caption text-caption font-semibold text-text-display">
+<span class="text-text-muted">CHUNK OVERLAP:</span>
+<span class="text-primary-container font-mono">64 tokens</span>
+</span>
+<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-subtle font-caption text-caption font-semibold text-text-display">
+<span class="text-text-muted">MÉTRICA DISTANCIA:</span>
+<span class="text-text-display">Coseno (text-embedding-3-small)</span>
+</span>
+</div>
+</div>
+<div class="flex items-center gap-space-md flex-shrink-0">
+<button class="h-10 px-5 rounded-xl bg-surface-subtle hover:bg-surface-container-high text-text-display font-label-md text-label-md font-semibold inline-flex items-center gap-2 transition-all" type="button">
+<span class="material-symbols-outlined text-[18px] text-text-muted">settings</span>
+<span>Ajustar parámetros</span>
+</button>
+</div>
+</div>
+</div>
+</div></main></div></body></html>
