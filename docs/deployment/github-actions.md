@@ -86,9 +86,11 @@ servidor final.
    credencial de GitHub que tenga `read:packages`. Esta credencial es para
    `docker pull` en el VPS y no sustituye la clave SSH de despliegue. Si las
    imágenes son públicas, este paso no es necesario.
-6. Descargar en Ollama los modelos configurados para respuesta y embeddings.
-   Verificar que sus nombres coinciden exactamente con el `.env` antes del
-   primer arranque; el bootstrap valida el modelo de respuesta.
+6. El script de despliegue inicia Ollama y descarga los modelos configurados
+   que todavía no estén en el volumen persistente: `OLLAMA_MODEL` y, si el
+   proveedor de embeddings es Ollama, `EMBEDDING_MODEL`. Verificar que sus
+   nombres coinciden exactamente con el `.env`; el bootstrap valida el modelo
+   de respuesta antes de iniciar la API.
 7. Configurar en GitHub la variable de repositorio `DEPLOY_ENABLED=true`, la
    URL de producción y los cinco secretos SSH indicados arriba dentro del
    entorno `production`. Registrar en `DEPLOY_KNOWN_HOSTS` la clave pública del

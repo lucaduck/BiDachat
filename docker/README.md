@@ -29,5 +29,7 @@ La producción selecciona el perfil mediante `OLLAMA_ACCELERATION` en `.env`:
 - `gpu`: añade `docker-compose.gpu.yml` y requiere NVIDIA Container Toolkit.
 
 El script `deploy-production.sh` valida el valor y aplica el archivo adicional
-solo para el perfil GPU. Instalación de modelos y verificación:
+solo para el perfil GPU. Antes de iniciar el backend, descarga los modelos de
+respuesta y embeddings que falten en el volumen de Ollama. Instalación local y
+verificación:
 [guía local](../docs/local-ollama.md).
