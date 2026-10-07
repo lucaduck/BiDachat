@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Portal de indicadores</title>
+    <style>
+      :root { color: #193044; font-family: Arial, sans-serif; background: #f4f7fa; }
+      * { box-sizing: border-box; }
+      body { margin: 0; }
+      header { display: flex; justify-content: space-between; padding: 18px 7vw; border-bottom: 1px solid #d9e5ec; background: #fff; }
+      main { width: min(1120px, 86vw); margin: 48px auto; }
+      h1 { margin: 0; font-size: 30px; }
+      p { color: #60778a; line-height: 1.6; }
+      .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 32px; }
+      .card { min-height: 148px; border: 1px solid #d9e5ec; border-radius: 12px; background: #fff; padding: 20px; }
+      .card strong { display: block; margin-top: 16px; font-size: 28px; }
+      .chart { display: flex; align-items: end; gap: 14px; height: 220px; margin-top: 18px; padding: 24px; }
+      .chart i { flex: 1; border-radius: 6px 6px 0 0; background: #5ab1cb; }
+      .chart i:nth-child(2) { height: 62%; } .chart i:nth-child(3) { height: 42%; }
+      .chart i:nth-child(4) { height: 81%; } .chart i:nth-child(5) { height: 55%; }
+      @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <header><strong>Portal de indicadores</strong><span>Septiembre 2026</span></header>
+    <main>
+      <h1>Seguimiento operativo</h1>
+      <p>Esta página es un sitio externo e independiente usado únicamente para comprobar la integración del asistente.</p>
+      <section class="grid">
+        <article class="card"><span>Avance mensual</span><strong>74.2%</strong></article>
+        <article class="card"><span>Metas cumplidas</span><strong>92</strong></article>
+        <article class="card"><span>Alertas activas</span><strong>3</strong></article>
+      </section>
+      <section class="card chart" aria-label="Gráfico ilustrativo"><i></i><i></i><i></i><i></i><i></i></section>
+    </main>
+
+    <!-- Este es el único fragmento de integración que un sitio externo necesita. -->
+    <script
+      src="http://127.0.0.1:3000/bidachat-widget.js"
+      data-chatbot-id="42e590ec-0def-4ea7-8e4b-b03d1557c1b9"
+      data-title="Autenticador Dashboard"
+      data-primary-color="#14a8ce"
+      data-icon="chat"
+      data-welcome-message="Hola, ¿en qué puedo ayudarte con este dashboard?"
+    ></script>
+  </body>
+</html>

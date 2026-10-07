@@ -1,0 +1,31 @@
+schema: spec-driven
+
+context: |
+  BIDACHAT is a web application for managing chatbots embedded in BI-DATA dashboards.
+  Current target: Complete application. Read SRS.md for requirements and AGENTS.md for implementation rules.
+  SRS.md version 0.2 is the current complete-application baseline; user-approved later requirements take precedence over obsolete plans.
+  Stack: Next.js, TypeScript, Tailwind CSS; FastAPI, Python, LangChain, Gemini;
+  PostgreSQL with pgvector; independent JavaScript widget; Docker Compose; REST /api/v1.
+  Use logical services within one backend. Do not add microservices or new infrastructure without need.
+  Technical identifiers and code comments are English. User-facing text and review documents are Spanish.
+  Endpoints stay thin; business logic belongs in backend services. Clients access only the API.
+  Preserve chatbot isolation. Keep credentials in backend environment configuration.
+  docs/database-design.md describes the seven-table initial schema applied locally with Docker Compose.
+  PostgreSQL 16.15 and pgvector 0.8.6 were verified. The local vector dimension is 768;
+  local Ollama embeddings and multimodal providers are already implemented.
+  The user authorized the professionalize-frontend-experience plan and its implementation.
+  Existing changes may contain historical MVP wording; preserve history but target the complete application.
+
+rules:
+  proposal:
+    - Distinguish user-authorized scaffolding from database decisions awaiting approval.
+    - Cite existing RF, RNF, RS and CA identifiers where applicable; do not invent requirements.
+  design:
+    - Justify entities, cardinalities, constraints, isolation, deletion and transaction boundaries.
+    - Record unresolved decisions explicitly and link to docs/database-design.md.
+  specs:
+    - Use SHALL or MUST and at least one WHEN/THEN scenario for each requirement.
+    - Keep proposed specifications in the change until approved and implemented.
+  tasks:
+    - Separate completed documentation from approval and future implementation tasks.
+    - Database integration tests must use PostgreSQL with pgvector.

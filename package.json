@@ -1,0 +1,15 @@
+{
+  "name": "bidachat",
+  "version": "0.1.0",
+  "private": true,
+  "description": "BIDACHAT project specification tooling",
+  "scripts": {
+    "spec:list": "openspec list",
+    "spec:validate": "openspec validate --all --strict --no-interactive",
+    "format:check": "prettier --check README.md docs openspec package.json .prettierrc.json frontend/README.md backend/README.md widget/README.md database/README.md docker/README.md docker-compose.yml"
+  },
+  "devDependencies": {
+    "@fission-ai/openspec": "1.13.0",
+    "prettier": "3.8.1"
+  }
+}

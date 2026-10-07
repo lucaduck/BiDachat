@@ -1,0 +1,5 @@
+node_modules
+.next
+public/bidachat-widget.js
+public/widget-example.html
+coverage

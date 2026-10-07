@@ -1,0 +1,61 @@
+{
+  "capturedAt": "2026-10-06T04:06:27.478074+00:00",
+  "evidence": "Session 65609 stdout and Docker backend/Ollama logs; stopped runner waiting after completed HTTP 503",
+  "results": [
+    {
+      "caseId": "live-create",
+      "status": "passed"
+    },
+    {
+      "caseId": "live-local-embedding",
+      "status": "passed"
+    },
+    {
+      "caseId": "live-rag-query",
+      "status": "passed"
+    },
+    {
+      "caseId": "live-preview-return",
+      "status": "passed"
+    },
+    {
+      "caseId": "live-external-origin-allowed",
+      "status": "passed"
+    },
+    {
+      "caseId": "live-multimodal-query-initial",
+      "status": "failed",
+      "model": "qwen3-vl:2b",
+      "backendStatus": 503,
+      "provider": "HTTP 200, generated 512 tokens; no usable final content"
+    },
+    {
+      "caseId": "live-multimodal-query-retry",
+      "status": "passed",
+      "model": "qwen3-vl:2b-instruct",
+      "response": "La imagen muestra una comparación trimestral de dos valores: A con 40 y B con 80.",
+      "imageType": "image/png",
+      "origin": "http://127.0.0.1:4173"
+    },
+    {
+      "caseId": "live-external-origin-denied",
+      "status": "passed",
+      "origin": "http://127.0.0.1:4174"
+    },
+    {
+      "caseId": "live-metrics",
+      "status": "passed",
+      "completed": 3,
+      "failed": 1,
+      "measured": 3
+    },
+    {
+      "caseId": "live-shared-source",
+      "status": "passed",
+      "removedFromFirst": true,
+      "preservedInSecond": true,
+      "availableAndReassociated": true
+    }
+  ],
+  "retryCapturedAt": "2026-10-06T04:09:26.333Z"
+}

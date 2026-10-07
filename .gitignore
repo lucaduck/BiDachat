@@ -1,0 +1,38 @@
+# Local credentials
+.env
+.env.*
+!.env.example
+
+# JavaScript artifacts
+node_modules/
+.next/
+out/
+coverage/
+*.tsbuildinfo
+widget/dist/*
+frontend/public/bidachat-widget.js
+frontend/public/widget-example.html
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Private runtime data
+storage/
+backups/
+*.log
+
+# Editor and OS artifacts
+.DS_Store
+Thumbs.db
+.idea/
+
+# ext
+glosario.md
+.impeccable/

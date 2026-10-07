@@ -1,0 +1,450 @@
+@import "tailwindcss" source(none);
+@source "../components";
+@source "./";
+@font-face {
+  font-family: Inter;
+  src: url("/fonts/inter-variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: Caveat;
+  src: url("/fonts/caveat-variable.ttf") format("truetype");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+:root {
+  color-scheme: light;
+  --canvas: #f5f8fb;
+  --surface: #ffffff;
+  --surface-muted: #edf3f7;
+  --sidebar: #ffffff;
+  --subtle: #e7f6fa;
+  --border: #d5e2eb;
+  --text: #163247;
+  --muted: #526a7e;
+  --primary: #0aa8c6;
+  --on-primary: #062a36;
+  --link: #086e89;
+  --focus: #087a99;
+  --success: #087356;
+  --success-bg: #e9f7f1;
+  --warning: #865414;
+  --warning-bg: #fff6e5;
+  --danger: #b02c38;
+  --danger-bg: #fff0f1;
+  --radius: 12px;
+  --space: 8px;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  background: var(--canvas);
+  color: var(--text);
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --canvas: #091521;
+  --surface: #102332;
+  --surface-muted: #172e40;
+  --sidebar: #0d1e2c;
+  --subtle: #153a48;
+  --border: #2b465a;
+  --text: #eef5fb;
+  --muted: #a6bdce;
+  --primary: #35c5df;
+  --on-primary: #062a36;
+  --link: #76d8ea;
+  --focus: #6ed9eb;
+  --success: #7ce3bd;
+  --success-bg: #163a32;
+  --warning: #f4cb7b;
+  --warning-bg: #3d301e;
+  --danger: #ffadb6;
+  --danger-bg: #422832;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+button {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: not-allowed;
+}
+a {
+  color: var(--link);
+  text-underline-offset: 3px;
+}
+h1,
+h2,
+h3,
+h4,
+p {
+  margin: 0;
+}
+h1,
+h2,
+h3,
+h4 {
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+h1 {
+  font-size: clamp(26px, 2.5vw, 34px);
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+  font-weight: 700;
+}
+h2 {
+  font-size: 20px;
+  line-height: 1.35;
+  font-weight: 650;
+}
+h3 {
+  font-size: 17px;
+  font-weight: 650;
+}
+h4 {
+  font-size: 15px;
+  font-weight: 650;
+}
+p {
+  line-height: 1.6;
+  max-width: 75ch;
+}
+ul,
+ol,
+dl {
+  margin: 0;
+  padding: 0;
+}
+dd {
+  margin: 0;
+}
+fieldset {
+  min-width: 0;
+}
+svg {
+  display: block;
+}
+::selection {
+  background: var(--subtle);
+  color: var(--text);
+}
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+input,
+textarea {
+  caret-color: var(--link);
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+[hidden] {
+  display: none !important;
+}
+.icon {
+  width: 20px;
+  height: 20px;
+  flex: none;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  background: var(--subtle);
+  color: var(--link);
+  border-radius: 10px;
+}
+.brand-wordmark {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+.brand-circuit {
+  width: 46px;
+  height: 46px;
+  overflow: hidden;
+  background: #08111f;
+  border-radius: 12px;
+}
+.brand-circuit img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.brand-wordmark strong {
+  font-size: 19px;
+  letter-spacing: -0.025em;
+  font-weight: 800;
+}
+.brand-wordmark span {
+  font-size: 10px;
+  white-space: nowrap;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 10px 16px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: var(--primary);
+  color: var(--on-primary);
+  font-size: 13px;
+  font-weight: 650;
+  text-decoration: none;
+  text-align: center;
+  line-height: 1.35;
+  transition: background 0.15s;
+}
+.button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--primary) 88%, var(--text));
+}
+.button-secondary {
+  border-color: var(--border);
+  background: var(--surface);
+  color: var(--text);
+}
+.button-secondary:hover:not(:disabled) {
+  background: var(--surface-muted);
+}
+.button-quiet {
+  background: transparent;
+  color: var(--link);
+  padding-inline: 8px;
+}
+.button-danger {
+  background: var(--danger);
+  color: var(--surface);
+}
+.button:disabled {
+  background: var(--surface-muted);
+  color: var(--muted);
+  border-color: var(--border);
+}
+.button-full {
+  width: 100%;
+}
+.button .icon {
+  width: 18px;
+  height: 18px;
+}
+.text-action {
+  border: 0;
+  background: transparent;
+  color: var(--link);
+  font-weight: 650;
+  text-decoration: underline;
+}
+.field {
+  display: grid;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  min-width: 0;
+}
+.field > span:first-child {
+  color: var(--text);
+}
+.input,
+.wizard-publication textarea {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 11px 12px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+.input:hover {
+  border-color: var(--muted);
+}
+.input[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+.input::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+.textarea {
+  min-height: 104px;
+  resize: vertical;
+}
+.field-hint,
+.field-error {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.field-error {
+  color: var(--danger);
+}
+.form-stack {
+  display: grid;
+  gap: 20px;
+}
+.alert {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 16px;
+  margin-block: 16px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--subtle);
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.alert-error {
+  color: var(--danger);
+  background: var(--danger-bg);
+  border-color: color-mix(in srgb, var(--danger) 30%, var(--border));
+}
+.alert-success {
+  color: var(--success);
+  background: var(--success-bg);
+  border-color: color-mix(in srgb, var(--success) 30%, var(--border));
+}
+.alert-warning {
+  color: var(--warning);
+  background: var(--warning-bg);
+  border-color: color-mix(in srgb, var(--warning) 30%, var(--border));
+}
+.empty-state {
+  padding: 48px 24px;
+  text-align: center;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.empty-state p {
+  margin: 10px auto 22px;
+  color: var(--muted);
+}
+.loading-state {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 32px 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--border);
+  border-top-color: var(--link);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.session-restoring {
+  display: grid;
+  place-items: center;
+  min-height: 100dvh;
+}
+.not-found-page {
+  display: grid;
+  place-items: center;
+  min-height: 100dvh;
+  padding: 24px;
+}
+.not-found-content {
+  display: grid;
+  gap: 20px;
+  max-width: 560px;
+}
+.not-found-code {
+  color: var(--muted);
+  font-size: 14px;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.button > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.circuit-logo {
+  display: grid;
+  flex: none;
+}
+.circuit-logo img {
+  grid-area: 1 / 1;
+  display: block;
+}
+.circuit-logo-dark {
+  display: none !important;
+}
+:root[data-theme="dark"] .circuit-logo-dark {
+  display: block !important;
+}
+:root[data-theme="dark"] .circuit-logo-light {
+  display: none;
+}
+:root:not([data-theme="dark"]) .brand-circuit {
+  background: #fff;
+}

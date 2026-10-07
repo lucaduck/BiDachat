@@ -1,0 +1,179 @@
+{
+  "capturedAt": "2026-10-06T04:19:07.507Z",
+  "source": "Docker frontend final production image",
+  "failures": [],
+  "results": [
+    {
+      "theme": "light",
+      "name": "login",
+      "apiRequests": [],
+      "resources": 13,
+      "duration": 240.7000000178814,
+      "transferred": 517009
+    },
+    {
+      "theme": "light",
+      "name": "Resumen",
+      "apiRequests": [
+        "http://127.0.0.1:3000/api/v1/chatbots",
+        "http://127.0.0.1:3000/api/v1/chatbots/11111111-1111-4111-8111-111111111111/documents",
+        "http://127.0.0.1:3000/api/v1/chatbots/11111111-1111-4111-8111-111111111111/metrics?started_at=2026-09-06T04%3A18%3A49.208Z&ended_at=2026-10-06T04%3A18%3A49.208Z",
+        "http://127.0.0.1:3000/api/v1/chatbots/22222222-2222-4222-8222-222222222222/documents",
+        "http://127.0.0.1:3000/api/v1/chatbots/22222222-2222-4222-8222-222222222222/metrics?started_at=2026-09-06T04%3A18%3A49.208Z&ended_at=2026-10-06T04%3A18%3A49.208Z"
+      ],
+      "resources": 22,
+      "duration": 126.5,
+      "transferred": 524178
+    },
+    {
+      "theme": "light",
+      "name": "Chatbots",
+      "apiRequests": [
+        "http://127.0.0.1:3000/api/v1/chatbots",
+        "http://127.0.0.1:3000/api/v1/llm-models"
+      ],
+      "resources": 19,
+      "duration": 142.30000001192093,
+      "transferred": 522170
+    },
+    {
+      "theme": "light",
+      "name": "Documentos",
+      "apiRequests": [
+        "http://127.0.0.1:3000/api/v1/chatbots",
+        "http://127.0.0.1:3000/api/v1/chatbots/11111111-1111-4111-8111-111111111111/documents"
+      ],
+      "resources": 19,
+      "duration": 271.60000002384186,
+      "transferred": 522449
+    },
+    {
+      "theme": "light",
+      "name": "Métricas",
+      "apiRequests": [
+        "http://127.0.0.1:3000/api/v1/chatbots",
+        "http://127.0.0.1:3000/api/v1/chatbots/11111111-1111-4111-8111-111111111111/metrics"
+      ],
+      "resources": 19,
+      "duration": 285.39999997615814,
+      "transferred": 522313
+    },
+    {
+      "theme": "light",
+      "name": "Configuración",
+      "apiRequests": [
+        "http://127.0.0.1:3000/api/v1/chatbots",
+        "http://127.0.0.1:3000/api/v1/settings",
+        "http://127.0.0.1:3000/api/v1/llm-models"
+      ],
+      "resources": 20,
+      "duration": 107.30000001192093,
+      "transferred": 522759
+    },
+    {
+      "theme": "light",
+      "name": "editor",
+      "apiRequests": [
+        "http://127.0.0.1:3000/api/v1/chatbots",
+        "http://127.0.0.1:3000/api/v1/llm-models"
+      ],
+      "resources": 19,
+      "duration": 106.69999998807907,
+      "transferred": 522170
+    },
+    {
+      "theme": "light",
+      "name": "preview",
+      "apiRequests": [],
+      "resources": 21,
+      "duration": 143.40000000596046,
+      "transferred": 536165
+    },
+    {
+      "theme": "dark",
+      "name": "login",
+      "apiRequests": [],
+      "resources": 13,
+      "duration": 204.59999999403954,
+      "transferred": 517009
+    },
+    {
+      "theme": "dark",
+      "name": "Resumen",
+      "apiRequests": [
+        "http://127.0.0.1:3000/api/v1/chatbots",
+        "http://127.0.0.1:3000/api/v1/chatbots/11111111-1111-4111-8111-111111111111/documents",
+        "http://127.0.0.1:3000/api/v1/chatbots/11111111-1111-4111-8111-111111111111/metrics?started_at=2026-09-06T04%3A18%3A58.940Z&ended_at=2026-10-06T04%3A18%3A58.940Z",
+        "http://127.0.0.1:3000/api/v1/chatbots/22222222-2222-4222-8222-222222222222/documents",
+        "http://127.0.0.1:3000/api/v1/chatbots/22222222-2222-4222-8222-222222222222/metrics?started_at=2026-09-06T04%3A18%3A58.940Z&ended_at=2026-10-06T04%3A18%3A58.940Z"
+      ],
+      "resources": 22,
+      "duration": 118.59999999403954,
+      "transferred": 524178
+    },
+    {
+      "theme": "dark",
+      "name": "Chatbots",
+      "apiRequests": [
+        "http://127.0.0.1:3000/api/v1/chatbots",
+        "http://127.0.0.1:3000/api/v1/llm-models"
+      ],
+      "resources": 19,
+      "duration": 119.40000000596046,
+      "transferred": 522170
+    },
+    {
+      "theme": "dark",
+      "name": "Documentos",
+      "apiRequests": [
+        "http://127.0.0.1:3000/api/v1/chatbots",
+        "http://127.0.0.1:3000/api/v1/chatbots/11111111-1111-4111-8111-111111111111/documents"
+      ],
+      "resources": 19,
+      "duration": 114.7000000178814,
+      "transferred": 522449
+    },
+    {
+      "theme": "dark",
+      "name": "Métricas",
+      "apiRequests": [
+        "http://127.0.0.1:3000/api/v1/chatbots",
+        "http://127.0.0.1:3000/api/v1/chatbots/11111111-1111-4111-8111-111111111111/metrics"
+      ],
+      "resources": 19,
+      "duration": 150.09999999403954,
+      "transferred": 522313
+    },
+    {
+      "theme": "dark",
+      "name": "Configuración",
+      "apiRequests": [
+        "http://127.0.0.1:3000/api/v1/chatbots",
+        "http://127.0.0.1:3000/api/v1/settings",
+        "http://127.0.0.1:3000/api/v1/llm-models"
+      ],
+      "resources": 20,
+      "duration": 165.60000002384186,
+      "transferred": 522759
+    },
+    {
+      "theme": "dark",
+      "name": "editor",
+      "apiRequests": [
+        "http://127.0.0.1:3000/api/v1/chatbots",
+        "http://127.0.0.1:3000/api/v1/llm-models"
+      ],
+      "resources": 19,
+      "duration": 157.5,
+      "transferred": 522170
+    },
+    {
+      "theme": "dark",
+      "name": "preview",
+      "apiRequests": [],
+      "resources": 21,
+      "duration": 123.59999999403954,
+      "transferred": 536165
+    }
+  ]
+}

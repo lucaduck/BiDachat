@@ -1,0 +1,42 @@
+{
+  "recordedAt": "2026-10-06T04:23:23.810410+00:00",
+  "frontendUnitTests": {
+    "passed": 23,
+    "files": 6
+  },
+  "backendAffectedTests": {
+    "passed": 15,
+    "files": [
+      "test_chatbot_api.py",
+      "test_document_api.py",
+      "test_rag_knowledge_service.py",
+      "test_public_queries.py",
+      "test_settings_api.py"
+    ],
+    "database": "PostgreSQL + pgvector, isolated fixtures",
+    "provider": "mocked in focused service tests; live acceptance separate"
+  },
+  "browserTests": {
+    "passed": 19,
+    "fullSuite": "Playwright Chromium, 2.6m"
+  },
+  "axeAudits": {
+    "passed": 33,
+    "tags": [
+      "wcag2a",
+      "wcag2aa",
+      "wcag21aa"
+    ],
+    "notConformanceCertificate": true
+  },
+  "frontendLint": "passed",
+  "frontendTypes": "passed",
+  "frontendFormatting": "passed",
+  "productionBuild": "passed",
+  "backendQaHelperRuff": "passed",
+  "knownVerificationLimits": [
+    "Native screen-reader listening unverified",
+    "200% native browser zoom unverified; equivalent reflow checked"
+  ],
+  "supplementaryHistoryCheck": "passed: back/forward between two chatbot destinations, close and reload"
+}

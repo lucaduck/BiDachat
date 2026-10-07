@@ -1,0 +1,28 @@
+[
+  {
+    "antipattern": "overused-font",
+    "name": "Overused font",
+    "description": "Inter, Roboto, Fraunces, Geist, Plus Jakarta Sans, and Space Grotesk are used on so many sites they no longer feel distinctive. Each new wave of AI-generated UIs converges on the same handful of faces. Choose a face that gives your interface personality.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "/mnt/d/espoch/tesis/tesis_patricio/bidachat/frontend/app/globals.css",
+    "line": 5,
+    "snippet": "font-family: Inter",
+    "importedBy": [
+      "layout.tsx"
+    ]
+  },
+  {
+    "antipattern": "overused-font",
+    "name": "Overused font",
+    "description": "Inter, Roboto, Fraunces, Geist, Plus Jakarta Sans, and Space Grotesk are used on so many sites they no longer feel distinctive. Each new wave of AI-generated UIs converges on the same handful of faces. Choose a face that gives your interface personality.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "/mnt/d/espoch/tesis/tesis_patricio/bidachat/frontend/app/globals.css",
+    "line": 33,
+    "snippet": "font-family: Inter",
+    "importedBy": [
+      "layout.tsx"
+    ]
+  }
+]
