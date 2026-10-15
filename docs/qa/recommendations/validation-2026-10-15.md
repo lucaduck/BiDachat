@@ -38,7 +38,14 @@ Inicialmente el directorio y `.env` pertenecían a `root:root`.
 Se transfirió la propiedad de **esos dos elementos** a `despliegue:despliegue`,
 se dejó el directorio en modo `750` y el archivo en `600`, y se comprobó como
 `despliegue` que puede leer `.env` y escribir en la ruta. El usuario pertenece
-al grupo Docker, pero su acceso SSH con la clave local probada fue rechazado.
+al grupo Docker. La clave SSH que existía en el equipo fue rechazada, por lo
+que se creó una clave dedicada fuera del repositorio y se añadió su parte
+pública a `authorized_keys` sin retirar las entradas previas. Con verificación
+estricta de la clave del host, la conexión como `despliegue` pasó y confirmó
+lectura del `.env`, escritura en la ruta de despliegue y acceso a Docker. La
+clave pública obtenida por `ssh-keyscan` coincidió con la clave del host
+consultada mediante la sesión administrativa existente; el archivo
+`known_hosts` se guardó fuera del repositorio.
 El Apache del dominio aún sirve `public_html` y no tiene `ProxyPass` hacia
 BIDACHAT. Tiene activos los módulos
 Apache `proxy`, `proxy_http`, `headers`, `rewrite` y `ssl`, pero no `remoteip`.
@@ -68,13 +75,13 @@ cambia automáticamente los chatbots que usen Ollama. Los embeddings continúan
 con `embeddinggemma:300m` en Ollama local.
 
 Estas condiciones impiden validar la aplicación completa en ese VPS. La siguiente
-liberación debe verificar el acceso SSH de GitHub Actions para `despliegue`,
+liberación debe cargar y verificar la clave privada y `known_hosts` en los
+secretos de GitHub Actions,
 corregir la credencial de OpenAI, medir los límites efectivos bajo carga,
 instalar el proxy Apache y publicar las
 imágenes GHCR de un commit aprobado. Desde el equipo del usuario aún no hay
-acceso SSH configurado para `despliegue`; el alias administrativo disponible en
-este entorno permitió ajustar el `.env`, pero no sustituye la clave privada y la
-huella que requiere GitHub Actions. Solo entonces corresponde
+acceso SSH para `despliegue` antes de esta comprobación; ahora funciona desde
+este entorno, pero aún no se ha ensayado desde GitHub Actions. Solo entonces corresponde
 probar TLS, orígenes permitidos, identidad real del cliente, tiempos, respaldo
 y restauración sobre una copia de datos del entorno.
 
