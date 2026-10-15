@@ -201,4 +201,17 @@ Completar el inventario y conjunto de regresión de fase 0. Los primeros casos t
 
 **Avance del 13 de octubre de 2026:** [la línea base](qa/recommendations/baseline-2026-10-13.md) reprodujo y corrigió los casos de extracción DOCX y CSV; se añadió una regresión para reintento compartido y scripts para respaldo coordinado y verificación de restauración aislada. [La revisión de guardrails](qa/recommendations/guardrails-review-2026-10-13.md) identifica los controles existentes y sus límites. El motor Docker no respondió en este entorno, por lo que la integración PostgreSQL, la prueba de restauración real, el CORS por proxy y la medición por etapa continúan pendientes. No se modificó el VPS ni el SRS en esta entrega.
 
-**Avance del 15 de octubre de 2026:** [la comprobación local y el inventario del VPS](qa/recommendations/validation-2026-10-15.md) confirman pruebas backend aprobadas, ingestión y recuperación con fixtures sintéticos, visión real con Ollama para PNG/JPEG/WebP, una prueba adversarial de documento con el modelo local y respaldo/restauración aislados. Se configuró por separado el proveedor de descripción de imágenes y se corrigieron los permisos de la ruta y `.env` para `despliegue`. El workflow transfiere el commit aprobado por SSH sin exigir un checkout Git en el VPS. El VPS aún no ejecuta BIDACHAT: faltan acceso SSH de despliegue, límites efectivos de recursos y proxy Apache. Siguen abiertos el ensayo operacional en el VPS, el corpus académico completo, las pruebas adversariales por página, imagen y proveedor, y las decisiones de optimización basadas en mediciones.
+**Avance del 15 de octubre de 2026:** [la comprobación local y el inventario del VPS](qa/recommendations/validation-2026-10-15.md) confirman pruebas backend aprobadas, ingestión y recuperación con fixtures sintéticos, visión real con Ollama para PNG/JPEG/WebP, pruebas adversariales de documento, página e imagen con un modelo local y respaldo/restauración aislados. Se configuró por separado el proveedor de descripción de imágenes y se corrigieron los permisos de la ruta y `.env` para `despliegue`. El workflow transfiere el commit aprobado por SSH sin exigir un checkout Git en el VPS. El VPS aún no ejecuta BIDACHAT: faltan acceso SSH de despliegue, límites efectivos de recursos y proxy Apache. Siguen abiertos el ensayo operacional en el VPS, el corpus académico completo, pruebas adversariales más variadas y por proveedor externo, y las decisiones de optimización basadas en mediciones.
+
+**Decisión para el VPS del mismo día:** el usuario eligió OpenAI para describir
+fuentes visuales. Se configuró `gpt-5.6-luna` como modelo visual y se agregaron
+los diez límites exigidos al `.env` de producción. Su seguridad operativa aún
+depende de medir consumo real de memoria y concurrencia. El usuario confirmó
+que su equipo todavía no tiene acceso SSH; siguen pendientes la clave de
+`despliegue` para GitHub Actions, el PR aprobado, el proxy Apache, el despliegue
+y la aceptación extremo a extremo.
+
+La llamada visual real con la clave configurada devolvió `401 invalid_api_key`;
+la clave local también fue rechazada. El proveedor visual quedó seleccionado,
+pero su aceptación externa está pendiente de una credencial válida y de una
+prueba que registre modelo, respuesta y consumo dentro del presupuesto acordado.

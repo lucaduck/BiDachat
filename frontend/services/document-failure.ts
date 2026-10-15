@@ -1,8 +1,8 @@
 export function documentFailure(errorCode: string | null) {
   if (errorCode === "image_model_not_configured")
-    return "Configura OLLAMA_MODEL con un modelo visual para procesar la imagen.";
+    return "Configura un modelo visual en el servidor para procesar la imagen.";
   if (errorCode === "image_processing_failed")
-    return "No se pudo describir la imagen. Comprueba que Ollama y el modelo visual estén disponibles.";
+    return "No se pudo describir la imagen. Comprueba el proveedor y el modelo visual configurados.";
   if (errorCode === "embedding_not_configured")
     return "Falta configurar el proveedor de embeddings en el backend.";
   if (errorCode === "embedding_provider_failed")

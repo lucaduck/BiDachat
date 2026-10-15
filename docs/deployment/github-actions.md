@@ -38,13 +38,13 @@ Para habilitar el despliegue remoto, crear la variable de repositorio
 `DEPLOY_ENABLED` con el valor `true` y, dentro del entorno `production`, crear
 estos secretos:
 
-| Secreto                  | Valor                                               |
-| ------------------------ | --------------------------------------------------- |
-| `DEPLOY_HOST`            | Nombre DNS o IP del servidor Linux.                 |
-| `DEPLOY_USER`            | Usuario limitado que ejecuta Docker Compose.        |
-| `DEPLOY_PATH`            | Directorio donde está clonado el repositorio.       |
-| `DEPLOY_SSH_PRIVATE_KEY` | Clave privada SSH del usuario de despliegue.        |
-| `DEPLOY_KNOWN_HOSTS`     | Resultado verificado de `ssh-keyscan` del servidor. |
+| Secreto                  | Valor                                                                             |
+| ------------------------ | --------------------------------------------------------------------------------- |
+| `DEPLOY_HOST`            | Nombre DNS o IP del servidor Linux.                                               |
+| `DEPLOY_USER`            | Usuario limitado que ejecuta Docker Compose.                                      |
+| `DEPLOY_PATH`            | Directorio del VPS que contiene `.env` y recibirá el paquete del commit aprobado. |
+| `DEPLOY_SSH_PRIVATE_KEY` | Clave privada SSH del usuario de despliegue.                                      |
+| `DEPLOY_KNOWN_HOSTS`     | Resultado verificado de `ssh-keyscan` del servidor.                               |
 
 También puede crearse la variable `PRODUCTION_URL` para que GitHub muestre el
 enlace público del sistema después de cada despliegue.
@@ -143,7 +143,7 @@ configuración de Nginx y consulta `/api/v1/health` a través de este proxy.
 La topología y el ejemplo de configuración externa están en
 [Proxy inverso con Nginx](reverse-proxy.md).
 
-Las migraciones existentes se conservan en el clon del servidor y se montan de
+Las migraciones del commit aprobado se transfieren al servidor y se montan de
 solo lectura durante la inicialización de PostgreSQL. Antes de añadir una nueva
 migración, probarla sobre una copia de la base y realizar un respaldo, tal como
 establece la guía de base de datos.
@@ -164,7 +164,16 @@ valores de `.env.example` se eligieron para el entorno de desarrollo que muestra
 7,7 GiB de RAM en Docker; el equipo físico dispone de 16 GB, pero Docker ve
 menos. El inventario de lectura del 15 de octubre encontró en el VPS 4 CPU,
 7,8 GiB de RAM, sin swap y alrededor de 2,5 GiB usados por otros servicios.
-Su `.env` todavía carece de los diez límites obligatorios. Antes del primer
+Su `.env` ya contiene los diez límites obligatorios: Ollama 2 CPU / 3 GiB,
+backend 1 CPU / 768 MiB, frontend 1 CPU / 512 MiB, Nginx 0,25 CPU / 128 MiB y
+PostgreSQL 1 CPU / 768 MiB. También se seleccionó OpenAI
+(`VISION_PROVIDER=openai`, `VISION_MODEL=gpt-5.6-luna`) para describir fuentes
+visuales. La [documentación del modelo](https://developers.openai.com/api/docs/models/gpt-5.6-luna)
+confirma que acepta imágenes. El perfil de embeddings continúa en Ollama local.
+La prueba del 15 de octubre devolvió `401 invalid_api_key` con la clave
+configurada. Sustituir esa credencial en el `.env` privado y comprobar una
+descripción real antes de dar por habilitada la ingestión de imágenes.
+Antes del primer
 despliegue, medir los picos de BIDACHAT durante ingestión y consultas. Fijar
 presupuestos para los cinco servicios sin agotar la memoria del host; Ollama
 merece especial atención por el tamaño de los modelos. Un límite demasiado
@@ -188,4 +197,7 @@ con `docker inspect` sobre cada contenedor (`HostConfig.NanoCpus` y
 `HostConfig.Memory`). Observar `docker stats`, fallos OOM y latencias de
 consultas reales; ajustar los presupuestos a partir de esas mediciones. La
 validación de Compose confirma sintaxis y configuración, pero no que el VPS
-tenga capacidad suficiente.
+tenga capacidad suficiente. El máximo de memoria configurado para BIDACHAT es
+aproximadamente 5,1 GiB; los otros servicios ya usaban alrededor de 2,5 GiB
+cuando se tomó el inventario. El margen del host es pequeño: vigilar OOM y
+reducir concurrencia o ampliar memoria si la medición real lo exige.

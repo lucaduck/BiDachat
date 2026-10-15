@@ -1,23 +1,24 @@
 # Comprobación de recomendaciones — 15 de octubre de 2026
 
-Base local: `develop` sobre `10a01bf`, con cambios aún sin commit. Se utilizaron
+Base local: rama `feature/recommendations-verification` derivada de `develop`
+en `10a01bf`. Se utilizaron
 datos sintéticos y una base PostgreSQL/pgvector temporal en un contenedor con
 almacenamiento efímero. Los volúmenes existentes de BIDACHAT no se modificaron.
-La suite backend final registró **83 aprobadas y 2 omitidas** (pruebas optativas
+La suite backend final registró **84 aprobadas y 4 omitidas** (pruebas optativas
 de modelo local real); las 30 pruebas unitarias del frontend pasaron. Ruff,
 ESLint y la comprobación TypeScript que excluye el archivo generado y corrupto
 de `.next/dev/types/validator.ts` también aprobaron.
 
-| Recorrido                  | Resultado comprobado                                                                                                                                                                                                                                                                                                                                        | Límite de la evidencia                                                                                                           |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| Integraciones existentes   | 10 pruebas con PostgreSQL/pgvector aprobadas; incluyen reintento de documento compartido desde el chatbot asociado.                                                                                                                                                                                                                                         | No es la base del VPS.                                                                                                           |
-| Ingestión y recuperación   | DOCX con tabla, CSV con alias MIME y separador `;`, TXT, PDF digital con tabla e imagen PNG llegaron a chunks recuperables; el documento compartido se recuperó solo mientras existió la asociación.                                                                                                                                                        | Las respuestas de embedding y descripción visual de este recorrido fueron simuladas; `wkhtmltopdf` generó el PDF sintético.      |
-| Modelo local real          | PNG, JPEG y WebP con “VENTAS 42” se describieron con `qwen3-vl:2b-instruct`; `embeddinggemma:300m` generó vectores de 768 dimensiones; pgvector recuperó los tres. Prueba aprobada en 416,88 s.                                                                                                                                                             | CPU local, una imagen simple por formato; no extrapolar calidad ni latencia al VPS.                                              |
-| Duración del modelo visual | El registro de Ollama muestra `/api/chat` de 2 min 21 s, 1 min 59 s y 2 min 1 s; `/api/embed` de aproximadamente 5 s por fuente.                                                                                                                                                                                                                            | Estas cifras corresponden a este equipo y a cargas secuenciales con `keep_alive: 0`. No son tiempos estándar del chatbot.        |
-| Respaldo y restauración    | Un Compose temporal sembró un bot y un original; `backup-production.sh` produjo manifiesto y copia coordinada; `verify-production-backup.sh` restauró en un volumen aislado y comprobó tabla y archivo. Prueba aprobada.                                                                                                                                    | Falta ensayo sobre una copia del despliegue real y comprobar login y recuperación después del restore.                           |
-| PDF digital                | La extracción con `pypdf` recuperó `PDF_TASA_BI` y `91 por ciento` de una tabla sencilla.                                                                                                                                                                                                                                                                   | El texto salió por celdas; no se demostró preservación de relaciones en tablas complejas. OCR no forma parte de esta aceptación. |
-| Compose de producción      | Configuración renderizada con cinco límites de CPU/RAM; solo Nginx publica `127.0.0.1:3000`. `nginx -t` aprobó.                                                                                                                                                                                                                                             | No se ejecutó aún el stack completo detrás de Apache/TLS del VPS.                                                                |
-| Guardrail de fuentes       | El backend añade una instrucción de sistema común para tratar documentos, página e imagen como evidencia no confiable; 42 pruebas dirigidas de proveedores/extracción aprobaron. La primera prueba real repitió una orden inyectada aunque dio el dato correcto; tras pedir expresamente que no cite esas órdenes, la misma prueba respondió sin repetirla. | Una prueba adversarial aprobada no garantiza resistencia general; faltan ataques por página, imagen y proveedores externos.      |
+| Recorrido                  | Resultado comprobado                                                                                                                                                                                                                                                                                                                                                                                                                                            | Límite de la evidencia                                                                                                                                 |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Integraciones existentes   | 10 pruebas con PostgreSQL/pgvector aprobadas; incluyen reintento de documento compartido desde el chatbot asociado.                                                                                                                                                                                                                                                                                                                                             | No es la base del VPS.                                                                                                                                 |
+| Ingestión y recuperación   | DOCX con tabla, CSV con alias MIME y separador `;`, TXT, PDF digital con tabla e imagen PNG llegaron a chunks recuperables; el documento compartido se recuperó solo mientras existió la asociación.                                                                                                                                                                                                                                                            | Las respuestas de embedding y descripción visual de este recorrido fueron simuladas; `wkhtmltopdf` generó el PDF sintético.                            |
+| Modelo local real          | PNG, JPEG y WebP con “VENTAS 42” se describieron con `qwen3-vl:2b-instruct`; `embeddinggemma:300m` generó vectores de 768 dimensiones; pgvector recuperó los tres. Prueba aprobada en 416,88 s.                                                                                                                                                                                                                                                                 | CPU local, una imagen simple por formato; no extrapolar calidad ni latencia al VPS.                                                                    |
+| Duración del modelo visual | El registro de Ollama muestra `/api/chat` de 2 min 21 s, 1 min 59 s y 2 min 1 s; `/api/embed` de aproximadamente 5 s por fuente.                                                                                                                                                                                                                                                                                                                                | Estas cifras corresponden a este equipo y a cargas secuenciales con `keep_alive: 0`. No son tiempos estándar del chatbot.                              |
+| Respaldo y restauración    | Un Compose temporal sembró un bot y un original; `backup-production.sh` produjo manifiesto y copia coordinada; `verify-production-backup.sh` restauró en un volumen aislado y comprobó tabla y archivo. Prueba aprobada.                                                                                                                                                                                                                                        | Falta ensayo sobre una copia del despliegue real y comprobar login y recuperación después del restore.                                                 |
+| PDF digital                | La extracción con `pypdf` recuperó `PDF_TASA_BI` y `91 por ciento` de una tabla sencilla.                                                                                                                                                                                                                                                                                                                                                                       | El texto salió por celdas; no se demostró preservación de relaciones en tablas complejas. OCR no forma parte de esta aceptación.                       |
+| Compose de producción      | Configuración renderizada con cinco límites de CPU/RAM; solo Nginx publica `127.0.0.1:3000`. `nginx -t` aprobó.                                                                                                                                                                                                                                                                                                                                                 | No se ejecutó aún el stack completo detrás de Apache/TLS del VPS.                                                                                      |
+| Guardrail de fuentes       | El backend añade una instrucción de sistema común para tratar documentos, página e imagen como evidencia no confiable. La primera prueba real repitió una orden documental aunque dio el dato correcto; tras pedir que no la cite, ese caso pasó. Una orden en el contexto de página desvió la respuesta; tras omitir líneas evidentemente imperativas, la repetición pasó. Una imagen con un dato y una orden visible produjo el dato correcto sin obedecerla. | El filtro puede descartar texto legítimo y no detecta todas las órdenes. Una imagen y un modelo local no cubren otros ataques ni proveedores externos. |
 
 El proveedor que describe fuentes visuales puede configurarse por separado
 con `VISION_PROVIDER` y `VISION_MODEL`. Las pruebas de contrato cubren los tres
@@ -43,14 +44,37 @@ BIDACHAT. Tiene activos los módulos
 Apache `proxy`, `proxy_http`, `headers`, `rewrite` y `ssl`, pero no `remoteip`.
 El DNS público responde con direcciones de Cloudflare. En el `.env` existen
 `FRONTEND_PORT=3000`, `EMBEDDING_PROVIDER=ollama`,
-`EMBEDDING_MODEL=embeddinggemma:300m` y `OLLAMA_MODEL=qwen3-vl:2b-instruct`; no
-se encontraron las diez variables obligatorias de límites de CPU/RAM. No se
-leyeron ni imprimieron valores de credenciales.
+`EMBEDDING_MODEL=embeddinggemma:300m` y `OLLAMA_MODEL=qwen3-vl:2b-instruct`.
+Tras elegir OpenAI para las imágenes, se fijaron `VISION_PROVIDER=openai` y
+`VISION_MODEL=gpt-5.6-luna`. Este modelo admite entrada de imágenes mediante
+Responses API según la [ficha oficial](https://developers.openai.com/api/docs/models/gpt-5.6-luna).
+Se agregaron los diez límites de CPU/RAM requeridos por Compose: Ollama 2 CPU / 3 GiB,
+backend 1 CPU / 768 MiB, frontend 1 CPU / 512 MiB, Nginx 0,25 CPU / 128 MiB y
+PostgreSQL 1 CPU / 768 MiB. Son valores iniciales para un VPS compartido; su suma
+máxima de memoria se acerca a la RAM libre observada y aún requiere medición bajo
+carga y ajuste. Se verificó propietario `despliegue:despliegue`, modo `600` y
+lectura por el usuario de despliegue. No se imprimieron valores de credenciales.
+La petición real de una imagen sintética a `gpt-5.6-luna` fue rechazada con
+HTTP `401`, código `invalid_api_key`; una lectura de `/v1/models` con la clave
+del VPS y otra con la clave local dieron el mismo resultado. No hubo respuesta
+visual externa válida ni se registraron tokens de respuesta. Se necesita actualizar la credencial
+de OpenAI en el `.env` privado del VPS y repetir una prueba acotada antes de
+aceptar ese recorrido.
 
-Estas condiciones impiden validar la aplicación en ese VPS. La siguiente
-liberación debe verificar el acceso SSH de GitHub Actions para `despliegue`, completar los límites
-según la memoria compartida con otros servicios, instalar el proxy Apache y
-publicar las imágenes GHCR de un commit aprobado. Solo entonces corresponde
+El proveedor visual anterior describe **fuentes de conocimiento subidas**.
+Una imagen o captura enviada en una conversación sigue el proveedor y modelo
+elegidos para ese chatbot; seleccionar OpenAI en el perfil visual global no
+cambia automáticamente los chatbots que usen Ollama. Los embeddings continúan
+con `embeddinggemma:300m` en Ollama local.
+
+Estas condiciones impiden validar la aplicación completa en ese VPS. La siguiente
+liberación debe verificar el acceso SSH de GitHub Actions para `despliegue`,
+corregir la credencial de OpenAI, medir los límites efectivos bajo carga,
+instalar el proxy Apache y publicar las
+imágenes GHCR de un commit aprobado. Desde el equipo del usuario aún no hay
+acceso SSH configurado para `despliegue`; el alias administrativo disponible en
+este entorno permitió ajustar el `.env`, pero no sustituye la clave privada y la
+huella que requiere GitHub Actions. Solo entonces corresponde
 probar TLS, orígenes permitidos, identidad real del cliente, tiempos, respaldo
 y restauración sobre una copia de datos del entorno.
 
