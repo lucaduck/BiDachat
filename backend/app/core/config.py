@@ -44,9 +44,18 @@ class Settings(BaseSettings):
     openrouter_site_url: str = ""
     ollama_base_url: str = "http://localhost:11434"
     ollama_model: str = ""
+    vision_provider: Literal["ollama", "gemini", "openai", "openrouter"] = "ollama"
+    vision_model: str = ""
     ollama_context_length: int = Field(default=2048, ge=512, le=32768)
     ollama_timeout_seconds: int = Field(default=600, ge=10, le=600)
     widget_allowed_origins: str = ""
+
+    @property
+    def effective_vision_model(self) -> str:
+        model = self.vision_model.strip()
+        if not model and self.vision_provider == "ollama":
+            model = self.ollama_model.strip()
+        return model
 
     @field_validator("ollama_base_url")
     @classmethod

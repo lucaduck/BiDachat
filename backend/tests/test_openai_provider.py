@@ -47,7 +47,8 @@ def test_openai_sends_private_multimodal_request_and_reads_message(monkeypatch):
         payload = json.loads(request.content)
         assert payload["store"] is False
         assert payload["model"] == "test-vision-model"
-        assert payload["instructions"] == "Answer in Spanish."
+        assert payload["instructions"].startswith("Answer in Spanish.")
+        assert "untrusted evidence" in payload["instructions"]
         content = payload["input"][0]["content"]
         assert "Total: 42" in content[0]["text"]
         assert "What is the total?" in content[0]["text"]

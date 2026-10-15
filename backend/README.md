@@ -1,8 +1,8 @@
 # Backend
 
-API FastAPI ejecutable con conexión asíncrona a PostgreSQL y modelos SQLAlchemy para las siete tablas del esquema inicial. Antes de crear servicios o migraciones adicionales, revisar [el diseño de datos](../docs/database-design.md).
+API FastAPI con conexión asíncrona a PostgreSQL y modelos SQLAlchemy. Las [migraciones SQL](../database/migrations/) definen el esquema vigente; [el diseño de datos](../docs/database-design.md) explica sus decisiones y antecedentes.
 
-`api/` delega en `services/`; `rag/` y `llm/` aíslan procesamiento y proveedor. Las pruebas se ubicarán en `tests/` y se relacionarán con RF, RNF, RS y criterios CA del SRS.
+`api/` delega en `services/`, donde reside el procesamiento RAG; `llm/` aísla los proveedores. Las pruebas están en `tests/` y se relacionan con RF, RNF, RS y criterios CA del SRS.
 
 ## Ejecutar con Docker
 
@@ -40,7 +40,7 @@ El endpoint público `POST /api/v1/chatbots/{chatbot_id}/queries` admite
 token administrativo; limita las solicitudes por cliente y usa el modelo
 configurado en el chatbot. La respuesta incluye texto y tiempo medido.
 
-Todas estas rutas requieren una sesión Bearer válida. `PUT` conserva el identificador del chatbot y permite cambiar nombre, descripción, instrucciones y una combinación ya registrada en `llm_models`. `created_by` conserva trazabilidad; no representa permiso exclusivo. La carga acepta PDF, DOCX, TXT y CSV de hasta 20 MiB, o PNG, JPEG y WebP de hasta 4 MiB. `DELETE /api/v1/chatbots/{chatbot_id}/documents/{document_id}` quita la asociación RAG sin borrar el archivo, que puede volver a asociarse. El original se guarda en un volumen privado con un nombre generado; no se entrega mediante rutas públicas.
+Las rutas administrativas enumeradas requieren una sesión Bearer válida; la consulta pública descrita arriba no la requiere. `PUT` conserva el identificador del chatbot y permite cambiar nombre, descripción, instrucciones y una combinación ya registrada en `llm_models`. `created_by` conserva trazabilidad; no representa permiso exclusivo. La carga acepta PDF, DOCX, TXT y CSV de hasta 20 MiB, o PNG, JPEG y WebP de hasta 4 MiB. `DELETE /api/v1/chatbots/{chatbot_id}/documents/{document_id}` quita la asociación RAG sin borrar el archivo, que puede volver a asociarse. El original se guarda en un volumen privado con un nombre generado; no se entrega mediante rutas públicas.
 
 Si cambias `BACKEND_PORT`, el puerto de diagnóstico local cambia, pero la ruta del navegador continúa en Nginx mediante `FRONTEND_PORT`. En producción el backend no publica un puerto al host.
 
@@ -71,7 +71,7 @@ Referencia: [Responses e imágenes](https://developers.openai.com/api/docs/guide
 ### Proveedor OpenRouter
 
 Configurar `OPENROUTER_API_KEY` y `OPENROUTER_MODEL` en el `.env` de la raíz.
-El modelo usa el *slug* de OpenRouter, por ejemplo el que se haya habilitado en
+El modelo usa el _slug_ de OpenRouter, por ejemplo el que se haya habilitado en
 la cuenta de consumo. Para enviar capturas, escoger un modelo que acepte
 imágenes. `OPENROUTER_SITE_URL` es opcional y se envía como referencia del sitio
 en la solicitud. La clave solo se monta en el backend; el navegador y el widget
@@ -139,9 +139,7 @@ La prueba marcada `integration` usa `DATABASE_URL` y escribe datos temporales en
 .\.venv\Scripts\python.exe -m pytest -m integration -vv
 ```
 
-Las veintiuna pruebas comprueban salud/esquema API (RNF-01/RNF-04), configuración por entorno y secretos (RS-04), documentación desactivada en producción, errores sin detalles privados (RS-09), correspondencia de las siete tablas, persistencia y rollback, hashing de credenciales, sesiones revocables, CRUD/configuración de chatbots, carga documental autenticada, formatos y tamaño permitidos, aislamiento por chatbot, publicación RAG atómica, reintento, rechazo de perfiles incompatibles, aislamiento A/B, registros/agrupación de métricas con fallos e interrupciones y borrado con cascadas, rollback, limpieza privada y admisiones concurrentes. La ejecución y salud del contenedor verifican el arranque Docker (RNF-03); no validan todavía el despliegue completo del MVP.
-
-Verificado el 2026-09-22: veintiuna pruebas aprobadas con Python 3.14.6, incluidas las integraciones PostgreSQL de autenticación, chatbots, documentos, RAG, métricas y borrado; Ruff sin errores y formato correcto. TestClient emitió dos avisos de deprecación de sus dependencias; las pruebas no fallaron. La imagen base Docker está fijada por digest y las dependencias de ejecución por versión y hash.
+Las pruebas de `tests/` cubren contratos API, autenticación, persistencia, chatbots, documentos, aislamiento RAG, consultas, métricas y borrado. Para un resultado vigente hay que ejecutar la suite en el entorno correspondiente; los resultados fechados se conservan como [evidencia histórica](../docs/qa/README.md). La salud del contenedor verifica el arranque Docker (RNF-03), pero no sustituye una prueba de despliegue de extremo a extremo.
 
 Referencias oficiales: [configuración FastAPI](https://fastapi.tiangolo.com/advanced/settings/) y [pruebas FastAPI](https://fastapi.tiangolo.com/tutorial/testing/).
 

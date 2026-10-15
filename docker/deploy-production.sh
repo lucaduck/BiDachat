@@ -46,18 +46,24 @@ ensure_ollama_model() {
 }
 
 printf 'Deploying Ollama with %s acceleration\n' "$acceleration"
+compose config --quiet
 compose pull backend frontend nginx
 compose up -d --wait database ollama
 
 ollama_model=$(env_value "OLLAMA_MODEL" "")
 embedding_provider=$(env_value "EMBEDDING_PROVIDER" "ollama")
 embedding_model=$(env_value "EMBEDDING_MODEL" "embeddinggemma:300m")
+vision_provider=$(env_value "VISION_PROVIDER" "ollama")
+vision_model=$(env_value "VISION_MODEL" "")
 
 if [ -n "$ollama_model" ]; then
     ensure_ollama_model "$ollama_model"
 fi
 if [ "$embedding_provider" = "ollama" ] && [ -n "$embedding_model" ]; then
     ensure_ollama_model "$embedding_model"
+fi
+if [ "$vision_provider" = "ollama" ] && [ -n "$vision_model" ]; then
+    ensure_ollama_model "$vision_model"
 fi
 
 compose up -d --remove-orphans

@@ -3,6 +3,11 @@ name: bidachat
 services:
   ollama:
     image: ollama/ollama:0.35.0@sha256:2a6e883b917fc543389599dae79918f5cac9e1438890506982f44aa4f5625d01
+    deploy:
+      resources:
+        limits:
+          cpus: ${OLLAMA_CPU_LIMIT:?Set OLLAMA_CPU_LIMIT in .env}
+          memory: ${OLLAMA_MEMORY_LIMIT:?Set OLLAMA_MEMORY_LIMIT in .env}
     environment:
       OLLAMA_HOST: 0.0.0.0:11434
       OLLAMA_MAX_LOADED_MODELS: ${OLLAMA_MAX_LOADED_MODELS:-1}
@@ -21,6 +26,11 @@ services:
 
   backend:
     image: ghcr.io/lucaduck/bidachat-backend:${IMAGE_TAG:?Set IMAGE_TAG to a published commit SHA}
+    deploy:
+      resources:
+        limits:
+          cpus: ${BACKEND_CPU_LIMIT:?Set BACKEND_CPU_LIMIT in .env}
+          memory: ${BACKEND_MEMORY_LIMIT:?Set BACKEND_MEMORY_LIMIT in .env}
     environment:
       APP_ENV: production
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:?Set POSTGRES_USER in .env}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@database:5432/${POSTGRES_DB:?Set POSTGRES_DB in .env}
@@ -39,6 +49,8 @@ services:
       OLLAMA_CONTEXT_LENGTH: ${OLLAMA_CONTEXT_LENGTH:-2048}
       OLLAMA_TIMEOUT_SECONDS: ${OLLAMA_TIMEOUT_SECONDS:-600}
       OLLAMA_MODEL: ${OLLAMA_MODEL:-}
+      VISION_PROVIDER: ${VISION_PROVIDER:-ollama}
+      VISION_MODEL: ${VISION_MODEL:-}
       OLLAMA_BASE_URL: http://ollama:11434
       WIDGET_ALLOWED_ORIGINS: ${WIDGET_ALLOWED_ORIGINS:-}
       SESSION_TTL_MINUTES: ${SESSION_TTL_MINUTES:-480}
@@ -62,6 +74,11 @@ services:
 
   frontend:
     image: ghcr.io/lucaduck/bidachat-frontend:${IMAGE_TAG:?Set IMAGE_TAG to a published commit SHA}
+    deploy:
+      resources:
+        limits:
+          cpus: ${FRONTEND_CPU_LIMIT:?Set FRONTEND_CPU_LIMIT in .env}
+          memory: ${FRONTEND_MEMORY_LIMIT:?Set FRONTEND_MEMORY_LIMIT in .env}
     environment:
       BACKEND_API_ORIGIN: http://backend:8000
     depends_on:
@@ -73,6 +90,11 @@ services:
 
   nginx:
     image: nginx:1.30.5-alpine3.24@sha256:0985e772fb9f729e6fa0980da05fca5d9c468e870eed43071545afa9d2e27d94
+    deploy:
+      resources:
+        limits:
+          cpus: ${NGINX_CPU_LIMIT:?Set NGINX_CPU_LIMIT in .env}
+          memory: ${NGINX_MEMORY_LIMIT:?Set NGINX_MEMORY_LIMIT in .env}
     depends_on:
       backend:
         condition: service_healthy
@@ -92,6 +114,11 @@ services:
 
   database:
     image: pgvector/pgvector:pg16@sha256:ccc6e83d6e35e931dc7c5def2022729d5a6c370318d099181995567ff1fb4d6b
+    deploy:
+      resources:
+        limits:
+          cpus: ${DATABASE_CPU_LIMIT:?Set DATABASE_CPU_LIMIT in .env}
+          memory: ${DATABASE_MEMORY_LIMIT:?Set DATABASE_MEMORY_LIMIT in .env}
     environment:
       POSTGRES_DB: ${POSTGRES_DB:?Set POSTGRES_DB in .env}
       POSTGRES_USER: ${POSTGRES_USER:?Set POSTGRES_USER in .env}

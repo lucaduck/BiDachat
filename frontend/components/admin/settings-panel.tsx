@@ -289,6 +289,14 @@ export function SettingsPanel({
             <dd>{configuration.embedding_dimensions}</dd>
           </div>
           <div>
+            <dt>Descripción de imágenes</dt>
+            <dd>
+              {configuration.vision_model
+                ? `${configuration.vision_provider} · ${configuration.vision_model}`
+                : "Pendiente de configurar"}
+            </dd>
+          </div>
+          <div>
             <dt>Tamaño máximo por documento</dt>
             <dd>{configuration.document_max_size_bytes / (1024 * 1024)} MB</dd>
           </div>

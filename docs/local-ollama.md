@@ -72,11 +72,21 @@ Compose fija la URL interna del backend. Seleccionar `ollama / qwen3-vl:2b-instr
 cada chatbot que deba usar inferencia local; se conservan las selecciones previas
 hasta editarlas. La sección Configuración muestra el proveedor de embeddings.
 
-Para un VPS sin GPU, usar `qwen3:1.7b` para texto y no prometer análisis de
-imágenes. Para usar capturas, elegir explícitamente el perfil GPU, instalar el
-modelo `qwen3-vl:2b-instruct`, ajustar `OLLAMA_MODEL` y, si la VRAM lo permite,
-configurar `OLLAMA_MAX_LOADED_MODELS=2`. Cambiar el modelo generativo no
-reindexa los documentos; cambiar embeddings sí exige reindexación.
+Para un VPS sin GPU, `qwen3:1.7b` solo cubre consultas textuales. La descripción
+de imágenes cargadas como fuentes utiliza `VISION_PROVIDER` y `VISION_MODEL` de
+forma independiente del modelo conversacional. Por defecto, `VISION_PROVIDER`
+es `ollama` y un `VISION_MODEL` vacío reutiliza `OLLAMA_MODEL`; si este no tiene
+capacidad visual, la carga de imágenes falla explícitamente. Con GPU puede
+seleccionarse `qwen3-vl:2b-instruct`. En un VPS con memoria limitada puede
+seleccionarse `gemini`, `openai` u `openrouter` con un modelo visual y su clave
+de API en el backend. Esta decisión envía el contenido de las imágenes a esa
+API externa y puede generar cargos. Los embeddings siguen en Ollama si
+`EMBEDDING_PROVIDER=ollama`. Cambiar el modelo generativo o el de descripción
+no reindexa documentos; cambiar embeddings sí exige reindexación.
+
+En la prueba local del 15 de octubre, Qwen visual en CPU consumió al menos
+2,88 GiB de memoria del contenedor durante una descripción. Es una observación
+de una carga, no el requisito máximo del modelo ni una garantía para el VPS.
 
 El perfil CPU limita la ejecución a un modelo cargado y una solicitud por modelo,
 con servicios cloud deshabilitados. El backend usa `keep_alive=0` para liberar
@@ -117,6 +127,7 @@ vacía al terminar. Verificar carga → fragmentos → recuperación → respues
 y una consulta con captura. Requisitos RF-08, RF-12, RF-14–RF-17 y RF-20–RF-26.
 
 Fuentes oficiales:
+
 - https://docs.ollama.com/docker
 - https://docs.docker.com/desktop/features/gpu/
 - https://docs.ollama.com/api/embed

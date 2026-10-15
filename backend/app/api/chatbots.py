@@ -291,7 +291,7 @@ async def retry_document_processing(
             document_id=document_id,
         )
         processed = await DocumentProcessingService(request.app.state.settings).process(
-            session, document=document, chatbot_id=chatbot_id
+            session, document=document, chatbot_id=document.chatbot_id
         )
     except ChatbotDocumentNotFoundError as exc:
         raise HTTPException(status_code=404, detail="El documento no existe.") from exc

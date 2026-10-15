@@ -7,6 +7,8 @@ export type SystemSettings = {
   embedding_provider: "gemini" | "ollama";
   embedding_model: string;
   embedding_dimensions: number;
+  vision_provider: "ollama" | "gemini" | "openai" | "openrouter";
+  vision_model: string;
   document_max_size_bytes: number;
   session_ttl_minutes: number;
   widget_allowed_origins: string[];

@@ -1,16 +1,11 @@
 # Base de datos
 
-El diseño principal está en [docs/database-design.md](../docs/database-design.md). Contiene entidades, relaciones, restricciones, justificación, operación Docker y decisiones aprobadas para el MVP.
+Las migraciones de `migrations/` definen el esquema vigente. [El diseño de datos](../docs/database-design.md) explica entidades, relaciones y decisiones históricas; para comprobar una instalación, contrasta las migraciones aplicadas con la base real.
 
-- `migrations/`: migración inicial SQL de creación y reversión del esquema.
-
-La migración `003_widget_settings.up.sql` añade la personalización visual del
-widget al chatbot. Los volúmenes nuevos la ejecutan durante la inicialización.
-Para un volumen existente, aplicar una vez el archivo con `psql` antes de
-actualizar el backend; no se debe reiniciar la migración sobre una base ya
-migrada. La migración de reversión elimina esa configuración y sus datos.
-- `seeds/`: inicialización controlada sin secretos ni datos privados versionados.
+- `migrations/`: cambios SQL numerados de creación y reversión del esquema.
 - `tests/`: comprobaciones de integridad ejecutadas dentro de PostgreSQL y revertidas al finalizar.
+
+Los volúmenes nuevos ejecutan las migraciones durante la inicialización. Para un volumen existente, aplica únicamente las migraciones pendientes, en orden, con un respaldo previo. No vuelvas a ejecutar una migración sobre una base ya migrada.
 
 ## Ejecución local con Docker
 
@@ -23,9 +18,9 @@ docker compose up -d database
 docker compose ps
 ```
 
-La primera creación del volumen ejecuta `001_initial_schema.up.sql`. `psql` recibe la dimensión desde `EMBEDDING_DIMENSIONS` después de validar que sea un entero positivo. Cambiarla después de crear el volumen no modifica una columna existente: requiere una migración y regenerar embeddings.
+La primera creación del volumen ejecuta, en orden, las migraciones `001` a `004` mediante `docker/postgres/init-database.sh`. `psql` recibe la dimensión desde `EMBEDDING_DIMENSIONS` después de validar que sea un entero positivo. Cambiarla después de crear el volumen no modifica una columna existente: requiere una migración y regenerar embeddings.
 
-La inicialización local usa `vector(768)`. El perfil aprobado es `gemini-embedding-2`/768; cambiarlo exige una migración compatible y regenerar los embeddings.
+El ejemplo local usa `vector(768)` y configura Ollama con `embeddinggemma:300m` para los embeddings. El proveedor y modelo de embeddings se eligen en `.env` de forma independiente del modelo de respuesta. Cambiar la dimensión requiere una migración compatible; cambiar el modelo exige regenerar los embeddings.
 
 Comprobación de integridad:
 
@@ -47,8 +42,8 @@ Esta configuración es local. Las credenciales permanecen en `.env`, excluido po
 ## Conexiones y persistencia
 
 - Desde el equipo: `localhost:5433`, base `bidachat`, con las credenciales del `.env` local.
-- Desde el futuro backend en la misma red Compose: host `database`, puerto `5432`.
-- Frontend y widget se conectarán a la API, nunca a PostgreSQL.
+- Desde el backend en la misma red Compose: host `database`, puerto `5432`.
+- Frontend y widget se conectan a la API, nunca a PostgreSQL.
 - El volumen `bidachat_postgres_data` conserva los datos al detener o recrear el contenedor. `docker compose down` conserva el volumen; añadir `-v` lo eliminaría y no es una operación normal de apagado.
 - Los scripts de inicialización solo se ejecutan en un volumen vacío. Editar el SQL no actualiza una base existente automáticamente.
 
@@ -74,6 +69,8 @@ Get-Content database/migrations/002_description.up.sql -Raw |
 Después, ejecutar la comprobación de integridad y las pruebas del backend. No se usa `docker compose down -v` como mecanismo de migración: elimina datos.
 
 ## Respaldo y restauración
+
+Para producción, utiliza el [procedimiento coordinado y su verificación aislada](../docs/deployment/backups.md). Los comandos de esta sección son una referencia manual de desarrollo y no sustituyen una restauración ensayada.
 
 Los datos persistentes se dividen entre PostgreSQL (`postgres_data`) y los originales privados de documentos (`bidachat_document_storage`). Un respaldo recuperable debe incluir ambos, tomados mientras el backend está detenido para evitar escrituras durante la copia.
 

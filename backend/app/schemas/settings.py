@@ -8,6 +8,8 @@ class SystemSettingsResponse(BaseModel):
     embedding_provider: str
     embedding_model: str
     embedding_dimensions: int
+    vision_provider: str
+    vision_model: str
     document_max_size_bytes: int
     session_ttl_minutes: int
     widget_allowed_origins: list[str]
