@@ -21,6 +21,10 @@ class Query(Base):
         ForeignKey("chatbots.id", ondelete="CASCADE"),
         nullable=False,
     )
+    conversation_id: Mapped[UUID | None] = mapped_column(
+        PostgreSQLUUID(as_uuid=True),
+        ForeignKey("conversations.id", ondelete="SET NULL"),
+    )
     executed_llm_model_id: Mapped[UUID] = mapped_column(
         PostgreSQLUUID(as_uuid=True),
         ForeignKey("llm_models.id", ondelete="RESTRICT"),

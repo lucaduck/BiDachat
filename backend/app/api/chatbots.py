@@ -70,10 +70,13 @@ async def list_available_documents(
 
 @router.get("/llm-models", response_model=list[LlmModelResponse])
 async def list_llm_models(
+    request: Request,
     _: Annotated[CurrentSession, Depends(get_current_session)],
     session: Annotated[AsyncSession, Depends(get_database_session)],
 ) -> list[LlmModelResponse]:
-    llm_models = await ChatbotService().list_llm_models(session)
+    llm_models = await ChatbotService(request.app.state.settings).list_llm_models(
+        session
+    )
     return [LlmModelResponse.model_validate(llm_model) for llm_model in llm_models]
 
 
@@ -93,11 +96,12 @@ async def list_chatbots(
 )
 async def create_chatbot(
     payload: ChatbotCreate,
+    request: Request,
     current_session: Annotated[CurrentSession, Depends(get_current_session)],
     session: Annotated[AsyncSession, Depends(get_database_session)],
 ) -> ChatbotResponse:
     try:
-        chatbot = await ChatbotService().create_chatbot(
+        chatbot = await ChatbotService(request.app.state.settings).create_chatbot(
             session,
             created_by=current_session.user.id,
             configured_llm_model_id=payload.configured_llm_model_id,
@@ -129,11 +133,12 @@ async def get_chatbot(
 async def update_chatbot(
     chatbot_id: UUID,
     payload: ChatbotUpdate,
+    request: Request,
     _: Annotated[CurrentSession, Depends(get_current_session)],
     session: Annotated[AsyncSession, Depends(get_database_session)],
 ) -> ChatbotResponse:
     try:
-        chatbot = await ChatbotService().update_chatbot(
+        chatbot = await ChatbotService(request.app.state.settings).update_chatbot(
             session,
             chatbot_id,
             configured_llm_model_id=payload.configured_llm_model_id,

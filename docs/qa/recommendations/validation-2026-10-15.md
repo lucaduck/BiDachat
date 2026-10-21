@@ -15,7 +15,7 @@ de `.next/dev/types/validator.ts` también aprobaron.
 | Ingestión y recuperación   | DOCX con tabla, CSV con alias MIME y separador `;`, TXT, PDF digital con tabla e imagen PNG llegaron a chunks recuperables; el documento compartido se recuperó solo mientras existió la asociación.                                                                                                                                                                                                                                                            | Las respuestas de embedding y descripción visual de este recorrido fueron simuladas; `wkhtmltopdf` generó el PDF sintético.                            |
 | Modelo local real          | PNG, JPEG y WebP con “VENTAS 42” se describieron con `qwen3-vl:2b-instruct`; `embeddinggemma:300m` generó vectores de 768 dimensiones; pgvector recuperó los tres. Prueba aprobada en 416,88 s.                                                                                                                                                                                                                                                                 | CPU local, una imagen simple por formato; no extrapolar calidad ni latencia al VPS.                                                                    |
 | Duración del modelo visual | El registro de Ollama muestra `/api/chat` de 2 min 21 s, 1 min 59 s y 2 min 1 s; `/api/embed` de aproximadamente 5 s por fuente.                                                                                                                                                                                                                                                                                                                                | Estas cifras corresponden a este equipo y a cargas secuenciales con `keep_alive: 0`. No son tiempos estándar del chatbot.                              |
-| Respaldo y restauración    | Un Compose temporal sembró un bot y un original; `backup-production.sh` produjo manifiesto y copia coordinada; `verify-production-backup.sh` restauró en un volumen aislado y comprobó tabla y archivo. Prueba aprobada.                                                                                                                                                                                                                                        | Falta ensayo sobre una copia del despliegue real y comprobar login y recuperación después del restore.                                                 |
+| Respaldo y restauración    | Un Compose temporal sembró dos bots, una fuente compartida, un chunk vectorial y su original; `backup-production.sh` produjo manifiesto y copia coordinada. `verify-production-backup.sh` restauró en un volumen aislado, comprobó integridad relacional, recuperación vectorial mediante la asociación y presencia del archivo, y eliminó contenedor y volumen temporales. Prueba repetida el 16 de octubre: aprobada.                                         | Falta ensayo sobre una copia del despliegue real y comprobar login después del restore.                                                                |
 | PDF digital                | La extracción con `pypdf` recuperó `PDF_TASA_BI` y `91 por ciento` de una tabla sencilla.                                                                                                                                                                                                                                                                                                                                                                       | El texto salió por celdas; no se demostró preservación de relaciones en tablas complejas. OCR no forma parte de esta aceptación.                       |
 | Compose de producción      | Configuración renderizada con cinco límites de CPU/RAM; solo Nginx publica `127.0.0.1:3000`. `nginx -t` aprobó.                                                                                                                                                                                                                                                                                                                                                 | No se ejecutó aún el stack completo detrás de Apache/TLS del VPS.                                                                                      |
 | Guardrail de fuentes       | El backend añade una instrucción de sistema común para tratar documentos, página e imagen como evidencia no confiable. La primera prueba real repitió una orden documental aunque dio el dato correcto; tras pedir que no la cite, ese caso pasó. Una orden en el contexto de página desvió la respuesta; tras omitir líneas evidentemente imperativas, la repetición pasó. Una imagen con un dato y una orden visible produjo el dato correcto sin obedecerla. | El filtro puede descartar texto legítimo y no detecta todas las órdenes. Una imagen y un modelo local no cubren otros ataques ni proveedores externos. |
@@ -107,3 +107,37 @@ DATABASE_URL=postgresql+psycopg://bidachat_test:local_test_only@127.0.0.1:49831/
 Los puertos anteriores fueron asignados temporalmente por Docker; cada nueva
 ejecución debe obtener sus propios puertos. Los contenedores de prueba se
 detienen al cerrar la comprobación.
+
+## Continuación del 16 de octubre de 2026
+
+El workflow de integración continua incluye ahora tres puertas separadas:
+
+- backend con PostgreSQL/pgvector aislado, migraciones, Ruff y Pytest;
+- frontend y widget con formato, ESLint, unitarias y build;
+- aceptación de navegador con Chromium, servidor Next.js administrado por
+  Playwright y respuestas API controladas, sin credenciales ni consumo de LLM.
+
+La suite de navegador ejecutó 38 recorridos. Treinta y siete aprobaron en la
+primera ejecución; el único fallo fue una ambigüedad del selector de prueba
+`Periodo`, que coincidía con nombres accesibles de dos gráficos. Se exigió la
+coincidencia exacta y el caso afectado aprobó al repetirse. No fue un defecto
+funcional de la aplicación.
+
+La restauración aislada se repitió después de ampliar el fixture con una fuente
+compartida y un vector de 768 dimensiones. El verificador confirmó que no hay
+asociaciones, chunks ni documentos huérfanos y ejecutó una búsqueda vectorial a
+través de `chatbot_documents`. La prueba aprobó y su limpieza se ejecutó en el
+bloque `finally` aun ante fallo.
+
+Las cuatro pruebas que consultan Ollama real se registraron con la marca Pytest
+`external`; el CI ejecuta expresamente `-m "not external"`. La colección confirmó
+111 pruebas deterministas para PR y cuatro casos reales optativos. Los contratos
+de proveedores permanecen en el conjunto determinista porque sustituyen el
+transporte HTTP. Los recorridos reales requieren variables explícitas, fixtures
+aislados, presupuesto cuando corresponda y limpieza final.
+
+La regresión conjunta cubrió navegación y renovación de sesión, editor, cambio de
+proveedor/modelo, asociación y retiro de fuentes, widget en origen externo,
+contexto visible, métricas, ambos temas, reflujo y zoom. El resultado combinado
+fue 38 de 38 recorridos aprobados después de corregir el selector ambiguo de la
+propia prueba.

@@ -1,6 +1,49 @@
 name: bidachat
 
 services:
+  litellm:
+    image: ghcr.io/berriai/litellm:v1.105.1@sha256:b7b9e2c306343721802253d0dd9436b9634a2eb4e14da7c7cf06c5c7b7530802
+    profiles: ["vertex"]
+    deploy:
+      resources:
+        limits:
+          cpus: ${LITELLM_CPUS:-1}
+          memory: ${LITELLM_MEMORY_LIMIT:-1g}
+    environment:
+      VERTEX_PROJECT: ${VERTEX_PROJECT:-}
+      VERTEX_LOCATION: ${VERTEX_LOCATION:-}
+      VERTEX_MODEL: ${VERTEX_MODEL:-}
+      VERTEX_MODELS: ${VERTEX_MODELS:-}
+      LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY:-}
+      LITELLM_CPUS: ${LITELLM_CPUS:-}
+      LITELLM_MEMORY_LIMIT: ${LITELLM_MEMORY_LIMIT:-}
+      GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/vertex-service-account.json
+      LITELLM_LOCAL_MODEL_COST_MAP: "True"
+      LITELLM_LOG: ERROR
+      DISABLE_ADMIN_UI: "True"
+    entrypoint: ["python", "/app/bidachat/start.py"]
+    volumes:
+      - ./docker/litellm:/app/bidachat:ro
+      - type: bind
+        source: ${VERTEX_CREDENTIALS_FILE:-./secrets/vertex-service-account.json}
+        target: /run/secrets/vertex-service-account.json
+        read_only: true
+        bind:
+          create_host_path: false
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:4000/health/liveliness', timeout=3)",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 45s
+    restart: unless-stopped
+
   ollama:
     image: ollama/ollama:0.35.0@sha256:2a6e883b917fc543389599dae79918f5cac9e1438890506982f44aa4f5625d01
     deploy:
@@ -46,6 +89,16 @@ services:
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
       OPENROUTER_MODEL: ${OPENROUTER_MODEL:-}
       OPENROUTER_SITE_URL: ${OPENROUTER_SITE_URL:-}
+      VERTEX_ENABLED: ${VERTEX_ENABLED:-false}
+      VERTEX_MODEL: ${VERTEX_MODEL:-}
+      VERTEX_MODELS: ${VERTEX_MODELS:-}
+      LITELLM_BASE_URL: http://litellm:4000
+      LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY:-}
+      CONVERSATION_TTL_HOURS: ${CONVERSATION_TTL_HOURS:-24}
+      CONVERSATION_MAX_TURNS: ${CONVERSATION_MAX_TURNS:-12}
+      CONVERSATION_MAX_CHARS: ${CONVERSATION_MAX_CHARS:-12000}
+      CONVERSATION_CLEANUP_INTERVAL_MINUTES: ${CONVERSATION_CLEANUP_INTERVAL_MINUTES:-60}
+      WIDGET_IDENTITY_MASTER_KEY: ${WIDGET_IDENTITY_MASTER_KEY:-}
       OLLAMA_CONTEXT_LENGTH: ${OLLAMA_CONTEXT_LENGTH:-2048}
       OLLAMA_TIMEOUT_SECONDS: ${OLLAMA_TIMEOUT_SECONDS:-600}
       OLLAMA_MODEL: ${OLLAMA_MODEL:-}
@@ -57,18 +110,32 @@ services:
       ADMIN_EMAIL: ${ADMIN_EMAIL:-}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
     depends_on:
+      litellm:
+        condition: service_healthy
+        required: false
       ollama:
         condition: service_healthy
       database:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health', timeout=3)"]
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health', timeout=3)",
+        ]
       interval: 10s
       timeout: 5s
       retries: 3
       start_period: 10s
     restart: unless-stopped
-    command: ["sh", "-c", "python -m app.bootstrap && exec uvicorn app.main:app --host 0.0.0.0 --port 8000 --proxy-headers --forwarded-allow-ips='*'"]
+    command:
+      [
+        "sh",
+        "-c",
+        "python -m app.bootstrap && exec uvicorn app.main:app --host 0.0.0.0 --port 8000 --proxy-headers --forwarded-allow-ips='*'",
+      ]
     volumes:
       - bidachat_document_storage:/app/storage/documents
 

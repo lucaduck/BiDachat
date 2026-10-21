@@ -28,6 +28,7 @@ def get_system_settings(
             and settings.openrouter_api_key.get_secret_value().strip()
         ),
         embedding_provider=settings.embedding_provider,
+        vertex_configured=settings.vertex_enabled,
         embedding_model=settings.embedding_model,
         embedding_dimensions=settings.embedding_dimensions,
         vision_provider=settings.vision_provider,

@@ -128,6 +128,13 @@ export function SettingsPanel({
           </div>
         </dl>
         <p className="field-hint">
+          Vertex AI:{" "}
+          {configuration.vertex_configured
+            ? "Configurado mediante LiteLLM"
+            : "Deshabilitado"}
+          .
+        </p>
+        <p className="field-hint">
           Una credencial configurada no confirma la disponibilidad del proveedor.
         </p>
         <h3>Modelos registrados</h3>
@@ -252,8 +259,8 @@ export function SettingsPanel({
           </ul>
         ) : (
           <p>
-            No hay orígenes externos autorizados. Puedes probar el widget desde esta
-            aplicación.
+            No hay orígenes autorizados. Configura los sitios permitidos y el origen de
+            este panel para habilitar el widget y su vista previa.
           </p>
         )}
       </section>

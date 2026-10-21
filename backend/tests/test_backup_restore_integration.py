@@ -1,6 +1,7 @@
 import os
 import shutil
 import subprocess
+import time
 from pathlib import Path
 from uuid import uuid4
 
@@ -16,14 +17,50 @@ def _run(
     environment: dict[str, str],
     input: str | None = None,
 ) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
-        command,
-        cwd=cwd,
-        env=environment,
-        input=input,
-        text=True,
-        capture_output=True,
-        check=True,
+    try:
+        return subprocess.run(
+            command,
+            cwd=cwd,
+            env=environment,
+            input=input,
+            text=True,
+            capture_output=True,
+            check=True,
+        )
+    except subprocess.CalledProcessError as error:
+        pytest.fail(
+            f"Command failed with exit code {error.returncode}: "
+            f"{' '.join(command)}\nstdout:\n{error.stdout}\nstderr:\n{error.stderr}"
+        )
+
+
+def _run_when_database_is_stable(
+    command: list[str],
+    *,
+    cwd: Path,
+    environment: dict[str, str],
+    input: str,
+) -> subprocess.CompletedProcess[str]:
+    last_error: subprocess.CalledProcessError | None = None
+    for _ in range(15):
+        try:
+            return subprocess.run(
+                command,
+                cwd=cwd,
+                env=environment,
+                input=input,
+                text=True,
+                capture_output=True,
+                check=True,
+            )
+        except subprocess.CalledProcessError as error:
+            last_error = error
+            if "Is the server running" not in error.stderr:
+                raise
+            time.sleep(1)
+    assert last_error is not None
+    pytest.fail(
+        f"PostgreSQL did not stabilize after initialization: {last_error.stderr}"
     )
 
 
@@ -72,7 +109,7 @@ def test_coordinated_backup_restores_records_and_originals(tmp_path: Path):
     compose = ["docker", "compose", "-f", "docker-compose.production.yml"]
     try:
         _run([*compose, "up", "-d", "--wait"], cwd=checkout, environment=environment)
-        _run(
+        _run_when_database_is_stable(
             [
                 *compose,
                 "exec",
@@ -98,12 +135,32 @@ def test_coordinated_backup_restores_records_and_originals(tmp_path: Path):
                 VALUES ('00000000-0000-0000-0000-000000000003',
                         '00000000-0000-0000-0000-000000000001',
                         '00000000-0000-0000-0000-000000000002', 'Fixture');
+                INSERT INTO chatbots (id, created_by, configured_llm_model_id, name)
+                VALUES ('00000000-0000-0000-0000-000000000005',
+                        '00000000-0000-0000-0000-000000000001',
+                        '00000000-0000-0000-0000-000000000002',
+                        'Fixture shared');
                 INSERT INTO documents
                     (id, chatbot_id, original_filename, storage_key,
-                     media_type, size_bytes)
+                     media_type, size_bytes, status, embedding_model,
+                     embedding_dimensions, processed_at)
                 VALUES ('00000000-0000-0000-0000-000000000004',
                         '00000000-0000-0000-0000-000000000003',
-                        'fixture.txt', 'documents/fixture.txt', 'text/plain', 7);
+                        'fixture.txt', 'documents/fixture.txt', 'text/plain', 7,
+                        'ready', 'fixture-embedding', 768, now());
+                INSERT INTO chatbot_documents (chatbot_id, document_id)
+                VALUES
+                    ('00000000-0000-0000-0000-000000000003',
+                     '00000000-0000-0000-0000-000000000004'),
+                    ('00000000-0000-0000-0000-000000000005',
+                     '00000000-0000-0000-0000-000000000004');
+                INSERT INTO document_chunks
+                    (id, document_id, chunk_index, content, embedding)
+                VALUES ('00000000-0000-0000-0000-000000000006',
+                        '00000000-0000-0000-0000-000000000004', 0,
+                        'RESTORE_RECOVERY_FIXTURE',
+                        array_prepend(1.0::real,
+                            array_fill(0.0::real, ARRAY[767]))::vector);
             """,
         )
         _run(

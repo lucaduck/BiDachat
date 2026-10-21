@@ -44,6 +44,7 @@ def test_settings_return_configuration_without_secrets():
         "gemini_configured",
         "openai_configured",
         "openrouter_configured",
+        "vertex_configured",
         "embedding_provider",
         "embedding_model",
         "embedding_dimensions",

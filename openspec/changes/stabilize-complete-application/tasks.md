@@ -8,11 +8,11 @@ resuelta. El alcance se explica en [proposal.md](proposal.md), el método en
 Dependencia: comienzo de ejecución autorizado. Salida: actualización compatible y
 evidencia de avisos cerrados o tratados, sin pérdida de los recorridos principales.
 
-- [ ] 1.1 Registrar versiones, lockfiles, imágenes, modelo/configuración no secreta y cambios preexistentes; conservar una referencia de reversión reproducible.
-- [ ] 1.2 Reconsultar avisos y compatibilidad oficiales de Next/React y dependencias transitivas; clasificar los cuatro paquetes señalados en producción según archivos incluidos y uso efectivo del proxy.
-- [ ] 1.3 Actualizar el lote de producción y lockfile sin actualización forzada indiscriminada; reconstruir Docker standalone y verificar login, editor, retorno de preview y snippet.
-- [ ] 1.4 Actualizar herramientas de desarrollo afectadas en un segundo lote y revisar dependencias Python con la herramienta disponible; registrar decisiones y avisos pendientes sin asumir equivalencia entre vulnerabilidad del paquete y explotación real.
-- [ ] 1.5 Ejecutar lint, tipos, formato, pruebas afectadas, build y auditorías repetidas; impedir cierre de publicación con avisos críticos/altos aplicables sin tratamiento.
+- [x] 1.1 Registrar versiones, lockfiles, imágenes, modelo/configuración no secreta y cambios preexistentes; conservar una referencia de reversión reproducible.
+- [x] 1.2 Reconsultar avisos y compatibilidad oficiales de Next/React y dependencias transitivas; clasificar los cuatro paquetes señalados en producción según archivos incluidos y uso efectivo del proxy.
+- [x] 1.3 Actualizar el lote de producción y lockfile sin actualización forzada indiscriminada; reconstruir Docker standalone y verificar login, editor, retorno de preview y snippet.
+- [x] 1.4 Actualizar herramientas de desarrollo afectadas en un segundo lote y revisar dependencias Python con la herramienta disponible; registrar decisiones y avisos pendientes sin asumir equivalencia entre vulnerabilidad del paquete y explotación real.
+- [x] 1.5 Ejecutar lint, tipos, formato, pruebas afectadas, build y auditorías repetidas; impedir cierre de publicación con avisos críticos/altos aplicables sin tratamiento.
 
 ## 2. Inferencia local y errores — prioridad alta
 
@@ -56,9 +56,9 @@ comparables y resolución de fallos concretos; sin umbrales arbitrarios de rendi
 Dependencia: cada bloque corregido aporta regresiones; cierre con versión integrada.
 Salida: puertas de calidad reproducibles y comprobaciones humanas registradas.
 
-- [ ] 5.1 Integrar lint, formato, tipos, unidades, backend crítico y build en CI del repositorio; usar PostgreSQL/pgvector aislado y un job de navegador con respuestas controladas.
-- [ ] 5.2 Separar llamadas externas/LLM reales de las verificaciones de cada PR; proteger secretos y artefactos, fijar precondiciones y limpieza del recorrido real.
-- [ ] 5.3 Ejecutar regresión integrada de navegación/sesión, editor, asociación de fuentes, widget externo y métricas; revisar capturas de los tamaños/temas afectados por las actualizaciones.
+- [x] 5.1 Integrar lint, formato, tipos, unidades, backend crítico y build en CI del repositorio; usar PostgreSQL/pgvector aislado y un job de navegador con respuestas controladas.
+- [x] 5.2 Separar llamadas externas/LLM reales de las verificaciones de cada PR; proteger secretos y artefactos, fijar precondiciones y limpieza del recorrido real.
+- [x] 5.3 Ejecutar regresión integrada de navegación/sesión, editor, asociación de fuentes, widget externo y métricas; revisar capturas de los tamaños/temas afectados por las actualizaciones.
 - [ ] 5.4 Registrar escucha con lector de pantalla y zoom nativo 200 % en acceso, editor, publicación y widget; corregir hallazgos comprobados y repetir solo recorridos afectados.
 - [ ] 5.5 Registrar cancelación humana del selector nativo de captura y conservación de pregunta/adjunto previo; mantener la confirmación anterior de captura adjunta como evidencia válida.
 - [ ] 5.6 Actualizar tareas 6.5, 7.2, 7.3 y 7.7 de professionalize-frontend-experience solo cuando la evidencia correspondiente exista; generar matriz RF/RNF/RS/CA con resultados y límites actuales.
@@ -68,8 +68,8 @@ Salida: puertas de calidad reproducibles y comprobaciones humanas registradas.
 Dependencia: bloques locales cerrados. El destino TLS requiere dominio/plataforma
 y acceso autorizados; estos pendientes no impiden entregar los bloques locales.
 
-- [ ] 6.1 Revisar persistencia/revocación de sesión, acceso administrativo, límites de consultas y errores seguros; documentar hallazgos concretos y tratar defectos demostrados sin decidir una migración de autenticación por defecto.
-- [ ] 6.2 Crear respaldo de base y documentos de QA y restaurar en volúmenes temporales aislados; verificar fuentes, asociaciones, recuperación y limpieza sin operar sobre datos del usuario.
+- [x] 6.1 Revisar persistencia/revocación de sesión, acceso administrativo, límites de consultas y errores seguros; documentar hallazgos concretos y tratar defectos demostrados sin decidir una migración de autenticación por defecto.
+- [x] 6.2 Crear respaldo de base y documentos de QA y restaurar en volúmenes temporales aislados; verificar fuentes, asociaciones, recuperación y limpieza sin operar sobre datos del usuario.
 - [ ] 6.3 Documentar destino de publicación y configurar/verificar HTTPS/TLS en el mecanismo autorizado; comprobar panel, API y widget externo sin contenido activo mixto y con orígenes correctos.
 - [ ] 6.4 Reconstruir la versión final reproducible y ejecutar acceso → crear/configurar → cargar/procesar → recuperar → conversar con imagen → integrar externamente → consultar métricas; probar reversión de imagen/configuración en el entorno aislado.
 - [ ] 6.5 Publicar informe de cierre con versiones, avisos tratados, pruebas, mediciones y pendientes; distinguir «verificado localmente» de «aceptado para publicación» y no declarar 100 % sin criterio/evidencia.

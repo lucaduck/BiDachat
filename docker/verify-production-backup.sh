@@ -47,7 +47,10 @@ docker run -d --name "$container" \
 ready=false
 attempt=0
 while [ "$attempt" -lt 30 ]; do
-    if docker exec "$container" pg_isready -U verify -d verify > /dev/null 2>&1; then
+    ready_events=$(docker logs "$container" 2>&1 |
+        grep -c 'database system is ready to accept connections' || true)
+    if [ "$ready_events" -ge 2 ] &&
+        docker exec "$container" pg_isready -U verify -d verify > /dev/null 2>&1; then
         ready=true
         break
     fi
@@ -68,6 +71,44 @@ for table in users chatbots documents document_chunks chatbot_documents queries;
         -c "SELECT count(*) FROM $table" > /dev/null
 done
 
+orphan_associations=$(docker exec "$container" psql -X -qAt -U verify -d verify \
+    -c 'SELECT count(*) FROM chatbot_documents cd
+        LEFT JOIN chatbots c ON c.id = cd.chatbot_id
+        LEFT JOIN documents d ON d.id = cd.document_id
+        WHERE c.id IS NULL OR d.id IS NULL')
+orphan_chunks=$(docker exec "$container" psql -X -qAt -U verify -d verify \
+    -c 'SELECT count(*) FROM document_chunks dc
+        LEFT JOIN documents d ON d.id = dc.document_id
+        WHERE d.id IS NULL')
+unassociated_documents=$(docker exec "$container" psql -X -qAt -U verify -d verify \
+    -c 'SELECT count(*) FROM documents d
+        LEFT JOIN chatbot_documents cd ON cd.document_id = d.id
+        WHERE cd.document_id IS NULL')
+if [ "$orphan_associations" -ne 0 ] || [ "$orphan_chunks" -ne 0 ] || \
+    [ "$unassociated_documents" -ne 0 ]; then
+    printf 'Restored source relationships are inconsistent.\n' >&2
+    exit 1
+fi
+
+chunk_count=$(docker exec "$container" psql -X -qAt -U verify -d verify \
+    -c 'SELECT count(*) FROM document_chunks')
+if [ "$chunk_count" -gt 0 ]; then
+    recovered_content=$(docker exec "$container" psql -X -qAt -U verify -d verify \
+        -c 'WITH target AS (
+                SELECT embedding FROM document_chunks ORDER BY id LIMIT 1
+            )
+            SELECT dc.content
+            FROM document_chunks dc
+            JOIN chatbot_documents cd ON cd.document_id = dc.document_id
+            CROSS JOIN target
+            ORDER BY dc.embedding <=> target.embedding
+            LIMIT 1')
+    if [ -z "$recovered_content" ]; then
+        printf 'Restored vectors are not recoverable through chatbot associations.\n' >&2
+        exit 1
+    fi
+fi
+
 docker exec "$container" psql -X -qAt -U verify -d verify \
     -c 'SELECT storage_key FROM documents ORDER BY storage_key' |
 while IFS= read -r storage_key; do
@@ -79,4 +120,4 @@ while IFS= read -r storage_key; do
     fi
 done
 
-printf 'Isolated restore passed: database schema, records and document originals.\n'
+printf 'Isolated restore passed: records, source associations, vector recovery and document originals.\n'

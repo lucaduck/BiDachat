@@ -17,6 +17,11 @@
   const IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp"];
   const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
   const MAX_PAGE_CONTEXT_CHARACTERS = 6000;
+  const conversationStorageKey = `bidachat-conversation:${window.location.origin}:${chatbotId}`;
+  const activityStorageKey = `${conversationStorageKey}:activity`;
+  const identityStorageKey = `${conversationStorageKey}:identity`;
+  const idleMinutes = Number(script.dataset.idleMinutes || 30);
+  const idleMilliseconds = (Number.isInteger(idleMinutes) && idleMinutes >= 1 && idleMinutes <= 1440 ? idleMinutes : 30) * 60000;
   const symbols = {
     bot: '<rect x="5" y="7" width="14" height="12" rx="3"/><path d="M12 4v3M9 12h.01M15 12h.01M9 16h6"/>',
     chat: '<path d="M4 5h16v12H8l-4 3V5Z"/><path d="M8 9h8M8 13h5"/>',
@@ -28,9 +33,17 @@
     attach: '<path d="m8 12.5 5.7-5.7a3 3 0 0 1 4.2 4.2l-7.8 7.8a5 5 0 0 1-7.1-7.1l8-8"/>',
     capture: '<path d="M4 7h3l1.5-2h7L17 7h3v12H4V7Z"/><circle cx="12" cy="13" r="3"/>',
     send: '<path d="m3 20 18-8L3 4l2.5 8L3 20Z"/><path d="M5.5 12H21"/>',
+    reset: '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>',
   };
   const svg = (name) => `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${symbols[name]}</svg>`;
   const visualPreview = script.dataset.preview === "true";
+  let conversationId = readConversationId();
+  const savedActivity = Number(readStoredValue(activityStorageKey));
+  let lastActivity = Number.isFinite(savedActivity) && savedActivity > 0 ? savedActivity : Date.now();
+  let identitySubject = readStoredValue(identityStorageKey);
+  let idleTimer;
+  let identityGeneration = 0;
+  let activeRequest = null;
   const host = document.createElement("bidachat-widget");
   host.dataset.chatbotId = chatbotId;
   host.dataset.theme = script.dataset.theme === "dark" ? "dark" : "light";
@@ -64,6 +77,10 @@
       .identity small { display: block; margin-top: 2px; color: var(--w-muted); font-size: 11px; }
       .close { display: grid; place-items: center; width: 32px; height: 32px; flex: none; border: 0; border-radius: 8px; background: transparent; color: var(--w-muted); }
       .close:hover { background: var(--w-canvas); color: var(--w-text); }
+      .header-actions { display:flex; align-items:center; gap:4px; }
+      .new-conversation { display:grid; place-items:center; width:32px; height:32px; flex:none; border:0; border-radius:8px; background:transparent; color:var(--w-muted); }
+      .new-conversation:hover { background:var(--w-canvas); color:var(--w-text); }
+      .new-conversation:disabled { cursor:not-allowed; opacity:.5; }
       .messages { display: flex; flex: 1; flex-direction: column; gap: 12px; min-height: 0; overflow-y: auto; padding: 18px 16px; background: var(--w-canvas); scrollbar-color: #c7d9e2 transparent; scrollbar-width: thin; }
       .message-row { display: flex; align-items: flex-start; gap: 8px; max-width: 100%; }
       .message-row-user { justify-content: flex-end; }
@@ -118,7 +135,7 @@
     <section class="panel" id="bidachat-panel" role="dialog" aria-label="Asistente BIDACHAT" hidden>
       <header class="header">
         <div class="identity"><span class="avatar">${svg(icon)}</span><span class="identity-copy"><strong></strong><small>Asistente del dashboard</small></span></div>
-        <button class="close" type="button" aria-label="Cerrar asistente" title="Cerrar asistente">${svg("close")}</button>
+        <div class="header-actions"><button class="new-conversation" type="button" aria-label="Nueva conversación" title="Nueva conversación">${svg("reset")}</button><button class="close" type="button" aria-label="Cerrar asistente" title="Cerrar asistente">${svg("close")}</button></div>
       </header>
       <div class="messages" role="log" aria-label="Conversación" aria-live="polite" tabindex="0"></div>
       <div class="footer">
@@ -145,30 +162,133 @@
   const fileInput = shadow.querySelector(".file-input");
   const preview = shadow.querySelector(".attachment-preview");
   const status = shadow.querySelector(".status");
+  const newConversationButton = shadow.querySelector(".new-conversation");
   let attachment = null;
   let attachmentUrl = null;
   let sending = false;
   shadow.querySelector(".identity strong").textContent = title;
   launcher.querySelector("span").textContent = title;
 
-  function setOpen(open) {
+  async function setOpen(open) {
+    if (open) {
+      const generation = identityGeneration;
+      resetIfIdle();
+      if (script.dataset.identityEndpoint) {
+        try {
+          await fetchIdentityToken(generation);
+        } catch {
+          if (generation !== identityGeneration) return;
+          resetConversation("No se pudo verificar la sesión del sitio.", true);
+        }
+      }
+      if (generation !== identityGeneration) return;
+      recordActivity();
+    }
     panel.hidden = !open;
     launcher.hidden = open;
     launcher.setAttribute("aria-expanded", String(open));
     (open ? questionInput : launcher).focus();
   }
 
-  async function sendQuery(payload) {
+  function readStoredValue(key) {
+    try { return window.sessionStorage.getItem(key); } catch { return null; }
+  }
+
+  function writeStoredValue(key, value) {
+    try {
+      if (value == null) window.sessionStorage.removeItem(key);
+      else window.sessionStorage.setItem(key, value);
+    } catch { /* The active tab still keeps its state in memory. */ }
+  }
+
+  function resetConversation(message, preserveDraft = false) {
+    conversationId = typeof crypto.randomUUID === "function" ? crypto.randomUUID() : null;
+    writeStoredValue(conversationStorageKey, conversationId);
+    messages.replaceChildren();
+    addMessage(welcome, "assistant");
+    if (!preserveDraft) {
+      questionInput.value = "";
+      clearAttachment();
+    }
+    setStatus(message);
+  }
+
+  function resetIfIdle() {
+    if (!sending && Date.now() - lastActivity >= idleMilliseconds) {
+      resetConversation("La conversación se reinició por inactividad.", true);
+      lastActivity = Date.now();
+      writeStoredValue(activityStorageKey, String(lastActivity));
+    }
+  }
+
+  function recordActivity() {
+    resetIfIdle();
+    lastActivity = Date.now();
+    writeStoredValue(activityStorageKey, String(lastActivity));
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => {
+      if (!sending) resetIfIdle();
+      else recordActivity();
+    }, idleMilliseconds);
+  }
+
+  async function fetchIdentityToken(generation) {
+    const configuredEndpoint = script.dataset.identityEndpoint;
+    if (!configuredEndpoint) return null;
+    const endpoint = new URL(configuredEndpoint, window.location.href);
+    if (endpoint.origin !== window.location.origin || !["http:", "https:"].includes(endpoint.protocol)) {
+      throw new Error("No se pudo verificar la sesión del sitio.");
+    }
+    const response = await fetch(endpoint.href, { credentials: "same-origin", cache: "no-store", redirect: "error" });
+    if (!response.ok) throw new Error("No se pudo verificar la sesión del sitio.");
+    const data = await response.json();
+    if (generation !== identityGeneration) throw new Error("La sesión del sitio cambió.");
+    const match = typeof data.token === "string" && /^v1\.([0-9a-f]{64})\.[0-9]{10,12}\.[A-Za-z0-9_-]{43}$/.exec(data.token);
+    if (!match) throw new Error("No se pudo verificar la sesión del sitio.");
+    if (identitySubject !== match[1]) {
+      resetConversation("Se inició una conversación para la sesión actual.", true);
+      identitySubject = match[1];
+      writeStoredValue(identityStorageKey, identitySubject);
+    }
+    return data.token;
+  }
+
+  async function sendQuery(payload, signal) {
     const response = await fetch(`${apiBase.replace(/\/$/, "")}/chatbots/${chatbotId}/queries`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
+      signal,
     });
     if (!response.ok) {
       const failure = await response.json().catch(() => null);
       throw new Error(typeof failure?.detail === "string" ? failure.detail : `Error ${response.status}`);
     }
     return response.json();
+  }
+
+  function readConversationId() {
+    try {
+      const existing = window.sessionStorage.getItem(conversationStorageKey);
+      if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(existing || "")) return existing;
+      const created = typeof crypto.randomUUID === "function" ? crypto.randomUUID() : null;
+      if (created) window.sessionStorage.setItem(conversationStorageKey, created);
+      return created;
+    } catch {
+      return typeof crypto.randomUUID === "function" ? crypto.randomUUID() : null;
+    }
+  }
+
+  function storeConversationId(id) {
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id || "")) return false;
+    const changed = id !== conversationId;
+    conversationId = id;
+    try {
+      window.sessionStorage.setItem(conversationStorageKey, id);
+    } catch {
+      // The current page can still use the in-memory conversation identifier.
+    }
+    return changed;
   }
 
   function collectPageContext() {
@@ -387,6 +507,22 @@
 
   shadow.querySelector(".close").addEventListener("click", () => setOpen(false));
   launcher.addEventListener("click", () => setOpen(true));
+  window.addEventListener("bidachat:identity-changed", () => {
+    if (!script.dataset.identityEndpoint) return;
+    identityGeneration += 1;
+    activeRequest?.abort();
+    identitySubject = null;
+    writeStoredValue(identityStorageKey, null);
+    resetConversation("La sesión del sitio cambió. Abre el asistente para continuar.");
+    setOpen(false);
+  });
+  newConversationButton.addEventListener("click", () => {
+    if (sending || visualPreview) return;
+    resetConversation("Se inició una nueva conversación.");
+    recordActivity();
+    questionInput.focus();
+  });
+  questionInput.addEventListener("input", recordActivity);
   shadow.querySelector(".attach").addEventListener("click", () => fileInput.click());
   shadow.querySelector(".capture").addEventListener("click", captureScreen);
   shadow.querySelector(".remove-attachment").addEventListener("click", clearAttachment);
@@ -410,10 +546,12 @@
     event.preventDefault();
     const question = questionInput.value.trim();
     if (!question || sending || visualPreview) return;
+    resetIfIdle();
     const image = attachment;
-    const submittedMessage = addMessage(question, "user", image);
-    questionInput.value = "";
+    const generation = identityGeneration;
+    let submittedMessage = null;
     sending = true;
+    newConversationButton.disabled = true;
     panel.setAttribute("aria-busy", "true");
     shadow.querySelector(".remove-attachment").disabled = true;
     for (const control of form.elements) control.disabled = true;
@@ -423,28 +561,45 @@
     feedback.className = "feedback";
     feedback.setAttribute("role", "status");
     feedback.textContent = "Procesando consulta…";
-    messages.appendChild(feedback);
-    messages.scrollTop = messages.scrollHeight;
     try {
-      const payload = { question };
+      const identityToken = await fetchIdentityToken(generation);
+      if (generation !== identityGeneration) return;
+      submittedMessage = addMessage(question, "user", image);
+      questionInput.value = "";
+      messages.appendChild(feedback);
+      messages.scrollTop = messages.scrollHeight;
+      const payload = { question, conversation_id: conversationId };
+      if (identityToken) payload.identity_token = identityToken;
       const pageContext = collectPageContext();
       if (pageContext) payload.page_context = pageContext;
       if (image) {
         payload.image_base64 = await readImage(image);
         payload.image_mime_type = image.type;
       }
-      const result = await sendQuery(payload);
+      if (generation !== identityGeneration) return;
+      activeRequest = new AbortController();
+      const result = await sendQuery(payload, activeRequest.signal);
+      if (generation !== identityGeneration) return;
       feedback.remove();
       addMessage(result.answer, "assistant");
+      if (storeConversationId(result.conversation_id)) {
+        setStatus("La conversación anterior venció. Se inició una nueva conversación.");
+      }
       if (attachment === image) clearAttachment();
+      recordActivity();
     } catch (error) {
-      submittedMessage.remove();
-      feedback.classList.add("feedback-error");
+      if (generation !== identityGeneration) return;
+      submittedMessage?.remove();
       const message = error instanceof TypeError || error instanceof SyntaxError ? "Revisa la conexión y que este sitio esté autorizado para usar el chatbot." : error instanceof Error ? error.message : "Inténtalo nuevamente.";
-      feedback.textContent = `No se pudo obtener una respuesta. ${message}`;
+      if (feedback.isConnected) {
+        feedback.classList.add("feedback-error");
+        feedback.textContent = `No se pudo obtener una respuesta. ${message}`;
+      } else setStatus(message);
       questionInput.value = question;
     } finally {
+      activeRequest = null;
       sending = false;
+      newConversationButton.disabled = false;
       panel.removeAttribute("aria-busy");
       shadow.querySelector(".remove-attachment").disabled = false;
       for (const control of form.elements) control.disabled = false;
@@ -454,7 +609,9 @@
   });
 
   addMessage(welcome, "assistant");
-  if (visualPreview) { panel.hidden=false; launcher.hidden=true; for (const control of form.elements) control.disabled=true; fileInput.disabled=true; shadow.querySelector(".hint").textContent="Vista de apariencia · La conversación se prueba en Publicación."; }
+  resetIfIdle();
+  recordActivity();
+  if (visualPreview) { panel.hidden=false; launcher.hidden=true; for (const control of form.elements) control.disabled=true; fileInput.disabled=true; newConversationButton.disabled=true; shadow.querySelector(".hint").textContent="Vista de apariencia · La conversación se prueba en Publicación."; }
   if (document.body) document.body.appendChild(host);
   else document.addEventListener("DOMContentLoaded", () => document.body.appendChild(host), { once: true });
 })();

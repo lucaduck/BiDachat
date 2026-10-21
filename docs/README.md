@@ -10,6 +10,8 @@ El [README principal](../README.md) permite arrancar el proyecto. Aquí se agrup
 ## Realizar una tarea
 
 - [Configurar Ollama en Docker](local-ollama.md).
+- [Configurar Vertex AI mediante LiteLLM en Docker](vertex-ai.md).
+- [Operar la memoria conversacional y el contexto de página](conversation-memory.md).
 - [Preparar y desplegar con GitHub Actions](deployment/github-actions.md).
 - [Respaldar y comprobar la restauración](deployment/backups.md).
 - [Configurar el proxy inverso](deployment/reverse-proxy.md).
@@ -29,7 +31,8 @@ El [README principal](../README.md) permite arrancar el proyecto. Aquí se agrup
 
 ## Comprender las decisiones
 
-- [Arquitectura y límites entre componentes](architecture.md).
+- [Arquitectura y límites entre componentes](architecture.md): diagramas C4
+  versionados con Mermaid.
 - [Diseño de datos y justificación histórica](database-design.md). Para el esquema aplicado, consultar las [migraciones](../database/migrations/).
 - [Decisión sobre documentación y repositorio](documentation-decision.md).
 - [Plan crítico de recomendaciones de tesis](recommendations-review-plan.md).

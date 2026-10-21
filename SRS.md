@@ -132,13 +132,23 @@ Esta normalización deberá reflejarse posteriormente en la fuente de Notion si 
 | **RF-05** | El sistema deberá permitir consultar los chatbots registrados. |
 | **RF-06** | El sistema deberá permitir editar la configuración de un chatbot. |
 | **RF-07** | El sistema deberá permitir eliminar un chatbot. |
-| **RF-08** | El sistema deberá permitir seleccionar, para cada chatbot, el proveedor y modelo de lenguaje que utilizará, incluyendo proveedor externo u Ollama local entre las combinaciones admitidas. |
+| **RF-08** | El sistema deberá permitir seleccionar, para cada chatbot, el proveedor y modelo de lenguaje que utilizará, incluyendo proveedor externo u Ollama local entre las combinaciones admitidas. Cuando Vertex AI esté habilitado, el catálogo podrá contener varios identificadores de modelo comprobados y uno de ellos será el valor predeterminado. |
 | **RF-09** | El sistema deberá permitir asociar y quitar fuentes de conocimiento de cada chatbot sin eliminar los archivos compartidos. Una fuente quitada dejará de recuperarse en las consultas de ese chatbot. |
 | **RF-10** | El sistema deberá generar el mecanismo de integración necesario para incorporar un chatbot en un dashboard. |
 | **RF-11** | El sistema deberá permitir definir instrucciones de comportamiento, rol, tono y reglas de respuesta del chatbot. |
 | **RF-12** | El chatbot deberá poder recibir y procesar imágenes o capturas de pantalla proporcionadas por el usuario final, incluida una imagen pegada en el campo de pregunta desde el portapapeles, para responder consultas relacionadas con lo que observa en pantalla. |
 
 ## 5.3 Procesamiento documental y RAG
+
+Ampliación aprobada de RF-08, RF-12 y RF-21: se admite Vertex AI mediante
+LiteLLM alojado en la red privada Docker. El administrador selecciona un modelo
+explícito habilitado; las consultas conservan el modelo ejecutado aunque cambie
+la configuración posterior. Un modelo retirado no puede seleccionarse ni se
+sustituye silenciosamente. Vertex también puede configurarse explícitamente como
+perfil visual global de RF-13. Su activación no modifica el perfil de embeddings.
+El gateway usa credenciales privadas, no publica puertos y puede deshabilitarse.
+RNF-15 permite la autenticación Google necesaria para esta integración de IA;
+los datos persistentes y el backend permanecen en infraestructura propia.
 
 | ID | Requisito |
 |---|---|
@@ -158,6 +168,7 @@ Esta normalización deberá reflejarse posteriormente en la fuente de Notion si 
 | **RF-21** | El sistema deberá enviar el contexto obtenido al modelo de lenguaje configurado para el chatbot. |
 | **RF-22** | El sistema deberá devolver al usuario la respuesta generada mediante la interfaz conversacional. |
 | **RF-23** | El chatbot deberá poder ser utilizado desde el mecanismo de integración definido para el dashboard correspondiente. |
+| **RF-32** | El sistema deberá mantener, durante una sesión anónima acotada, los turnos recientes de cada conversación para que el chatbot pueda responder preguntas de seguimiento sin pedir nuevamente información ya proporcionada. La memoria deberá aislarse por chatbot y origen, expirar y excluir imágenes. |
 
 ## 5.5 Métricas de uso
 
@@ -176,6 +187,10 @@ Esta normalización deberá reflejarse posteriormente en la fuente de Notion si 
 | **RF-29** | El investigador deberá poder revisar una vista previa del widget antes de copiar el mecanismo de integración. |
 | **RF-30** | El widget deberá presentar las respuestas del asistente con párrafos, listas y énfasis legibles, sin mostrar los marcadores de formato como texto literal ni ejecutar contenido HTML recibido del modelo. |
 | **RF-31** | El widget integrado podrá enviar con cada consulta el texto visible de una región de la página anfitriona indicada en el código de integración, para que el chatbot responda con el contexto actual del dashboard sin rastrear otras páginas. |
+| **RF-33** | La página de prueba del chatbot deberá enviar en cada consulta únicamente el contexto visible del tablero de demostración, usando el mismo mecanismo del widget integrado y excluyendo navegación, introducción y conversación. |
+| **RF-34** | El widget deberá permitir iniciar una nueva conversación y reiniciarla después de un periodo configurable de inactividad, conservando el aislamiento entre chatbot y origen. |
+| **RF-35** | El widget podrá recibir una identidad anónima firmada por el servidor del sitio anfitrión. Cuando se utilice, el backend deberá verificar su vigencia y vincular la memoria únicamente a esa identidad, chatbot y origen; una credencial inválida no podrá recuperar memoria ni usar un modo anónimo de respaldo. |
+| **RF-36** | El sistema deberá ejecutar periódicamente la eliminación de conversaciones vencidas y sus mensajes, sin eliminar consultas ni métricas históricas. |
 
 ---
 
@@ -216,6 +231,7 @@ Esta normalización deberá reflejarse posteriormente en la fuente de Notion si 
 | **RS-07** | El sistema deberá mantener aislamiento entre chatbots, de modo que una consulta solo pueda recuperar documentos, configuraciones y contexto asociados al chatbot correspondiente. |
 | **RS-08** | Los endpoints públicos utilizados por los chatbots deberán incorporar mecanismos para limitar el uso abusivo o excesivo de solicitudes. |
 | **RS-09** | Los errores enviados al cliente no deberán revelar claves, credenciales, cadenas de conexión, trazas internas ni información sensible de la infraestructura. |
+| **RS-10** | Antes de procesar una consulta pública, la API deberá exigir un único origen incluido explícitamente en `WIDGET_ALLOWED_ORIGINS`, incluido el del panel para la vista previa. Orígenes ausentes, `null`, múltiples o no autorizados serán rechazados antes del acceso a datos y al proveedor. Esta restricción complementa CORS y no constituye autenticación del visitante. |
 
 ---
 
@@ -399,13 +415,14 @@ Los siguientes casos de uso agrupan los requisitos funcionales en flujos compren
 2. Escribe una pregunta en lenguaje natural.
 3. El sistema identifica el chatbot y su configuración.
 4. El sistema recupera contexto de las fuentes de conocimiento correspondientes.
-5. Si el sitio anfitrión configuró una región de contexto, el widget añade el texto visible actual de esa región; el sistema lo trata como datos no confiables y construye el contexto para el modelo de lenguaje.
-6. El sistema envía la información al modelo configurado.
-7. El modelo genera una respuesta.
-8. El sistema muestra la respuesta al usuario.
-9. El sistema registra la consulta y su tiempo de respuesta.
+5. El sistema recupera los turnos recientes de la conversación anónima que correspondan al mismo chatbot y origen.
+6. Si el sitio anfitrión configuró una región de contexto, el widget añade el texto visible actual de esa región; el sistema lo trata como datos no confiables y construye el contexto para el modelo de lenguaje.
+7. El sistema envía la información al modelo configurado.
+8. El modelo genera una respuesta.
+9. El sistema muestra la respuesta al usuario.
+10. El sistema registra la consulta, su tiempo de respuesta y los turnos textuales completados.
 
-**Requisitos relacionados:** `RF-16`, `RF-18`, `RF-20`, `RF-21`, `RF-22`, `RF-24`, `RF-25`, `RF-26`, `RF-31`, `RNF-06`, `RNF-07`, `RNF-08`, `RNF-09`.
+**Requisitos relacionados:** `RF-16`, `RF-18`, `RF-20`, `RF-21`, `RF-22`, `RF-24`, `RF-25`, `RF-26`, `RF-31`, `RF-32`, `RF-33`, `RNF-01`, `RNF-04`, `RNF-05`, `RNF-06`, `RNF-07`, `RNF-08`, `RNF-09`, `RS-04`, `RS-07`, `RS-09`.
 
 ### Criterios de aceptación
 
@@ -416,6 +433,12 @@ Los siguientes casos de uso agrupan los requisitos funcionales en flujos compren
 - **CA-UC06-05:** Después de procesar la consulta, entonces el sistema registra la consulta y el tiempo de respuesta asociados al chatbot.
 - **CA-UC06-06:** Cuando la respuesta incluye listas o énfasis, el widget los presenta con formato legible en ambos temas; el contenido HTML del modelo se muestra como texto y no se ejecuta.
 - **CA-UC06-07:** Cuando el script declara una región de contexto, cada pregunta incluye hasta 6000 caracteres de texto visible actualizado de esa región, sin HTML, formularios ni contenido marcado para excluir; el backend lo distingue del contexto RAG. Si la región no existe o el selector es inválido, la consulta continúa sin contexto de página.
+- **CA-UC06-08:** Dada una conversación vigente, cuando el usuario proporciona un dato y después formula una pregunta de seguimiento desde el mismo chatbot y origen, entonces el modelo recibe los turnos textuales recientes dentro de los límites configurados; otro chatbot u origen no puede recuperar esa memoria.
+- **CA-UC06-09:** Cuando una conversación vence o su identificador no corresponde al chatbot y origen, entonces el backend crea una conversación nueva sin exponer el historial anterior; las consultas y métricas históricas se conservan.
+- **CA-UC06-10:** En la página de prueba, cada consulta contiene el texto visible actualizado del tablero de demostración y no contiene el encabezado, la navegación ni los mensajes del widget.
+- **CA-UC06-11:** Al iniciar una nueva conversación o vencer el periodo de inactividad del widget, el siguiente mensaje no incorpora turnos de la conversación anterior.
+- **CA-UC06-12:** Una identidad firmada vigente solo recupera memoria de su propia identidad, chatbot y origen; una credencial modificada, vencida o no disponible es rechazada.
+- **CA-UC06-13:** La limpieza periódica elimina conversaciones vencidas y conserva consultas y métricas históricas.
 
 ## UC-07 — Realizar una consulta multimodal con imagen
 
@@ -492,7 +515,7 @@ Los siguientes casos de uso agrupan los requisitos funcionales en flujos compren
 | **UC-03** Configurar chatbot | RF-08, RF-09, RF-11 |
 | **UC-04** Gestionar documentos y RAG | RF-13, RF-14, RF-15, RF-16, RF-17 |
 | **UC-05** Integrar chatbot | RF-10, RF-23 |
-| **UC-06** Consulta conversacional | RF-16, RF-18, RF-20, RF-21, RF-22, RF-24, RF-25, RF-26, RF-31 |
+| **UC-06** Consulta conversacional | RF-16, RF-18, RF-20, RF-21, RF-22, RF-24, RF-25, RF-26, RF-31, RF-32, RF-33 |
 | **UC-07** Consulta multimodal | RF-12, RF-16, RF-18, RF-19, RF-20, RF-21, RF-22, RF-24, RF-25 |
 | **UC-08** Consultar métricas | RF-24, RF-25, RF-26, RF-27 |
 
@@ -594,4 +617,8 @@ acceso funcional para crear chatbots; los valores de la maqueta no son datos del
 
 **Identidad por tema — 6 de octubre de 2026:** El panel usa «Logotipo BC de Circuitos Tecnológicos.png» en modo claro y «Logotipo BC de Circuito Futurista.png» en modo oscuro, incluidos sus usos en la marca BIDACHAT y el bloque BI-DATA. El lema «Datos que conversan» conserva el estilo manuscrito, inclinado, de dos líneas y con subrayado turquesa de la referencia aportada.
 
-**Identidad del acceso — 7 de octubre de 2026:** La pantalla de inicio de sesión cambia el logo con el tema. En modo oscuro utiliza `docs/brand/logotipo-autenticacion-blanco.png`; en modo claro conserva su variante para fondo claro.
+**Identidad del acceso — 7 de octubre de 2026 (sustituida por el criterio del 21 de octubre):** La pantalla de inicio de sesión cambia el logo con el tema. En modo oscuro utiliza `docs/brand/logotipo-autenticacion-blanco.png`; en modo claro conserva su variante para fondo claro.
+
+### Logo de autenticación — 21 de octubre de 2026
+
+- El inicio de sesión utiliza `/brand/login-logo-dark.png` en modo claro y oscuro, conservando las proporciones y los colores originales de la misma imagen.

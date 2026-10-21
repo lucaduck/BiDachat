@@ -5,7 +5,7 @@ Las migraciones de `migrations/` definen el esquema vigente. [El diseño de dato
 - `migrations/`: cambios SQL numerados de creación y reversión del esquema.
 - `tests/`: comprobaciones de integridad ejecutadas dentro de PostgreSQL y revertidas al finalizar.
 
-Los volúmenes nuevos ejecutan las migraciones durante la inicialización. Para un volumen existente, aplica únicamente las migraciones pendientes, en orden, con un respaldo previo. No vuelvas a ejecutar una migración sobre una base ya migrada.
+Los volúmenes nuevos ejecutan las migraciones durante la inicialización. Para un volumen existente, `docker/postgres/migrate-database.sh` reconoce el esquema heredado, registra las migraciones aplicadas y ejecuta únicamente las pendientes en orden. Se detiene ante un estado parcial para evitar completar automáticamente una base ambigua. Realiza un respaldo verificado antes de desplegar una migración.
 
 ## Ejecución local con Docker
 
@@ -18,7 +18,7 @@ docker compose up -d database
 docker compose ps
 ```
 
-La primera creación del volumen ejecuta, en orden, las migraciones `001` a `004` mediante `docker/postgres/init-database.sh`. `psql` recibe la dimensión desde `EMBEDDING_DIMENSIONS` después de validar que sea un entero positivo. Cambiarla después de crear el volumen no modifica una columna existente: requiere una migración y regenerar embeddings.
+La primera creación del volumen ejecuta, en orden, las migraciones `001` a `006` mediante `docker/postgres/init-database.sh`. `psql` recibe la dimensión desde `EMBEDDING_DIMENSIONS` después de validar que sea un entero positivo. Cambiarla después de crear el volumen no modifica una columna existente: requiere una migración y regenerar embeddings.
 
 El ejemplo local usa `vector(768)` y configura Ollama con `embeddinggemma:300m` para los embeddings. El proveedor y modelo de embeddings se eligen en `.env` de forma independiente del modelo de respuesta. Cambiar la dimensión requiere una migración compatible; cambiar el modelo exige regenerar los embeddings.
 
@@ -59,7 +59,16 @@ La migración de reversión se comprobó en la base local sin filas, seguida inm
 
 No se editan migraciones ya aplicadas. Cada cambio de esquema añade una pareja numerada, por ejemplo `002_description.up.sql` y, cuando sea viable, `002_description.down.sql`. Antes de aplicarla se realiza un respaldo y se prueba en una copia de desarrollo. La migración debe ejecutarse en orden, con `ON_ERROR_STOP`, y registrar cualquier operación no reversible.
 
-Para aplicar una migración adicional ya incluida en la imagen:
+En producción, `docker/deploy-production.sh` ejecuta el corredor después de iniciar PostgreSQL y antes de reemplazar el backend:
+
+```bash
+docker compose -f docker-compose.production.yml exec -T database sh -s \
+  < docker/postgres/migrate-database.sh
+```
+
+La tabla técnica `schema_migrations` registra el nombre y momento de aplicación. En el primer uso sobre una instalación anterior, el corredor contrasta tablas, columnas e índices esperados antes de registrar cada migración heredada. Si detecta solo una parte de una migración, termina con error y exige inspección; no borra datos ni ejecuta migraciones de reversión.
+
+Para aplicar manualmente una migración adicional durante desarrollo:
 
 ```powershell
 Get-Content database/migrations/002_description.up.sql -Raw |

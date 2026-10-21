@@ -139,6 +139,19 @@ La prueba marcada `integration` usa `DATABASE_URL` y escribe datos temporales en
 .\.venv\Scripts\python.exe -m pytest -m integration -vv
 ```
 
+Las pruebas marcadas `external` son optativas y consultan un runtime o proveedor
+LLM real. No forman parte de cada pull request y solo deben ejecutarse en un
+entorno aislado, con sus variables explícitas y un límite de consumo aprobado:
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest -m external -vv
+```
+
+El CI usa `-m "not external"`. Las pruebas unitarias de proveedores usan
+transportes simulados y sí se ejecutan en cada PR. Los recorridos reales emplean
+fixtures dedicados y su limpieza se ejecuta aunque falle una aserción; las
+credenciales y salidas privadas no se guardan como artefactos.
+
 Las pruebas de `tests/` cubren contratos API, autenticación, persistencia, chatbots, documentos, aislamiento RAG, consultas, métricas y borrado. Para un resultado vigente hay que ejecutar la suite en el entorno correspondiente; los resultados fechados se conservan como [evidencia histórica](../docs/qa/README.md). La salud del contenedor verifica el arranque Docker (RNF-03), pero no sustituye una prueba de despliegue de extremo a extremo.
 
 Referencias oficiales: [configuración FastAPI](https://fastapi.tiangolo.com/advanced/settings/) y [pruebas FastAPI](https://fastapi.tiangolo.com/tutorial/testing/).

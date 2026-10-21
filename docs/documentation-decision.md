@@ -22,6 +22,21 @@ La elección debe permitir encontrar instrucciones, mantener trazabilidad con re
 
 **Resultado:** Diátaxis ordena la documentación general; el SRS conserva la autoridad sobre requisitos; C4 sirve para explicar la arquitectura. Un documento nuevo debe tener un propósito identificable antes de crearse.
 
+### Convención para diagramas
+
+- **C4 define qué se representa:** contexto del sistema, aplicaciones y almacenes
+  en ejecución, y componentes lógicos cuando aportan una decisión útil.
+- **Mermaid define cómo se dibuja:** el origen del diagrama permanece como texto
+  versionado dentro del Markdown y puede revisarse junto con el cambio que explica.
+- **El modelo entidad-relación usa `erDiagram` de Mermaid:** su fuente ejecutable
+  sigue siendo el conjunto de migraciones, no el dibujo.
+- Todo diagrama debe incluir una explicación textual y enlaces a la configuración o
+  código que lo respalda. No se usarán imágenes estáticas como única descripción de
+  una arquitectura que cambia.
+
+Esta combinación no convierte Mermaid en una arquitectura ni C4 en una herramienta
+de renderizado. Evita mezclar el contenido del modelo con el formato del gráfico.
+
 ## Matriz de decisión: estructura del repositorio
 
 | Alternativa                                                                                      | Ventaja en este proyecto                                                                                                             | Costo o riesgo                                                                                                                         | Decisión                                                                       |

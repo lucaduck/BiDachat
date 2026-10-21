@@ -9,6 +9,8 @@ from pydantic import BaseModel, Field, model_validator
 class QueryRequest(BaseModel):
     question: str = Field(min_length=1, max_length=4000)
     page_context: str | None = Field(default=None, max_length=6000)
+    conversation_id: UUID | None = None
+    identity_token: str | None = Field(default=None, min_length=1, max_length=160)
     image_base64: str | None = Field(default=None, max_length=5_600_000)
     image_mime_type: str | None = None
 
@@ -48,3 +50,4 @@ class QueryResponse(BaseModel):
     answer: str
     response_time_ms: int
     completed_at: datetime
+    conversation_id: UUID | None = None

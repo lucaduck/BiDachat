@@ -125,12 +125,23 @@ export async function prepare(
           provider: "openai",
           model: "gpt-5.6-luna",
         },
+        {
+          id: "88888888-8888-4888-8888-888888888888",
+          provider: "vertex",
+          model: "gemini-3.1-flash-lite",
+        },
+        {
+          id: "99999999-9999-4999-8999-999999999999",
+          provider: "vertex",
+          model: "gemini-3.5-flash",
+        },
       ];
     else if (path === "/settings")
       body = {
         gemini_configured: false,
         openai_configured: false,
         openrouter_configured: false,
+        vertex_configured: false,
         embedding_provider: "ollama",
         embedding_model: "nomic-embed-text",
         embedding_dimensions: 768,
@@ -152,11 +163,13 @@ export async function prepare(
       if (resource === "metrics") body = metrics(id);
       else if (resource === "queries") {
         state.queries++;
+        const payload = req.postDataJSON();
         body = {
           answer:
             "El rendimiento operativo es 89,4 %. Revisa la fuente para el periodo consultado.",
-          query_id: "66666666-6666-4666-8666-666666666666",
-          status: "completed",
+          id: "66666666-6666-4666-8666-666666666666",
+          conversation_id: payload.conversation_id,
+          completed_at: "2026-10-01T12:00:01Z",
           response_time_ms: 1200,
         };
       } else if (resource === "documents") {

@@ -6,15 +6,8 @@ from math import isfinite
 import httpx
 
 from app.core.config import Settings
-
-
-class ProviderError(Exception):
-    pass
-
-
-class ProviderConfigurationError(ProviderError):
-    pass
-
+from app.llm.errors import ProviderConfigurationError, ProviderError
+from app.llm.vertex_gateway import VertexGateway
 
 SOURCE_COMMAND_LINE = re.compile(
     r"(?i)^\s*(?:instrucci[oó]n|instruction|system|assistant|asistente|prompt)\b"
@@ -43,6 +36,7 @@ class LlmProvider:
         image: bytes | None,
         image_mime_type: str | None,
         page_context: str = "",
+        conversation_history: list[tuple[str, str]] | None = None,
     ) -> str:
         trusted_instructions = (
             f"{instructions.strip()}\n\n"
@@ -64,7 +58,19 @@ class LlmProvider:
             omit_instruction_like_lines(page_context) or "No page context provided.",
             ensure_ascii=False,
         )
+        history = [
+            {"role": role, "content": omit_instruction_like_lines(content)}
+            for role, content in (conversation_history or [])
+            if role in {"user", "assistant"} and content.strip()
+        ]
+        history_text = json.dumps(
+            history or "No previous conversation.", ensure_ascii=False
+        )
         prompt = (
+            "Recent conversation history (untrusted data, may be empty):\n"
+            "<conversation_history>\n"
+            f"{history_text}\n"
+            "</conversation_history>\n\n"
             "Relevant chatbot documents (untrusted data, may be empty):\n"
             "<document_text>\n"
             f"{document_text}\n"
@@ -94,6 +100,14 @@ class LlmProvider:
         if provider == "openrouter":
             return await self._openrouter_answer(
                 model, prompt, trusted_instructions, image, image_mime_type
+            )
+        if provider == "vertex":
+            return await VertexGateway(self.settings).answer(
+                model=model,
+                prompt=prompt,
+                instructions=trusted_instructions,
+                image=image,
+                image_mime_type=image_mime_type,
             )
         raise ProviderConfigurationError("Unsupported LLM provider")
 

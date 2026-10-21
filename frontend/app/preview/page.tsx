@@ -35,6 +35,7 @@ function ChatbotPreview() {
     script.src = "/bidachat-widget.js";
     script.dataset.apiBase = `${window.location.origin}/api/v1`;
     script.dataset.chatbotId = chatbotId;
+    script.dataset.contextSelector = "#preview-dashboard";
     script.dataset.theme =
       localStorage.getItem("bidachat-theme") === "dark" ? "dark" : "light";
     document.documentElement.dataset.theme = script.dataset.theme;
@@ -84,7 +85,11 @@ function ChatbotPreview() {
             No se pudo cargar el widget. Recarga esta página para intentarlo nuevamente.
           </Alert>
         ) : null}
-        <div className="preview-dashboard" aria-label="Dashboard de demostración">
+        <div
+          id="preview-dashboard"
+          className="preview-dashboard"
+          aria-label="Dashboard de demostración"
+        >
           <div className="preview-dashboard-heading">
             <div>
               <h2>Tablero de análisis</h2>

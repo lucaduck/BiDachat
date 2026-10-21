@@ -5,6 +5,7 @@ class SystemSettingsResponse(BaseModel):
     gemini_configured: bool
     openai_configured: bool
     openrouter_configured: bool
+    vertex_configured: bool
     embedding_provider: str
     embedding_model: str
     embedding_dimensions: int

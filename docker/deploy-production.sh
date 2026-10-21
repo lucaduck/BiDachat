@@ -16,6 +16,17 @@ env_value() {
 }
 
 acceleration=$(env_value "OLLAMA_ACCELERATION" "cpu")
+vertex_enabled=$(env_value "VERTEX_ENABLED" "false")
+case "$vertex_enabled" in
+    true|false) ;;
+    *) printf 'VERTEX_ENABLED must be true or false\n' >&2; exit 1 ;;
+esac
+if [ "$vertex_enabled" = "true" ]; then
+    for key in VERTEX_PROJECT VERTEX_LOCATION VERTEX_MODEL VERTEX_CREDENTIALS_FILE LITELLM_MASTER_KEY LITELLM_CPUS LITELLM_MEMORY_LIMIT; do
+        test -n "$(env_value "$key" "")" || { printf 'Set %s in .env\n' "$key" >&2; exit 1; }
+    done
+    test -f "$(env_value VERTEX_CREDENTIALS_FILE "")" || { printf 'Vertex credential file not found\n' >&2; exit 1; }
+fi
 
 case "$acceleration" in
     cpu)
@@ -29,6 +40,9 @@ case "$acceleration" in
 esac
 
 compose() {
+    if [ "$vertex_enabled" = "true" ]; then
+        set -- --profile vertex "$@"
+    fi
     if [ "$acceleration" = "gpu" ]; then
         docker compose -f docker-compose.production.yml -f docker-compose.gpu.yml "$@"
     else
@@ -49,6 +63,11 @@ printf 'Deploying Ollama with %s acceleration\n' "$acceleration"
 compose config --quiet
 compose pull backend frontend nginx
 compose up -d --wait database ollama
+compose exec -T database sh -s < docker/postgres/migrate-database.sh
+if [ "$vertex_enabled" = "true" ]; then
+    compose pull litellm
+    compose up -d --wait litellm
+fi
 
 ollama_model=$(env_value "OLLAMA_MODEL" "")
 embedding_provider=$(env_value "EMBEDDING_PROVIDER" "ollama")

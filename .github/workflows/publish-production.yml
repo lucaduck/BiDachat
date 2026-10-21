@@ -80,6 +80,7 @@ jobs:
         run: |
           docker compose -f docker-compose.production.yml config --quiet
           docker compose -f docker-compose.production.yml -f docker-compose.gpu.yml config --quiet
+          docker compose -f docker-compose.production.yml --profile vertex config --quiet
 
       - name: Sign in to GitHub Container Registry
         uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.5.0
@@ -166,6 +167,8 @@ jobs:
             docker-compose.production.yml docker-compose.gpu.yml \
             docker/deploy-production.sh docker/backup-production.sh \
             docker/verify-production-backup.sh docker/nginx/default.conf \
-            docker/postgres/init-database.sh database/migrations \
+            docker/litellm \
+            docker/postgres/init-database.sh docker/postgres/migrate-database.sh \
+            database/migrations \
             | ssh -i ~/.ssh/id_ed25519 -o BatchMode=yes "$DEPLOY_USER@$DEPLOY_HOST" \
                 "cd '$DEPLOY_PATH' && test -f .env && tar --no-same-owner -xzf - && IMAGE_TAG='$RELEASE_SHA' sh docker/deploy-production.sh && printf '%s\\n' '$RELEASE_SHA' > .release-sha"

@@ -143,9 +143,11 @@ configuración de Nginx y consulta `/api/v1/health` a través de este proxy.
 La topología y el ejemplo de configuración externa están en
 [Proxy inverso con Nginx](reverse-proxy.md).
 
-Las migraciones del commit aprobado se transfieren al servidor y se montan de
-solo lectura durante la inicialización de PostgreSQL. Antes de añadir una nueva
-migración, probarla sobre una copia de la base y realizar un respaldo, tal como
+Las migraciones y su corredor se transfieren con el commit aprobado. Tras
+iniciar PostgreSQL, el despliegue registra instalaciones heredadas verificadas y
+aplica únicamente migraciones pendientes antes de sustituir el backend. Un
+esquema parcialmente aplicado detiene el despliegue. Antes de liberar una nueva
+migración, probarla sobre una copia y realizar un respaldo verificado, tal como
 establece la guía de base de datos.
 
 ## Puertos y recursos en un VPS compartido

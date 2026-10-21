@@ -19,6 +19,10 @@ async def bootstrap() -> None:
     try:
         async with database.session() as session:
             models = []
+            if settings.vertex_enabled:
+                models.extend(
+                    ("vertex", model) for model in settings.configured_vertex_models
+                )
             if os.getenv("GEMINI_API_KEY", "").strip():
                 models.append(("gemini", os.getenv("GEMINI_MODEL", "gemini-2.5-flash")))
             ollama_model = os.getenv("OLLAMA_MODEL", "").strip()

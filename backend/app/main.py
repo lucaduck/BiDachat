@@ -1,6 +1,7 @@
+import asyncio
 import logging
 from collections.abc import AsyncIterator
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, suppress
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,6 +10,7 @@ from fastapi.responses import JSONResponse
 from app.api.router import router
 from app.core.config import Settings, get_settings
 from app.database.session import Database
+from app.services.conversation_cleanup_service import run_conversation_cleanup
 
 logger = logging.getLogger(__name__)
 
@@ -19,10 +21,21 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @asynccontextmanager
     async def lifespan(application: FastAPI) -> AsyncIterator[None]:
-        yield
         database = getattr(application.state, "database", None)
-        if database is not None:
-            await database.dispose()
+        cleanup_task = (
+            asyncio.create_task(run_conversation_cleanup(database, settings))
+            if database is not None and settings.app_env != "test"
+            else None
+        )
+        try:
+            yield
+        finally:
+            if cleanup_task is not None:
+                cleanup_task.cancel()
+                with suppress(asyncio.CancelledError):
+                    await cleanup_task
+            if database is not None:
+                await database.dispose()
 
     application = FastAPI(
         title="BIDACHAT API",

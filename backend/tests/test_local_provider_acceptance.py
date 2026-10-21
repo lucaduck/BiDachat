@@ -19,6 +19,8 @@ from app.services.document_processing_service import DocumentProcessingService
 from app.services.document_service import DocumentService, UploadDocument
 from app.services.rag_knowledge_service import RagKnowledgeService
 
+pytestmark = pytest.mark.external
+
 
 def _generate_chart(tmp_path: Path) -> list[tuple[Path, str]]:
     png = tmp_path / "chart.png"

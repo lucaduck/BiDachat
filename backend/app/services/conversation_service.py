@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import Settings
 from app.llm.provider import LlmProvider
 from app.models import Chatbot, LlmModel
+from app.services.conversation_memory_service import ConversationMemoryService
 from app.services.query_service import QueryService
 from app.services.rag_knowledge_service import RagKnowledgeService
 
@@ -17,6 +18,7 @@ class ConversationService:
         self.provider = LlmProvider(settings)
         self.knowledge = RagKnowledgeService(settings)
         self.queries = QueryService()
+        self.memory = ConversationMemoryService(settings)
 
     async def ask(
         self,
@@ -27,6 +29,9 @@ class ConversationService:
         image: bytes | None,
         image_mime_type: str | None,
         page_context: str | None = None,
+        conversation_id: UUID | None = None,
+        origin: str | None = None,
+        identity_hash: str | None = None,
     ):
         query = await self.queries.start_query(
             session,
@@ -34,6 +39,14 @@ class ConversationService:
             question=question,
             has_image=image is not None,
         )
+        conversation = await self.memory.resolve(
+            session,
+            chatbot_id=chatbot_id,
+            requested_id=conversation_id,
+            origin=origin,
+            identity_hash=identity_hash,
+        )
+        query.conversation_id = conversation.id
         result = await session.execute(
             select(Chatbot.behavior_instructions, LlmModel.provider, LlmModel.model)
             .join(LlmModel, LlmModel.id == query.executed_llm_model_id)
@@ -50,6 +63,9 @@ class ConversationService:
         query_id = query.id
         await session.commit()
         try:
+            history = await self.memory.recent_messages(
+                session, conversation_id=conversation.id
+            )
             query_embedding = (
                 await self.provider.embed(question, task_type="RETRIEVAL_QUERY")
                 if (
@@ -78,11 +94,15 @@ class ConversationService:
                 instructions=instructions,
                 context=context,
                 page_context=page_context or "",
+                conversation_history=history,
                 image=image,
                 image_mime_type=image_mime_type,
             )
             completed = await self.queries.complete_query(
                 session, query_id=query_id, answer=answer
+            )
+            await self.memory.save_successful_turn(
+                session, conversation_id=conversation.id, query=completed
             )
             await session.commit()
             return completed
