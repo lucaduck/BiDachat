@@ -67,3 +67,41 @@ export type MetricsSummary = {
   status: "completed" | "failed" | "processing" | null;
   series: MetricsPoint[];
 };
+
+export type SatisfactionPoint = {
+  period_start: string;
+  offers: number;
+  responses: number;
+  satisfied: number;
+  clarity_count: number;
+  clarity_sum: number;
+  resolution_count: number;
+  resolved: number;
+  scores: Record<string, number>;
+};
+
+export type SatisfactionMetrics = {
+  chatbot_id: string;
+  started_at: string | null;
+  ended_at: string | null;
+  interval: "day" | "week" | "month";
+  offers: number;
+  responses: number;
+  satisfied: number;
+  participation_rate: number | null;
+  csat_rate: number | null;
+  clarity_count: number;
+  average_clarity: number | null;
+  resolution_count: number;
+  resolved: number;
+  resolution_rate: number | null;
+  scores: Record<string, number>;
+  series: SatisfactionPoint[];
+};
+
+export type SurveyCommentsPage = {
+  items: { submitted_at: string; comment: string }[];
+  total: number;
+  limit: number;
+  offset: number;
+};

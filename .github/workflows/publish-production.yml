@@ -80,7 +80,7 @@ jobs:
         run: |
           docker compose -f docker-compose.production.yml config --quiet
           docker compose -f docker-compose.production.yml -f docker-compose.gpu.yml config --quiet
-          docker compose -f docker-compose.production.yml --profile vertex config --quiet
+          docker compose -f docker-compose.production.yml --profile ai-gateway config --quiet
 
       - name: Sign in to GitHub Container Registry
         uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.5.0

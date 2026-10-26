@@ -25,13 +25,21 @@ def main() -> None:
     env_file = root / ".env"
     content = env_file.read_text()
     existing = dict(re.findall(r"^([A-Z_]+)=(.*)$", content, re.MULTILINE))
+    providers = [
+        item
+        for item in existing.get("EXTERNAL_AI_GATEWAY_PROVIDERS", "").split(",")
+        if item
+    ]
+    if "vertex" not in providers:
+        providers.append("vertex")
     profiles = [
         item for item in existing.get("COMPOSE_PROFILES", "").split(",") if item
     ]
-    if "vertex" not in profiles:
-        profiles.append("vertex")
+    if "ai-gateway" not in profiles:
+        profiles.append("ai-gateway")
     values = {
         "VERTEX_ENABLED": "true",
+        "EXTERNAL_AI_GATEWAY_PROVIDERS": ",".join(providers),
         "COMPOSE_PROFILES": ",".join(profiles),
         "VERTEX_PROJECT": data["project_id"],
         "VERTEX_LOCATION": args.location,

@@ -6,6 +6,7 @@ class SystemSettingsResponse(BaseModel):
     openai_configured: bool
     openrouter_configured: bool
     vertex_configured: bool
+    external_ai_gateway_providers: list[str]
     embedding_provider: str
     embedding_model: str
     embedding_dimensions: int

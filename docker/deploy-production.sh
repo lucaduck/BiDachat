@@ -17,10 +17,18 @@ env_value() {
 
 acceleration=$(env_value "OLLAMA_ACCELERATION" "cpu")
 vertex_enabled=$(env_value "VERTEX_ENABLED" "false")
+gateway_providers=$(env_value "EXTERNAL_AI_GATEWAY_PROVIDERS" "")
 case "$vertex_enabled" in
     true|false) ;;
     *) printf 'VERTEX_ENABLED must be true or false\n' >&2; exit 1 ;;
 esac
+if [ -n "$gateway_providers" ] || [ "$vertex_enabled" = "true" ]; then
+    case ",$gateway_providers," in
+        *,vertex,*)
+            [ "$vertex_enabled" = "true" ] || { printf 'Vertex gateway routing requires VERTEX_ENABLED=true\n' >&2; exit 1; }
+            ;;
+    esac
+fi
 if [ "$vertex_enabled" = "true" ]; then
     for key in VERTEX_PROJECT VERTEX_LOCATION VERTEX_MODEL VERTEX_CREDENTIALS_FILE LITELLM_MASTER_KEY LITELLM_CPUS LITELLM_MEMORY_LIMIT; do
         test -n "$(env_value "$key" "")" || { printf 'Set %s in .env\n' "$key" >&2; exit 1; }
@@ -40,8 +48,16 @@ case "$acceleration" in
 esac
 
 compose() {
-    if [ "$vertex_enabled" = "true" ]; then
-        set -- --profile vertex "$@"
+    if [ -n "$gateway_providers" ]; then
+        set -- --profile ai-gateway "$@"
+    fi
+    case ",$gateway_providers," in
+        *,vertex,*)
+            set -- -f docker-compose.vertex.yml "$@"
+            ;;
+    esac
+    if [ "$vertex_enabled" = "true" ] && [ -z "$gateway_providers" ]; then
+        set -- --profile vertex -f docker-compose.vertex.yml "$@"
     fi
     if [ "$acceleration" = "gpu" ]; then
         docker compose -f docker-compose.production.yml -f docker-compose.gpu.yml "$@"
@@ -64,7 +80,7 @@ compose config --quiet
 compose pull backend frontend nginx
 compose up -d --wait database ollama
 compose exec -T database sh -s < docker/postgres/migrate-database.sh
-if [ "$vertex_enabled" = "true" ]; then
+if [ -n "$gateway_providers" ] || [ "$vertex_enabled" = "true" ]; then
     compose pull litellm
     compose up -d --wait litellm
 fi

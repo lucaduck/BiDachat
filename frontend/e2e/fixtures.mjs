@@ -77,6 +77,24 @@ export const metrics = (id) => ({
     },
   ],
 });
+export const satisfaction = (id) => ({
+  chatbot_id: id,
+  started_at: null,
+  ended_at: null,
+  interval: "day",
+  offers: 0,
+  responses: 0,
+  satisfied: 0,
+  participation_rate: null,
+  csat_rate: null,
+  clarity_count: 0,
+  average_clarity: null,
+  resolution_count: 0,
+  resolved: 0,
+  resolution_rate: null,
+  scores: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+  series: [],
+});
 export async function prepare(
   page,
   { theme = "light", empty = false, authenticated = true } = {},
@@ -161,6 +179,9 @@ export async function prepare(
       const [, id, resource, docId] = path.split("/").slice(1);
       const b = state.bots.find((b) => b.id === id);
       if (resource === "metrics") body = metrics(id);
+      else if (resource === "satisfaction-metrics") body = satisfaction(id);
+      else if (resource === "survey-responses")
+        body = { items: [], total: 0, limit: 10, offset: 0 };
       else if (resource === "queries") {
         state.queries++;
         const payload = req.postDataJSON();

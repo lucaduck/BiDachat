@@ -10,6 +10,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_EMBEDDING_DIMENSIONS = 768
 DEFAULT_EMBEDDING_MODEL = "gemini-embedding-2"
 DEFAULT_DOCUMENT_MAX_SIZE_BYTES = 20 * 1024 * 1024
+EXTERNAL_GATEWAY_PROVIDERS = frozenset({"gemini", "openai", "openrouter", "vertex"})
 
 
 class Settings(BaseSettings):
@@ -44,14 +45,19 @@ class Settings(BaseSettings):
     gemini_api_key: SecretStr | None = None
     openai_api_key: SecretStr | None = None
     openai_model: str = ""
+    openai_models: str = ""
     openrouter_api_key: SecretStr | None = None
     openrouter_model: str = ""
+    openrouter_models: str = ""
     openrouter_site_url: str = ""
+    gemini_model: str = ""
+    gemini_models: str = ""
     vertex_enabled: bool = False
     vertex_model: str = ""
     vertex_models: str = ""
     litellm_base_url: str = "http://litellm:4000"
     litellm_master_key: SecretStr | None = None
+    external_ai_gateway_providers: str = ""
     ollama_base_url: str = "http://localhost:11434"
     ollama_model: str = ""
     vision_provider: Literal["ollama", "gemini", "openai", "openrouter", "vertex"] = (
@@ -122,14 +128,46 @@ class Settings(BaseSettings):
 
     @property
     def configured_vertex_models(self) -> tuple[str, ...]:
-        configured = tuple(
+        configured = _configured_models(self.vertex_models)
+        return configured or ((self.vertex_model,) if self.vertex_model else ())
+
+    @property
+    def configured_external_ai_gateway_providers(self) -> tuple[str, ...]:
+        return tuple(
             dict.fromkeys(
-                model.strip()
-                for model in self.vertex_models.split(",")
-                if model.strip()
+                provider.strip().lower()
+                for provider in self.external_ai_gateway_providers.split(",")
+                if provider.strip()
             )
         )
-        return configured or ((self.vertex_model,) if self.vertex_model else ())
+
+    def configured_models_for_provider(self, provider: str) -> tuple[str, ...]:
+        if provider == "vertex":
+            return self.configured_vertex_models
+        models_by_provider = {
+            "gemini": (self.gemini_models, self.gemini_model),
+            "openai": (self.openai_models, self.openai_model),
+            "openrouter": (self.openrouter_models, self.openrouter_model),
+        }
+        configured = models_by_provider.get(provider)
+        if configured is None:
+            return ()
+        listed, default = configured
+        return _configured_models(listed) or (
+            (default.strip(),) if default.strip() else ()
+        )
+
+    def provider_uses_gateway(self, provider: str) -> bool:
+        return provider in self.configured_external_ai_gateway_providers or (
+            provider == "vertex" and self.vertex_enabled
+        )
+
+    def gateway_model_available(self, provider: str, model: str) -> bool:
+        if provider == "vertex":
+            return self.vertex_model_available(model)
+        return self.provider_uses_gateway(
+            provider
+        ) and model in self.configured_models_for_provider(provider)
 
     def vertex_model_available(self, model: str) -> bool:
         return self.vertex_enabled and model in self.configured_vertex_models
@@ -155,6 +193,22 @@ class Settings(BaseSettings):
                 models.append(normalized)
         return ",".join(models)
 
+    @field_validator("external_ai_gateway_providers")
+    @classmethod
+    def normalize_external_gateway_providers(cls, value: str) -> str:
+        providers = []
+        for provider in value.split(","):
+            normalized = provider.strip().lower()
+            if not normalized:
+                continue
+            if normalized not in EXTERNAL_GATEWAY_PROVIDERS:
+                raise ValueError(
+                    "EXTERNAL_AI_GATEWAY_PROVIDERS has an unsupported provider"
+                )
+            if normalized not in providers:
+                providers.append(normalized)
+        return ",".join(providers)
+
     @model_validator(mode="after")
     def validate_vertex_settings(self) -> "Settings":
         if self.vertex_enabled and (
@@ -174,6 +228,29 @@ class Settings(BaseSettings):
             self.vision_model.strip()
         ):
             raise ValueError("VISION_MODEL must be an enabled VERTEX_MODELS entry")
+        gateway_providers = self.configured_external_ai_gateway_providers
+        if gateway_providers and (
+            self.litellm_master_key is None
+            or len(self.litellm_master_key.get_secret_value().strip()) < 32
+        ):
+            raise ValueError(
+                "EXTERNAL_AI_GATEWAY_PROVIDERS requires a gateway key of 32+ characters"
+            )
+        for provider in gateway_providers:
+            if provider == "vertex" and not self.vertex_enabled:
+                raise ValueError("Vertex gateway routing requires VERTEX_ENABLED=true")
+            if not self.configured_models_for_provider(provider):
+                raise ValueError(
+                    "EXTERNAL_AI_GATEWAY_PROVIDERS requires an explicit "
+                    f"{provider} model"
+                )
+        if (
+            self.vision_provider in gateway_providers
+            and not self.gateway_model_available(
+                self.vision_provider, self.vision_model.strip()
+            )
+        ):
+            raise ValueError("VISION_MODEL must be in the configured gateway catalogue")
         return self
 
     @field_validator("ollama_base_url", "litellm_base_url")
@@ -196,3 +273,9 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
+
+
+def _configured_models(value: str) -> tuple[str, ...]:
+    return tuple(
+        dict.fromkeys(model.strip() for model in value.split(",") if model.strip())
+    )

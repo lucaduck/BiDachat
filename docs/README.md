@@ -11,7 +11,9 @@ El [README principal](../README.md) permite arrancar el proyecto. Aquí se agrup
 
 - [Configurar Ollama en Docker](local-ollama.md).
 - [Configurar Vertex AI mediante LiteLLM en Docker](vertex-ai.md).
+- [Centralizar proveedores externos mediante LiteLLM](external-ai-gateway.md).
 - [Operar la memoria conversacional y el contexto de página](conversation-memory.md).
+- [Medir satisfacción y gestionar sus comentarios](conversation-satisfaction.md).
 - [Preparar y desplegar con GitHub Actions](deployment/github-actions.md).
 - [Respaldar y comprobar la restauración](deployment/backups.md).
 - [Configurar el proxy inverso](deployment/reverse-proxy.md).

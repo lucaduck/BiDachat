@@ -6,9 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Alert, EmptyState, LoadingState } from "@/components/ui/status";
 import { getMetrics } from "@/services/metrics-service";
+import { getSatisfactionMetrics } from "@/services/satisfaction-service";
 import { metricsDateRange, type MetricsFilters } from "@/services/metrics-filters";
-import type { Chatbot, MetricsSummary } from "@/types/api";
+import type { Chatbot, MetricsSummary, SatisfactionMetrics } from "@/types/api";
 import { MetricsCharts, formatMetricTime } from "./metrics-charts";
+import { SatisfactionPanel } from "./satisfaction-panel";
 import "./metrics.css";
 
 type Props = {
@@ -32,6 +34,7 @@ export function MetricsPanel({
     : (chatbots[0]?.id ?? "");
   const [draft, setDraft] = useState(initialFilters);
   const [metrics, setMetrics] = useState<MetricsSummary | null>(null);
+  const [satisfaction, setSatisfaction] = useState<SatisfactionMetrics | null>(null);
   const [error, setError] = useState(false);
   const [validation, setValidation] = useState(() => {
     try {
@@ -52,14 +55,24 @@ export function MetricsPanel({
     } catch {
       return;
     }
-    getMetrics(token, chatbotId, range.startedAt, range.endedAt, {
-      interval,
-      status,
-      includeSeries: true,
-    })
-      .then((result) => {
+    Promise.all([
+      getMetrics(token, chatbotId, range.startedAt, range.endedAt, {
+        interval,
+        status,
+        includeSeries: true,
+      }),
+      getSatisfactionMetrics(
+        token,
+        chatbotId,
+        range.startedAt,
+        range.endedAt,
+        interval,
+      ),
+    ])
+      .then(([result, surveyResult]) => {
         if (active) {
           setMetrics(result);
+          setSatisfaction(surveyResult);
           setError(false);
         }
       })
@@ -67,6 +80,7 @@ export function MetricsPanel({
         if (active) {
           onApiError(requestError);
           setError(true);
+          setSatisfaction(null);
         }
       });
     return () => {
@@ -93,6 +107,8 @@ export function MetricsPanel({
     }
     setValidation("");
     setDraft(next);
+    setMetrics(null);
+    setSatisfaction(null);
     onFilterChange(selectedId, next);
   }
   function updateFilter(key: "period" | "interval" | "status", value: string) {
@@ -120,6 +136,7 @@ export function MetricsPanel({
           disabled={!metrics && !error}
           onClick={() => {
             setMetrics(null);
+            setSatisfaction(null);
             setError(false);
             setReloadKey((key) => key + 1);
           }}
@@ -283,6 +300,16 @@ export function MetricsPanel({
             </div>
           </dl>
           <MetricsCharts metrics={metrics} />
+          {satisfaction ? (
+            <SatisfactionPanel
+              metrics={satisfaction}
+              chatbotId={chatbotId}
+              token={token}
+              startedAt={metrics.started_at ?? undefined}
+              endedAt={metrics.ended_at ?? undefined}
+              onApiError={onApiError}
+            />
+          ) : null}
         </>
       ) : null}
     </section>

@@ -1,12 +1,4 @@
-model_list:
-  - model_name: configured-at-startup
-    litellm_params:
-      model: configured-at-startup
-      vertex_project: os.environ/VERTEX_PROJECT
-      vertex_location: os.environ/VERTEX_LOCATION
-      vertex_credentials: /run/secrets/vertex-service-account.json
-      max_retries: 0
-      timeout: 40
+model_list: []
 general_settings:
   master_key: os.environ/LITELLM_MASTER_KEY
   disable_spend_logs: true

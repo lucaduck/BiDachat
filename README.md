@@ -27,7 +27,7 @@ Abre `http://127.0.0.1:3000` y entra con el administrador configurado. Si cambia
 
 El modelo inicial `qwen3:1.7b` responde consultas de texto. Las **imágenes como fuentes de conocimiento** requieren configurar `VISION_PROVIDER` y un modelo visual compatible en `VISION_MODEL` (Ollama, Gemini, OpenAI, OpenRouter o Vertex); la imagen adjunta en una conversación también requiere que el modelo de respuesta seleccionado admita visión. Consulta [Ollama local](docs/local-ollama.md) antes de probar esos casos.
 
-El widget conserva memoria textual anónima por chatbot y origen durante la sesión del navegador. El backend limita la ventana mediante `CONVERSATION_TTL_HOURS`, `CONVERSATION_MAX_TURNS` y `CONVERSATION_MAX_CHARS`; no guarda las imágenes como memoria. La limpieza de conversaciones vencidas se ejecuta al iniciar el backend y cada `CONVERSATION_CLEANUP_INTERVAL_MINUTES` (60 minutos por defecto). Conserva las consultas y métricas. También puede ejecutarse manualmente:
+El widget conserva memoria textual anónima por chatbot y origen durante la sesión del navegador. El backend limita la ventana mediante `CONVERSATION_TTL_HOURS`, `CONVERSATION_MAX_TURNS` y `CONVERSATION_MAX_CHARS`; no guarda las imágenes como memoria. La limpieza de conversaciones vencidas se ejecuta al iniciar el backend y cada `CONVERSATION_CLEANUP_INTERVAL_MINUTES` (60 minutos por defecto). Conserva las consultas y métricas. La misma tarea elimina comentarios de satisfacción después de 90 días, manteniendo ofertas y puntuaciones. También puede ejecutarse manualmente:
 
 ```bash
 docker compose exec -T backend python -m app.cleanup_conversations
@@ -37,7 +37,14 @@ La [guía de memoria conversacional](docs/conversation-memory.md) explica los l�
 
 Vertex admite un catálogo explícito mediante `VERTEX_MODELS` y usa `VERTEX_MODEL` como selección predeterminada. Cada modelo debe comprobarse en el proyecto de Google antes de exponerlo en el editor; consulta la [guía de Vertex AI](docs/vertex-ai.md).
 
+Los proveedores externos de generación pueden pasar por el gateway LiteLLM
+privado mediante `EXTERNAL_AI_GATEWAY_PROVIDERS`. Ollama y embeddings siguen
+directos; consulta la [guía del gateway](docs/external-ai-gateway.md) antes de
+activar proveedores o trasladar credenciales.
+
 Para comprobar el widget en la instalación local, crea un chatbot y abre `/widget-example.html?chatbot_id=UUID`. Para probarlo en otro sitio, sigue la [guía del widget](widget/README.md) y configura `WIDGET_ALLOWED_ORIGINS` con los orígenes exactos autorizados, incluido el panel para la vista previa (esquema, dominio y puerto). La API rechaza consultas sin `Origin`, con un origen no autorizado o con la lista vacía. Esta comprobación no sustituye la autenticación. `widget/example/` contiene la página de prueba; el build copia una versión a `frontend/public/` para la integración local.
+
+Tras una respuesta, «Finalizar conversación» ofrece una encuesta voluntaria. El panel Métricas muestra participación y satisfacción filtradas por chatbot y periodo; los comentarios solo son visibles con sesión administrativa. La [guía de satisfacción](docs/conversation-satisfaction.md) explica el contrato, denominadores, retención y pruebas.
 
 ## Mapa del repositorio
 

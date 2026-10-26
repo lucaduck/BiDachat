@@ -10,7 +10,7 @@
 
 ## 1. Resumen vigente
 
-Se utiliza una única base **PostgreSQL + pgvector**, accesible exclusivamente desde FastAPI. El esquema inicial contenía siete tablas. Las migraciones posteriores incorporaron `login_attempts`, asociación compartida mediante `chatbot_documents`, y memoria acotada mediante `conversations` y `conversation_messages`; el dominio vigente contiene once tablas. El despliegue crea además `schema_migrations`, una tabla técnica sin datos de negocio que registra las migraciones reconocidas o aplicadas.
+Se utiliza una única base **PostgreSQL + pgvector**, accesible exclusivamente desde FastAPI. El esquema inicial contenía siete tablas. Las migraciones posteriores incorporaron `login_attempts`, asociación compartida mediante `chatbot_documents`, memoria acotada mediante `conversations` y `conversation_messages` y satisfacción mediante `conversation_feedback`; el dominio vigente contiene doce tablas. El despliegue crea además `schema_migrations`, una tabla técnica sin datos de negocio que registra las migraciones reconocidas o aplicadas.
 
 La relación central es **chatbot → documentos → fragmentos vectoriales**. Cada consulta pertenece a un chatbot y solo puede recuperar sus fragmentos. El registro de consultas contiene los datos necesarios para calcular las métricas sin mantener contadores duplicados.
 
@@ -586,3 +586,26 @@ erDiagram
 Los índices `(chatbot_id, origin, expires_at)` y `expires_at` resuelven validación y limpieza. El índice `(conversation_id, created_at, id)` recupera los mensajes recientes de forma determinista. La eliminación de una conversación borra sus mensajes en cascada y desacopla las consultas históricas.
 
 La migración `006_conversation_identity` agrega `identity_hash`. El backend elimina conversaciones vencidas al arrancar y periódicamente; `python -m app.cleanup_conversations` también puede ejecutarse manualmente de forma segura. La limpieza conserva los registros de consultas y sus textos. La retención de 24 horas, 12 turnos y 12000 caracteres es el valor técnico inicial y permanece sujeta a confirmación de la política institucional.
+
+## 15. Satisfacción de la conversación
+
+La migración `007_conversation_feedback` incorpora una oferta y como máximo una respuesta por conversación (`conversation_id UNIQUE`). Ese UUID no tiene FK a `conversations`: al limpiar la memoria, permanecen la oferta y las puntuaciones. El servicio exige una conversación vigente, del mismo chatbot, origen e identidad, con al menos una consulta completada antes de aceptar oferta o envío. `chatbot_id` tiene FK con `ON DELETE CASCADE`, por lo que borrar el chatbot elimina sus evaluaciones.
+
+```mermaid
+erDiagram
+    chatbots ||--o{ conversation_feedback : receives
+    conversations ||..o| conversation_feedback : identified_by_uuid_only
+    conversation_feedback {
+        uuid id PK
+        uuid chatbot_id FK
+        uuid conversation_id UK
+        timestamptz offered_at
+        timestamptz submitted_at
+        smallint satisfaction_score
+        text resolution
+        smallint clarity_score
+        text comment
+    }
+```
+
+Una fila sin `submitted_at` mantiene nulos todos los campos de respuesta. Una fila enviada requiere `satisfaction_score` entre 1 y 5; `clarity_score` también queda entre 1 y 5, `resolution` solo admite `yes`, `partial` o `no`, y el comentario no excede 1000 caracteres. El índice `(chatbot_id, offered_at)` soporta filtros UTC; el índice parcial por `submitted_at` facilita borrar texto vencido. La limpieza periódica pone `comment = NULL` a los 90 días del envío sin alterar puntuaciones, oferta o agregados. No se almacenan nombre, correo, imagen, origen, identidad, pregunta ni respuesta en esta tabla. La reversión SQL elimina la tabla y pierde sus evaluaciones; debe usarse solo después de respaldar los datos y decidir expresamente esa pérdida.

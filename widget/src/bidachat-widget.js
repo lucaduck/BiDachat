@@ -61,13 +61,13 @@
       @font-face {font-family:"BIDACHAT Inter";src:url("${fontUrl}") format("woff2");font-weight:100 900;font-display:swap;}
       :host { all: initial; --w-text:#163247;--w-muted:#526a7e;--w-border:#d5e2eb;--w-surface:#fff;--w-canvas:#f5f8fb;--w-subtle:#e7f6fa;--w-link:#086e89;--w-danger:#b02c38;--w-danger-bg:#fff0f1; position: fixed; right: 24px; bottom: 24px; z-index: 2147483000; font: 14px/1.45 "BIDACHAT Inter", ui-sans-serif, system-ui, sans-serif; color: var(--w-text); }
       *, *::before, *::after { box-sizing: border-box; }
-      button, input { font: inherit; }
+      button, input, select, textarea { font: inherit; }
       button { cursor: pointer; }
-      button:focus-visible, input:focus-visible { outline: 2px solid var(--w-link); outline-offset: 2px; }
+      button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--w-link); outline-offset: 2px; }
       svg { width: 18px; height: 18px; flex: none; }
       .launcher { display: flex; align-items: center; gap: 10px; min-height: 48px; max-width: min(340px, calc(100vw - 32px)); padding: 10px 16px; border: 0; border-radius: 12px; background: var(--widget-accent); color: var(--widget-on-accent); font-weight: 700; box-shadow: 0 10px 28px rgb(16 51 70 / .2); }
       .launcher span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-      .launcher[hidden], .panel[hidden], .attachment-preview[hidden], .status[hidden] { display: none; }
+      .launcher[hidden], .panel[hidden], .attachment-preview[hidden], .status[hidden], .survey[hidden], .finish-conversation[hidden], .composer[hidden] { display: none; }
       .panel { display: flex; flex-direction: column; width: min(420px, calc(100vw - 32px)); height: min(640px, calc(100dvh - 48px)); overflow: hidden; border: 1px solid var(--w-border); border-radius: 16px; background: var(--w-surface); box-shadow: 0 20px 45px rgb(20 62 83 / .18), 0 3px 10px rgb(18 52 72 / .06); }
       .header { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 68px; padding: 12px 16px; border-bottom: 1px solid var(--w-border); background: var(--w-surface); }
       .identity { display: flex; align-items: center; gap: 10px; min-width: 0; }
@@ -126,6 +126,17 @@
       .file-input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
       .hint { margin: 0 2px; color: var(--w-muted); font-size: 11px; }
       .status { margin: 0 2px; color: var(--w-danger); font-size: 12px; }
+      .finish-conversation { align-self:flex-start; border:1px solid var(--w-border); border-radius:8px; padding:6px 10px; color:var(--w-text); background:var(--w-surface); font-size:12px; font-weight:600; }
+      .finish-conversation:hover { background:var(--w-subtle); }
+      .survey { display:grid; gap:9px; max-height:310px; overflow-y:auto; }
+      .survey h3 { margin:0; font-size:14px; }
+      .survey p { margin:0; font-size:11px; color:var(--w-muted); }
+      .survey label { display:grid; gap:4px; font-size:12px; font-weight:600; }
+      .survey select, .survey textarea { width:100%; padding:7px 9px; border:1px solid var(--w-border); border-radius:8px; color:var(--w-text); background:var(--w-canvas); }
+      .survey textarea { min-height:55px; resize:vertical; }
+      .survey-actions { display:flex; gap:8px; justify-content:flex-end; }
+      .survey-actions button { padding:7px 12px; border-radius:8px; border:1px solid var(--w-border); color:var(--w-text); background:var(--w-surface); }
+      .survey-actions button[type="submit"] { background:var(--widget-accent); color:var(--widget-on-accent); border-color:transparent; font-weight:700; }
       @media (max-width: 480px) { :host { right: 12px; bottom: 12px; } .panel { width: calc(100vw - 24px); height: min(640px, calc(100dvh - 24px)); } .header { padding-inline: 12px; } .messages { padding-inline: 12px; } }
       @media (max-width: 350px) { .send span { display: none; } .send { width: 40px; padding: 0; } }
 
@@ -139,6 +150,24 @@
       </header>
       <div class="messages" role="log" aria-label="Conversación" aria-live="polite" tabindex="0"></div>
       <div class="footer">
+        <button class="finish-conversation" type="button" hidden>Finalizar conversación</button>
+        <form class="survey" hidden aria-label="Encuesta de satisfacción">
+          <h3>¿Cómo fue tu experiencia?</h3>
+          <label>Satisfacción
+            <select name="satisfaction" required><option value="">Selecciona de 1 a 5</option><option value="1">1 · Muy mala</option><option value="2">2 · Mala</option><option value="3">3 · Regular</option><option value="4">4 · Buena</option><option value="5">5 · Excelente</option></select>
+          </label>
+          <label>¿Se resolvió tu consulta? (opcional)
+            <select name="resolution"><option value="">Prefiero no responder</option><option value="yes">Sí</option><option value="partial">Parcialmente</option><option value="no">No</option></select>
+          </label>
+          <label>Claridad de la respuesta (opcional)
+            <select name="clarity"><option value="">Prefiero no responder</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select>
+          </label>
+          <label>Comentario (opcional)
+            <textarea name="comment" maxlength="1000" placeholder="No incluyas datos personales"></textarea>
+          </label>
+          <p>Tu opinión ayuda a mejorar el asistente. No mide la exactitud de sus respuestas.</p>
+          <div class="survey-actions"><button class="omit-survey" type="button">Omitir</button><button type="submit">Enviar valoración</button></div>
+        </form>
         <div class="attachment-preview" hidden><span class="attachment-info"><strong></strong><small></small></span><button class="remove-attachment" type="button" aria-label="Quitar imagen adjunta" title="Quitar imagen">${svg("close")}</button></div>
         <form class="composer">
           <button class="action attach" type="button" aria-label="Adjuntar imagen" title="Adjuntar imagen">${svg("attach")}<span>Adjuntar</span></button>
@@ -163,6 +192,10 @@
   const preview = shadow.querySelector(".attachment-preview");
   const status = shadow.querySelector(".status");
   const newConversationButton = shadow.querySelector(".new-conversation");
+  const finishButton = shadow.querySelector(".finish-conversation");
+  const surveyForm = shadow.querySelector(".survey");
+  let completedAnswers = 0;
+  let surveyBusy = false;
   let attachment = null;
   let attachmentUrl = null;
   let sending = false;
@@ -187,7 +220,7 @@
     panel.hidden = !open;
     launcher.hidden = open;
     launcher.setAttribute("aria-expanded", String(open));
-    (open ? questionInput : launcher).focus();
+    (open ? (surveyForm.hidden ? questionInput : surveyForm.elements.satisfaction) : launcher).focus();
   }
 
   function readStoredValue(key) {
@@ -202,6 +235,11 @@
   }
 
   function resetConversation(message, preserveDraft = false) {
+    completedAnswers = 0;
+    finishButton.hidden = true;
+    surveyForm.hidden = true;
+    surveyForm.reset();
+    form.hidden = false;
     conversationId = typeof crypto.randomUUID === "function" ? crypto.randomUUID() : null;
     writeStoredValue(conversationStorageKey, conversationId);
     messages.replaceChildren();
@@ -214,7 +252,7 @@
   }
 
   function resetIfIdle() {
-    if (!sending && Date.now() - lastActivity >= idleMilliseconds) {
+    if (!sending && !surveyBusy && surveyForm.hidden && Date.now() - lastActivity >= idleMilliseconds) {
       resetConversation("La conversación se reinició por inactividad.", true);
       lastActivity = Date.now();
       writeStoredValue(activityStorageKey, String(lastActivity));
@@ -259,6 +297,19 @@
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
       signal,
+    });
+    if (!response.ok) {
+      const failure = await response.json().catch(() => null);
+      throw new Error(typeof failure?.detail === "string" ? failure.detail : `Error ${response.status}`);
+    }
+    return response.json();
+  }
+
+  async function sendSurvey(path, payload) {
+    const response = await fetch(`${apiBase.replace(/\/$/, "")}/chatbots/${chatbotId}/${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
     });
     if (!response.ok) {
       const failure = await response.json().catch(() => null);
@@ -517,10 +568,73 @@
     setOpen(false);
   });
   newConversationButton.addEventListener("click", () => {
-    if (sending || visualPreview) return;
+    if (sending || surveyBusy || visualPreview) return;
     resetConversation("Se inició una nueva conversación.");
     recordActivity();
     questionInput.focus();
+  });
+  finishButton.addEventListener("click", async () => {
+    if (sending || surveyBusy || !completedAnswers || visualPreview) return;
+    surveyBusy = true;
+    finishButton.disabled = true;
+    setStatus("");
+    const generation = identityGeneration;
+    try {
+      const identityToken = await fetchIdentityToken(generation);
+      if (generation !== identityGeneration) return;
+      const result = await sendSurvey("survey-offers", {
+        conversation_id: conversationId,
+        ...(identityToken ? { identity_token: identityToken } : {}),
+      });
+      if (generation !== identityGeneration) return;
+      if (result.state === "submitted") {
+        resetConversation("Esta conversación ya fue valorada. Inicia una nueva consulta.");
+      } else {
+        surveyForm.hidden = false;
+        form.hidden = true;
+        finishButton.hidden = true;
+        surveyForm.elements.satisfaction.focus();
+      }
+    } catch (error) {
+      if (generation === identityGeneration) setStatus(error.message || "No se pudo abrir la encuesta. Inténtalo otra vez.");
+    } finally {
+      surveyBusy = false;
+      finishButton.disabled = false;
+    }
+  });
+  shadow.querySelector(".omit-survey").addEventListener("click", () => {
+    if (surveyBusy) return;
+    resetConversation("Se inició una nueva conversación.");
+    recordActivity();
+    questionInput.focus();
+  });
+  surveyForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (surveyBusy || visualPreview) return;
+    surveyBusy = true;
+    for (const control of surveyForm.elements) control.disabled = true;
+    setStatus("");
+    const generation = identityGeneration;
+    try {
+      const identityToken = await fetchIdentityToken(generation);
+      if (generation !== identityGeneration) return;
+      await sendSurvey("survey-responses", {
+        conversation_id: conversationId,
+        ...(identityToken ? { identity_token: identityToken } : {}),
+        satisfaction_score: Number(surveyForm.elements.satisfaction.value),
+        resolution: surveyForm.elements.resolution.value || null,
+        clarity_score: surveyForm.elements.clarity.value ? Number(surveyForm.elements.clarity.value) : null,
+        comment: surveyForm.elements.comment.value.trim() || null,
+      });
+      if (generation !== identityGeneration) return;
+      resetConversation("Gracias por compartir tu opinión. Se inició una nueva conversación.");
+      recordActivity();
+    } catch (error) {
+      if (generation === identityGeneration) setStatus(error.message || "No se pudo enviar. Inténtalo otra vez u omite la encuesta.");
+    } finally {
+      surveyBusy = false;
+      for (const control of surveyForm.elements) control.disabled = false;
+    }
   });
   questionInput.addEventListener("input", recordActivity);
   shadow.querySelector(".attach").addEventListener("click", () => fileInput.click());
@@ -583,8 +697,11 @@
       feedback.remove();
       addMessage(result.answer, "assistant");
       if (storeConversationId(result.conversation_id)) {
+        completedAnswers = 0;
         setStatus("La conversación anterior venció. Se inició una nueva conversación.");
       }
+      completedAnswers += 1;
+      finishButton.hidden = false;
       if (attachment === image) clearAttachment();
       recordActivity();
     } catch (error) {
@@ -611,7 +728,7 @@
   addMessage(welcome, "assistant");
   resetIfIdle();
   recordActivity();
-  if (visualPreview) { panel.hidden=false; launcher.hidden=true; for (const control of form.elements) control.disabled=true; fileInput.disabled=true; newConversationButton.disabled=true; shadow.querySelector(".hint").textContent="Vista de apariencia · La conversación se prueba en Publicación."; }
+  if (visualPreview) { panel.hidden=false; launcher.hidden=true; for (const control of form.elements) control.disabled=true; fileInput.disabled=true; newConversationButton.disabled=true; finishButton.hidden=true; shadow.querySelector(".hint").textContent="Vista de apariencia · La conversación se prueba en Publicación."; }
   if (document.body) document.body.appendChild(host);
   else document.addEventListener("DOMContentLoaded", () => document.body.appendChild(host), { once: true });
 })();

@@ -61,3 +61,5 @@ El editor genera estos atributos a partir de la selección guardada.
 ## Memoria e identidad del sitio
 
 El widget ofrece **Nueva conversación** y reinicia por inactividad; el valor inicial es 30 minutos y se ajusta con `data-idle-minutes` (1–1440). La integración opcional con sitios que autentican visitantes se configura con `data-identity-endpoint`. Consulte la [guía de memoria e identidad](../docs/conversation-memory.md) antes de activar esta opción.
+
+Después de una respuesta completada, **Finalizar conversación** registra una oferta y abre un cuestionario voluntario. La puntuación de satisfacción (1–5) es obligatoria solo si se envía; resolución, claridad y comentario son opcionales. **Omitir** inicia una nueva conversación sin valoración. Un error de red mantiene los datos seleccionados para reintentar. **Cerrar asistente** oculta el panel y mantiene el formulario. La vista de apariencia del editor no envía encuestas. El flujo usa las rutas REST `survey-offers` y `survey-responses` con el mismo origen e identidad de la conversación; consulta la [guía de satisfacción](../docs/conversation-satisfaction.md).

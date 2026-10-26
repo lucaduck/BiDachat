@@ -35,6 +35,7 @@ def test_settings_return_configuration_without_secrets():
     assert response.json()["gemini_configured"] is True
     assert response.json()["openai_configured"] is False
     assert response.json()["openrouter_configured"] is True
+    assert response.json()["external_ai_gateway_providers"] == []
     assert response.json()["widget_allowed_origins"] == ["https://dashboard.example"]
     assert response.json()["vision_provider"] == "openrouter"
     assert response.json()["vision_model"] == "visual-fixture"
@@ -45,6 +46,7 @@ def test_settings_return_configuration_without_secrets():
         "openai_configured",
         "openrouter_configured",
         "vertex_configured",
+        "external_ai_gateway_providers",
         "embedding_provider",
         "embedding_model",
         "embedding_dimensions",

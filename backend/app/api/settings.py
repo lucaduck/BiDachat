@@ -29,6 +29,9 @@ def get_system_settings(
         ),
         embedding_provider=settings.embedding_provider,
         vertex_configured=settings.vertex_enabled,
+        external_ai_gateway_providers=list(
+            settings.configured_external_ai_gateway_providers
+        ),
         embedding_model=settings.embedding_model,
         embedding_dimensions=settings.embedding_dimensions,
         vision_provider=settings.vision_provider,

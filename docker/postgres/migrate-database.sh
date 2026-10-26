@@ -183,4 +183,16 @@ reconcile_migration \
           AND conname = 'conversations_identity_hash_check'
     );"
 
+reconcile_migration \
+    007_conversation_feedback \
+    /migrations/007_conversation_feedback.up.sql \
+    "SELECT
+        to_regclass('public.conversation_feedback') IS NOT NULL
+        AND to_regclass('public.conversation_feedback_chatbot_offered_idx') IS NOT NULL
+        AND to_regclass('public.conversation_feedback_comment_retention_idx') IS NOT NULL;" \
+    "SELECT
+        to_regclass('public.conversation_feedback') IS NULL
+        AND to_regclass('public.conversation_feedback_chatbot_offered_idx') IS NULL
+        AND to_regclass('public.conversation_feedback_comment_retention_idx') IS NULL;"
+
 printf 'Database schema is up to date\n'

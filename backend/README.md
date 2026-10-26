@@ -52,9 +52,10 @@ Compose pasa explícitamente `APP_ENV` al backend y usa `BACKEND_PORT` para diag
 
 ### Proveedor OpenAI
 
-Configurar `OPENAI_API_KEY` y `OPENAI_MODEL` en el `.env` de la raíz. Elegir un
-modelo disponible en la cuenta que admita Responses API; las consultas con
-capturas requieren soporte de imágenes. La clave solo se entrega al backend.
+Para una instalación nueva, configura `OPENAI_API_KEY`, `OPENAI_MODEL` y añade
+`openai` a `EXTERNAL_AI_GATEWAY_PROVIDERS`. LiteLLM recibe la clave dentro de la
+red Docker y FastAPI solo conserva la clave interna del gateway. Elegir un modelo
+de Responses API; las consultas con capturas requieren soporte de imágenes.
 Al arrancar, `app.bootstrap` registra la combinación `openai`/modelo y el
 selector administrativo permite asignarla a un chatbot (RF-08, CA-UC03-01).
 
@@ -70,23 +71,34 @@ Referencia: [Responses e imágenes](https://developers.openai.com/api/docs/guide
 
 ### Proveedor OpenRouter
 
-Configurar `OPENROUTER_API_KEY` y `OPENROUTER_MODEL` en el `.env` de la raíz.
-El modelo usa el _slug_ de OpenRouter, por ejemplo el que se haya habilitado en
-la cuenta de consumo. Para enviar capturas, escoger un modelo que acepte
-imágenes. `OPENROUTER_SITE_URL` es opcional y se envía como referencia del sitio
-en la solicitud. La clave solo se monta en el backend; el navegador y el widget
-nunca la reciben.
+Configura `OPENROUTER_API_KEY`, `OPENROUTER_MODEL` y añade `openrouter` a
+`EXTERNAL_AI_GATEWAY_PROVIDERS`. LiteLLM recibe la clave dentro de la red Docker;
+el navegador, el widget y las solicitudes de FastAPI no la reciben. El modelo
+usa el _slug_ completo de OpenRouter, por ejemplo el habilitado en la cuenta de
+consumo. Para enviar capturas, escoger un modelo que acepte imágenes.
+`OPENROUTER_SITE_URL` es opcional y se envía como referencia del sitio en la
+solicitud.
 
 Al arrancar, `app.bootstrap` registra la combinación `openrouter`/modelo para
 seleccionarla en el asistente de cada chatbot. El proveedor usa Chat Completions
 con instrucciones, contexto RAG y una imagen opcional. Consulta la
 [referencia oficial de Chat Completions](https://openrouter.ai/docs/api/api-reference/chat/send-chat-completion-request?explorer=true).
 
+### Gateway de proveedores externos
+
+`EXTERNAL_AI_GATEWAY_PROVIDERS` declara los proveedores de generación que se
+enrutan por LiteLLM: `gemini`, `openai`, `openrouter` y `vertex`. Cada uno exige
+un catálogo explícito mediante su variable `*_MODEL` o `*_MODELS`; LiteLLM usa
+un alias por proveedor, por lo que un mismo identificador de modelo no puede
+redirigirse accidentalmente a otro proveedor. Ollama y los embeddings no pasan
+por el gateway. Consulta la [guía operativa](../docs/external-ai-gateway.md)
+antes de activar un proveedor.
+
 ## Persistencia
 
 `app/database/` crea el motor y las sesiones asíncronas. Cada servicio debe delimitar su transacción y confirmar con `commit()` solo cuando la operación completa haya terminado; una excepción dentro del contexto de sesión ejecuta `rollback()`.
 
-`app/models/` representa `users`, `auth_sessions`, `llm_models`, `chatbots`, `documents`, `document_chunks` y `queries`. Las migraciones SQL continúan siendo la fuente del esquema; los modelos no crean ni alteran tablas durante el arranque. La dimensión actual de `document_chunks.embedding` es 768 y solo debe migrarse si cambia la dimensión; cambiar el modelo requiere reprocesar documentos.
+`app/models/` representa las entidades persistentes, incluidas `chatbots`, `queries`, `conversations` y `conversation_feedback`. Las migraciones SQL continúan siendo la fuente del esquema; los modelos no crean ni alteran tablas durante el arranque. La dimensión actual de `document_chunks.embedding` es 768 y solo debe migrarse si cambia la dimensión; cambiar el modelo requiere reprocesar documentos.
 
 `app/services/authentication_service.py` valida credenciales, emite sesiones, comprueba expiración y actividad del usuario, y revoca sesiones. Las contraseñas se almacenan con scrypt y una sal aleatoria; los tokens de sesión se generan con entropía criptográfica y PostgreSQL conserva únicamente su digest SHA-256. BIDACHAT no ofrece registro público de investigadores.
 
@@ -101,6 +113,8 @@ de forma aislada por chatbot. La carga devuelve `ready` o `failed` una vez
 terminado el procesamiento. Los originales se mantienen en volumen privado.
 
 `app/services/query_service.py` crea el registro al admitir una consulta y conserva el modelo configurado en ese instante. Después marca éxito, fallo con duración observada o interrupción sin duración. `app/services/metrics_service.py` agrupa esos registros por chatbot; `GET /api/v1/chatbots/{chatbot_id}/metrics` exige sesión administrativa y acepta opcionalmente un periodo UTC semiabierto mediante `started_at` y `ended_at`, que deben enviarse juntos. El resumen separa estados y reporta la media de respuestas exitosas junto con su número de muestras; si no hay muestras devuelve `null`, no `0`.
+
+`app/services/satisfaction_service.py` registra una oferta voluntaria y una respuesta por conversación vigente y completada, conservando el aislamiento por chatbot, origen e identidad firmada. Los POST públicos `survey-offers` y `survey-responses` no exponen lecturas. `app/services/satisfaction_metrics_service.py` entrega agregados por fecha UTC de oferta y comentarios paginados solo al panel autenticado. La migración `007_conversation_feedback` mantiene puntuaciones tras limpiar la memoria; la limpieza periódica borra únicamente el texto del comentario a los 90 días. Contrato y denominadores: [guía de satisfacción](../docs/conversation-satisfaction.md).
 
 `app/services/chatbot_deletion_service.py` bloquea el chatbot, obtiene las claves privadas de sus documentos y elimina la fila en la transacción. Las cascadas eliminan documentos, fragmentos y consultas. Solo tras el `commit` el endpoint elimina los originales del volumen; un rollback conserva los archivos. Las admisiones de carga y consulta toman un bloqueo compatible, por lo que no pueden crear trabajo durante el borrado. Una limpieza física fallida queda registrada internamente y nunca expone el archivo mediante la API.
 

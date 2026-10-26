@@ -18,7 +18,7 @@ docker compose up -d database
 docker compose ps
 ```
 
-La primera creación del volumen ejecuta, en orden, las migraciones `001` a `006` mediante `docker/postgres/init-database.sh`. `psql` recibe la dimensión desde `EMBEDDING_DIMENSIONS` después de validar que sea un entero positivo. Cambiarla después de crear el volumen no modifica una columna existente: requiere una migración y regenerar embeddings.
+La primera creación del volumen ejecuta, en orden, las migraciones `001` a `007` mediante `docker/postgres/init-database.sh`. `psql` recibe la dimensión desde `EMBEDDING_DIMENSIONS` después de validar que sea un entero positivo. Cambiarla después de crear el volumen no modifica una columna existente: requiere una migración y regenerar embeddings.
 
 El ejemplo local usa `vector(768)` y configura Ollama con `embeddinggemma:300m` para los embeddings. El proveedor y modelo de embeddings se eligen en `.env` de forma independiente del modelo de respuesta. Cambiar la dimensión requiere una migración compatible; cambiar el modelo exige regenerar los embeddings.
 

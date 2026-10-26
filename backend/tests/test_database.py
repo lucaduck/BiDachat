@@ -29,6 +29,7 @@ def test_all_migration_tables_have_models():
         "auth_sessions",
         "chatbots",
         "chatbot_documents",
+        "conversation_feedback",
         "conversation_messages",
         "conversations",
         "document_chunks",

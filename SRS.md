@@ -146,6 +146,15 @@ explícito habilitado; las consultas conservan el modelo ejecutado aunque cambie
 la configuración posterior. Un modelo retirado no puede seleccionarse ni se
 sustituye silenciosamente. Vertex también puede configurarse explícitamente como
 perfil visual global de RF-13. Su activación no modifica el perfil de embeddings.
+
+**Centralización de proveedores externos — 21 de octubre de 2026:** Los
+proveedores externos habilitados para generación conversacional o visual podrán
+utilizar un gateway LiteLLM privado, con un catálogo explícito de proveedor y
+modelo. El cambio de transporte no modifica las fuentes RAG, embeddings,
+memoria, métricas ni el aislamiento entre chatbots. Ollama y los embeddings
+permanecen fuera del gateway. Un error del gateway no podrá redirigir una
+consulta a otro proveedor o modelo sin que el administrador lo haya
+configurado.
 El gateway usa credenciales privadas, no publica puertos y puede deshabilitarse.
 RNF-15 permite la autenticación Google necesaria para esta integración de IA;
 los datos persistentes y el backend permanecen en infraestructura propia.
@@ -178,6 +187,9 @@ los datos persistentes y el backend permanecen en infraestructura propia.
 | **RF-25** | El sistema deberá registrar el tiempo de respuesta de las consultas. |
 | **RF-26** | El sistema deberá asociar las métricas registradas con el chatbot correspondiente. |
 | **RF-27** | El investigador deberá poder consultar las métricas de uso desde la aplicación web mediante gráficos de consultas, tiempos de respuesta y estados, filtrando por chatbot, periodo o fechas personalizadas y estado, con agrupación diaria, semanal o mensual. |
+| **RF-37** | Tras una respuesta completada, el usuario podrá finalizar la conversación y responder u omitir una encuesta voluntaria con satisfacción de 1 a 5, resolución y claridad opcionales y comentario opcional. Solo se registrará una respuesta por conversación. |
+| **RF-38** | El investigador autenticado podrá consultar ofertas, respuestas, participación, satisfacción, claridad y resolución por chatbot y periodo, con sus denominadores, gráficos y tabla accesible. Los comentarios serán de acceso administrativo paginado. |
+| **RF-39** | Las ofertas y puntuaciones sobrevivirán a la limpieza de memoria conversacional; el texto de comentarios se eliminará a los 90 días de su envío y todas las evaluaciones se eliminarán al borrar el chatbot. |
 
 ## 5.6 Personalización y vista previa del widget
 
@@ -439,6 +451,9 @@ Los siguientes casos de uso agrupan los requisitos funcionales en flujos compren
 - **CA-UC06-11:** Al iniciar una nueva conversación o vencer el periodo de inactividad del widget, el siguiente mensaje no incorpora turnos de la conversación anterior.
 - **CA-UC06-12:** Una identidad firmada vigente solo recupera memoria de su propia identidad, chatbot y origen; una credencial modificada, vencida o no disponible es rechazada.
 - **CA-UC06-13:** La limpieza periódica elimina conversaciones vencidas y conserva consultas y métricas históricas.
+- **CA-UC06-14:** Tras una respuesta completada, «Finalizar conversación» registra una sola oferta y muestra la encuesta; «Nueva conversación» y «Cerrar asistente» no la ofrecen automáticamente.
+- **CA-UC06-15:** El usuario puede omitir o enviar una satisfacción de 1 a 5 con campos opcionales; un reenvío idéntico se confirma sin duplicar y uno diferente se rechaza. Un fallo de red conserva el borrador.
+- **CA-UC06-16:** La API de encuesta rechaza de forma indistinguible conversaciones ajenas, vencidas o sin respuesta completada; exige origen e identidad vigentes y limita solicitudes.
 
 ## UC-07 — Realizar una consulta multimodal con imagen
 
@@ -503,6 +518,8 @@ Los siguientes casos de uso agrupan los requisitos funcionales en flujos compren
 - **CA-UC08-05:** Los gráficos y totales deben usar los mismos registros y filtros; se pueden consultar periodos de 7, 30 o 90 días, historial completo o fechas personalizadas inclusivas en UTC.
 - **CA-UC08-06:** Las agrupaciones diaria, semanal y mensual muestran periodos sin consultas como cero y tiempos sin medición como no disponibles; los filtros se conservan en la URL.
 - **CA-UC08-07:** La interfaz permite recuperar fallos de carga, informa rangos inválidos y ofrece una tabla accesible con los valores de los gráficos.
+- **CA-UC08-08:** Las ofertas se agrupan por fecha UTC de oferta; participación usa respuestas/ofertas, CSAT usa puntuaciones 4 o 5/respuestas y claridad y resolución usan solo respuestas con esos datos. Sin muestra, la tasa se presenta como no disponible.
+- **CA-UC08-09:** Solo el administrador puede consultar agregados y comentarios paginados; la limpieza de memoria conserva evaluaciones, la limpieza a 90 días borra texto y el borrado del chatbot elimina sus evaluaciones.
 
 ---
 
@@ -515,9 +532,9 @@ Los siguientes casos de uso agrupan los requisitos funcionales en flujos compren
 | **UC-03** Configurar chatbot | RF-08, RF-09, RF-11 |
 | **UC-04** Gestionar documentos y RAG | RF-13, RF-14, RF-15, RF-16, RF-17 |
 | **UC-05** Integrar chatbot | RF-10, RF-23 |
-| **UC-06** Consulta conversacional | RF-16, RF-18, RF-20, RF-21, RF-22, RF-24, RF-25, RF-26, RF-31, RF-32, RF-33 |
+| **UC-06** Consulta conversacional | RF-16, RF-18, RF-20, RF-21, RF-22, RF-24, RF-25, RF-26, RF-31, RF-32, RF-33, RF-37, RF-39 |
 | **UC-07** Consulta multimodal | RF-12, RF-16, RF-18, RF-19, RF-20, RF-21, RF-22, RF-24, RF-25 |
-| **UC-08** Consultar métricas | RF-24, RF-25, RF-26, RF-27 |
+| **UC-08** Consultar métricas | RF-24, RF-25, RF-26, RF-27, RF-38, RF-39 |
 
 ---
 

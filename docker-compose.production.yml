@@ -3,7 +3,7 @@ name: bidachat
 services:
   litellm:
     image: ghcr.io/berriai/litellm:v1.105.1@sha256:b7b9e2c306343721802253d0dd9436b9634a2eb4e14da7c7cf06c5c7b7530802
-    profiles: ["vertex"]
+    profiles: ["ai-gateway", "vertex"]
     deploy:
       resources:
         limits:
@@ -14,22 +14,27 @@ services:
       VERTEX_LOCATION: ${VERTEX_LOCATION:-}
       VERTEX_MODEL: ${VERTEX_MODEL:-}
       VERTEX_MODELS: ${VERTEX_MODELS:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-}
+      GEMINI_MODELS: ${GEMINI_MODELS:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-}
+      OPENAI_MODELS: ${OPENAI_MODELS:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENROUTER_MODEL: ${OPENROUTER_MODEL:-}
+      OPENROUTER_MODELS: ${OPENROUTER_MODELS:-}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OR_SITE_URL: ${OPENROUTER_SITE_URL:-}
+      OR_APP_NAME: BIDACHAT
+      EXTERNAL_AI_GATEWAY_PROVIDERS: ${EXTERNAL_AI_GATEWAY_PROVIDERS:-}
       LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY:-}
       LITELLM_CPUS: ${LITELLM_CPUS:-}
       LITELLM_MEMORY_LIMIT: ${LITELLM_MEMORY_LIMIT:-}
-      GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/vertex-service-account.json
       LITELLM_LOCAL_MODEL_COST_MAP: "True"
       LITELLM_LOG: ERROR
       DISABLE_ADMIN_UI: "True"
     entrypoint: ["python", "/app/bidachat/start.py"]
     volumes:
       - ./docker/litellm:/app/bidachat:ro
-      - type: bind
-        source: ${VERTEX_CREDENTIALS_FILE:-./secrets/vertex-service-account.json}
-        target: /run/secrets/vertex-service-account.json
-        read_only: true
-        bind:
-          create_host_path: false
     healthcheck:
       test:
         [
@@ -84,16 +89,20 @@ services:
       DOCUMENT_MAX_SIZE_BYTES: ${DOCUMENT_MAX_SIZE_BYTES:-20971520}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       GEMINI_MODEL: ${GEMINI_MODEL:-}
+      GEMINI_MODELS: ${GEMINI_MODELS:-}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       OPENAI_MODEL: ${OPENAI_MODEL:-}
+      OPENAI_MODELS: ${OPENAI_MODELS:-}
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
       OPENROUTER_MODEL: ${OPENROUTER_MODEL:-}
+      OPENROUTER_MODELS: ${OPENROUTER_MODELS:-}
       OPENROUTER_SITE_URL: ${OPENROUTER_SITE_URL:-}
       VERTEX_ENABLED: ${VERTEX_ENABLED:-false}
       VERTEX_MODEL: ${VERTEX_MODEL:-}
       VERTEX_MODELS: ${VERTEX_MODELS:-}
       LITELLM_BASE_URL: http://litellm:4000
       LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY:-}
+      EXTERNAL_AI_GATEWAY_PROVIDERS: ${EXTERNAL_AI_GATEWAY_PROVIDERS:-}
       CONVERSATION_TTL_HOURS: ${CONVERSATION_TTL_HOURS:-24}
       CONVERSATION_MAX_TURNS: ${CONVERSATION_MAX_TURNS:-12}
       CONVERSATION_MAX_CHARS: ${CONVERSATION_MAX_CHARS:-12000}

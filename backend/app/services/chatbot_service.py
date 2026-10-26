@@ -28,9 +28,11 @@ class ChatbotService:
         self.settings = settings if settings is not None else get_settings()
 
     def model_available(self, model: LlmModel) -> bool:
-        return model.provider != "vertex" or self.settings.vertex_model_available(
-            model.model
-        )
+        if model.provider == "vertex":
+            return self.settings.vertex_model_available(model.model)
+        if self.settings.provider_uses_gateway(model.provider):
+            return self.settings.gateway_model_available(model.provider, model.model)
+        return True
 
     async def list_chatbots(self, session: AsyncSession) -> list[ChatbotDetails]:
         result = await session.execute(

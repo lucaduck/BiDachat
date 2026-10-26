@@ -81,15 +81,18 @@ def test_vertex_contract_preserves_context_and_private_auth(monkeypatch, mime):
         assert str(request.url) == "http://litellm:4000/v1/chat/completions"
         assert request.headers["authorization"] == f"Bearer {KEY}"
         payload = json.loads(request.content)
-        assert payload["model"] == MODEL
+        assert payload["model"] == f"vertex/{MODEL}"
         assert payload["stream"] is False
         assert "untrusted evidence" in payload["messages"][0]["content"]
         parts = payload["messages"][1]["content"]
-        assert "Total 42" in parts[0]["text"]
-        assert "Dashboard actual" in parts[0]["text"]
-        assert "Patricio" in parts[0]["text"]
         if mime:
+            prompt = parts[0]["text"]
             assert parts[1]["image_url"]["url"] == f"data:{mime};base64,aW1hZ2U="
+        else:
+            prompt = parts
+        assert "Total 42" in prompt
+        assert "Dashboard actual" in prompt
+        assert "Patricio" in prompt
         assert KEY not in request.content.decode()
         return httpx.Response(200, json=result())
 
@@ -148,7 +151,7 @@ def test_vertex_failure_does_not_retry_or_expose_body(monkeypatch, status):
 )
 def test_invalid_or_incomplete_result_is_not_success(monkeypatch, response):
     install_transport(monkeypatch, lambda _: httpx.Response(200, json=response))
-    with pytest.raises(ProviderError, match="Invalid or incomplete"):
+    with pytest.raises(ProviderError, match="Invalid or incomplete gateway"):
         ask()
 
 
@@ -157,7 +160,7 @@ def test_timeout_is_safe(monkeypatch):
         raise httpx.ReadTimeout(KEY, request=request)
 
     install_transport(monkeypatch, respond)
-    with pytest.raises(ProviderError, match="timed out"):
+    with pytest.raises(ProviderError, match="gateway request timed out"):
         ask()
 
 

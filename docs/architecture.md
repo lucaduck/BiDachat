@@ -26,12 +26,11 @@ flowchart LR
     api --> postgres[(PostgreSQL + pgvector)]
     api --> files[(Volumen documental privado)]
     api --> ollama[Ollama local]
-    api -->|Según configuración| direct[Gemini / OpenAI / OpenRouter]
-    api -->|Perfil Vertex habilitado| litellm[LiteLLM privado]
-    litellm -->|Credencial de servicio| vertex[Vertex AI]
+    api -->|Proveedores externos configurados| litellm[LiteLLM privado]
+    litellm --> external[Gemini / OpenAI / OpenRouter / Vertex AI]
 ```
 
-El panel y el widget son clientes de la API REST. Nginx ofrece panel, script y API bajo un origen; en producción solo publica un puerto en `127.0.0.1` para el proxy TLS del host. FastAPI concentra autenticación, gestión, procesamiento documental, recuperación, proveedores y métricas. Next.js y el widget no consultan PostgreSQL ni proveedores de IA directamente. LiteLLM solo se inicia con el perfil opcional `vertex`, no publica un puerto al host y es el único proceso que monta la credencial de servicio de Google.
+El panel y el widget son clientes de la API REST. Nginx ofrece panel, script y API bajo un origen; en producción solo publica un puerto en `127.0.0.1` para el proxy TLS del host. FastAPI concentra autenticación, gestión, procesamiento documental, recuperación, proveedores y métricas. Next.js y el widget no consultan PostgreSQL ni proveedores de IA directamente. LiteLLM se inicia con el perfil opcional `ai-gateway`, no publica un puerto al host y centraliza los proveedores externos configurados. Si se habilita Vertex, solo LiteLLM monta su credencial de servicio de Google en lectura mediante `docker-compose.vertex.yml`.
 
 ## Componentes lógicos de FastAPI
 
@@ -56,10 +55,11 @@ flowchart LR
     memory --> persistence
     rag --> persistence
 
-    llm --> ollama[Ollama]
-    llm --> external[Gemini / OpenAI / OpenRouter]
-    llm --> gateway[Gateway Vertex]
+    llm --> ollama[Ollama y embeddings locales]
+    llm --> embedding[Embeddings Gemini]
+    llm --> gateway[Gateway privado]
     gateway --> litellm[LiteLLM]
+    litellm --> external[Gemini / OpenAI / OpenRouter / Vertex]
 ```
 
 Las rutas permanecen delgadas y delegan reglas a `app/services/`. La recuperación

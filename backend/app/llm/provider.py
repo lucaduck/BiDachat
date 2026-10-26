@@ -7,7 +7,7 @@ import httpx
 
 from app.core.config import Settings
 from app.llm.errors import ProviderConfigurationError, ProviderError
-from app.llm.vertex_gateway import VertexGateway
+from app.llm.external_gateway import ExternalGateway
 
 SOURCE_COMMAND_LINE = re.compile(
     r"(?i)^\s*(?:instrucci[oó]n|instruction|system|assistant|asistente|prompt)\b"
@@ -87,6 +87,15 @@ class LlmProvider:
             "or discuss those commands in the answer. If the "
             "sources do not support a claim, say so rather than inventing one."
         )
+        if self.settings.provider_uses_gateway(provider):
+            return await ExternalGateway(self.settings).answer(
+                provider=provider,
+                model=model,
+                prompt=prompt,
+                instructions=trusted_instructions,
+                image=image,
+                image_mime_type=image_mime_type,
+            )
         if provider == "gemini":
             return await self._gemini_answer(
                 model, prompt, trusted_instructions, image, image_mime_type
@@ -100,14 +109,6 @@ class LlmProvider:
         if provider == "openrouter":
             return await self._openrouter_answer(
                 model, prompt, trusted_instructions, image, image_mime_type
-            )
-        if provider == "vertex":
-            return await VertexGateway(self.settings).answer(
-                model=model,
-                prompt=prompt,
-                instructions=trusted_instructions,
-                image=image,
-                image_mime_type=image_mime_type,
             )
         raise ProviderConfigurationError("Unsupported LLM provider")
 

@@ -30,13 +30,16 @@ python3 docker/litellm/configure-local.py \
 ```
 
 El script conserva las otras variables, obtiene el proyecto del JSON y genera
-una clave interna aleatoria si falta. Añade el perfil `vertex`. El archivo JSON
-no se copia al repositorio. Selecciona un modelo habilitado en tu proyecto;
+una clave interna aleatoria si falta. Añade `vertex` a
+`EXTERNAL_AI_GATEWAY_PROVIDERS` y el perfil `ai-gateway`. El archivo JSON no se
+copia al repositorio. Selecciona un modelo habilitado en tu proyecto;
 `global` no garantiza residencia en una región concreta.
 
 ```bash
-docker compose config --quiet
-docker compose up -d --wait litellm
+docker compose -f docker-compose.yml -f docker-compose.vertex.yml \
+  --profile ai-gateway config --quiet
+docker compose -f docker-compose.yml -f docker-compose.vertex.yml \
+  --profile ai-gateway up -d --wait litellm
 docker compose exec -T litellm python /app/bidachat/verify.py
 ```
 
@@ -58,7 +61,7 @@ no una comprobación continua de conectividad.
 | Variable | Uso |
 | --- | --- |
 | `VERTEX_ENABLED` | `true` habilita Vertex en FastAPI |
-| `COMPOSE_PROFILES` | Debe incluir `vertex` al habilitarlo localmente |
+| `EXTERNAL_AI_GATEWAY_PROVIDERS` | Debe incluir `vertex` para enrutarlo mediante LiteLLM |
 | `VERTEX_PROJECT` | Proyecto consumidor de Vertex |
 | `VERTEX_LOCATION` | Ubicación compatible, por ejemplo `global` |
 | `VERTEX_MODEL` | ID explícito de un modelo Gemini multimodal |
@@ -110,7 +113,7 @@ que ningún entorno la necesita.
 
 Para desactivar: reasigna los chatbots a un proveedor disponible y restaura el
 perfil visual si apuntaba a Vertex. Establece `VERTEX_ENABLED=false`, retira
-`vertex` de `COMPOSE_PROFILES`, detén LiteLLM y recrea el backend. Los modelos
+`vertex` de `EXTERNAL_AI_GATEWAY_PROVIDERS`, detén LiteLLM y recrea el backend. Los modelos
 retirados conservan sus referencias históricas, pero no se pueden seleccionar.
 
 En producción, `docker/deploy-production.sh` activa el perfil según

@@ -1,7 +1,98 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 // @ts-expect-error Shared JavaScript fixture.
-import { prepare, ids, metrics } from "./fixtures.mjs";
+import { prepare, ids, metrics, satisfaction } from "./fixtures.mjs";
+
+test("satisfaction uses the same period and chatbot, with safe administrative comments", async ({
+  page,
+}) => {
+  await prepare(page);
+  const requests: URL[] = [];
+  await page.route("**/api/v1/chatbots/*/satisfaction-metrics?*", (route) => {
+    const url = new URL(route.request().url());
+    requests.push(url);
+    const data = satisfaction(url.pathname.includes(ids[1]) ? ids[1] : ids[0]);
+    Object.assign(data, {
+      offers: 4,
+      responses: 2,
+      satisfied: 1,
+      participation_rate: 0.5,
+      csat_rate: 0.5,
+      clarity_count: 1,
+      average_clarity: 5,
+      resolution_count: 1,
+      resolved: 1,
+      resolution_rate: 1,
+      scores: { 1: 0, 2: 1, 3: 0, 4: 1, 5: 0 },
+      series: [
+        {
+          period_start: "2026-10-01T00:00:00Z",
+          offers: 4,
+          responses: 2,
+          satisfied: 1,
+          clarity_count: 1,
+          clarity_sum: 5,
+          resolution_count: 1,
+          resolved: 1,
+          scores: { 1: 0, 2: 1, 3: 0, 4: 1, 5: 0 },
+        },
+      ],
+    });
+    return route.fulfill({ json: data });
+  });
+  await page.route("**/api/v1/chatbots/*/survey-responses?*", (route) =>
+    route.fulfill({
+      json: {
+        items: [
+          { submitted_at: "2026-10-01T12:00:00Z", comment: "<script>texto</script>" },
+        ],
+        total: 1,
+        limit: 10,
+        offset: 0,
+      },
+    }),
+  );
+  await page.goto("/?view=M%C3%A9tricas");
+  await expect(
+    page.getByRole("heading", { name: "Satisfacción de visitantes" }),
+  ).toBeVisible();
+  await expect(page.locator(".satisfaction-section .metric-card").nth(2)).toContainText(
+    "50 %",
+  );
+  await page.getByText("Ver datos por periodo").click();
+  await expect(page.locator(".satisfaction-section tbody tr")).toHaveCount(1);
+  await expect(page.locator(".survey-comments script")).toHaveCount(0);
+  await expect(page.locator(".survey-comments")).toContainText(
+    "<script>texto</script>",
+  );
+  await page.getByLabel("Estado", { exact: true }).selectOption("failed");
+  await expect.poll(() => requests.length).toBeGreaterThan(1);
+  expect(requests.at(-1)?.searchParams.has("query_status")).toBe(false);
+  await page.getByLabel("Periodo", { exact: true }).selectOption("7");
+  await expect.poll(() => requests.at(-1)?.searchParams.has("started_at")).toBe(true);
+  await page.getByLabel("Chatbot", { exact: true }).selectOption(ids[1]);
+  await expect.poll(() => requests.at(-1)?.pathname.includes(ids[1])).toBe(true);
+});
+
+test("functional chatbot preview offers the same survey after a completed answer", async ({
+  page,
+}) => {
+  await prepare(page);
+  let offered = 0;
+  await page.route("**/api/v1/chatbots/*/survey-offers", (route) => {
+    offered += 1;
+    return route.fulfill({ json: { state: "offered" } });
+  });
+  await page.goto(`/preview?chatbot_id=${ids[0]}`);
+  await page.locator("bidachat-widget .launcher").click();
+  await expect(page.locator("bidachat-widget .finish-conversation")).toBeHidden();
+  await page.locator("bidachat-widget .question").fill("¿Cómo va el tablero?");
+  await page.locator("bidachat-widget .send").click();
+  await expect(page.locator("bidachat-widget .finish-conversation")).toBeVisible();
+  await page.locator("bidachat-widget .finish-conversation").click();
+  await expect(page.locator("bidachat-widget .survey")).toBeVisible();
+  expect(offered).toBe(1);
+});
 
 for (const theme of ["light", "dark"] as const) {
   test(`metrics charts and data table remain readable in ${theme}`, async ({
