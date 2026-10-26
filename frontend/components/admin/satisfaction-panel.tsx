@@ -89,16 +89,16 @@ export function SatisfactionPanel({
         <div className="metric-card">
           <dt>Participación</dt>
           <dd>{percent(metrics.participation_rate)}</dd>
-          <small>
+          <dd className="metric-detail">
             {metrics.responses} de {metrics.offers} ofertas
-          </small>
+          </dd>
         </div>
         <div className="metric-card">
           <dt>CSAT (4 o 5)</dt>
           <dd>{percent(metrics.csat_rate)}</dd>
-          <small>
+          <dd className="metric-detail">
             {metrics.satisfied} de {metrics.responses} respuestas
-          </small>
+          </dd>
         </div>
         <div className="metric-card">
           <dt>Claridad media</dt>
@@ -107,14 +107,14 @@ export function SatisfactionPanel({
               ? "Sin datos"
               : `${metrics.average_clarity.toFixed(1)} / 5`}
           </dd>
-          <small>{metrics.clarity_count} respuestas</small>
+          <dd className="metric-detail">{metrics.clarity_count} respuestas</dd>
         </div>
         <div className="metric-card">
           <dt>Consulta resuelta</dt>
           <dd>{percent(metrics.resolution_rate)}</dd>
-          <small>
+          <dd className="metric-detail">
             {metrics.resolved} de {metrics.resolution_count} respuestas
-          </small>
+          </dd>
         </div>
       </dl>
       <div className="metrics-charts-grid satisfaction-charts">

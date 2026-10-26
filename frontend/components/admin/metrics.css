@@ -101,9 +101,12 @@
   padding-top: 30px;
   border-top: 1px solid var(--border);
 }
-.satisfaction-section .metric-card small {
-  display: block;
+.satisfaction-section .metric-card dd.metric-detail {
   margin-top: 6px;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: normal;
+  line-height: 1.5;
   color: var(--muted);
 }
 .satisfaction-charts {
