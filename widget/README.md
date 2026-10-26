@@ -23,6 +23,20 @@ Docker publica el script en `/bidachat-widget.js` y una prueba en
 `WIDGET_ALLOWED_ORIGINS` y usa la URL pública HTTPS del frontend en `src`.
 El script no contiene claves ni accede a la base de datos o al proveedor LLM.
 
+La lista debe incluir también el origen del panel para usar la vista previa.
+Una lista vacía bloquea todas las consultas públicas. El backend exige un único
+encabezado `Origin` con coincidencia exacta; rechaza su ausencia, `null`, rutas,
+subdominios no registrados y valores múltiples antes de consultar datos o IA.
+Las entradas de configuración se normalizan (dominio, puerto predeterminado y
+barra final), pero no se admiten comodines. En producción use los orígenes HTTPS
+reales; no copie los valores localhost del ejemplo de desarrollo.
+
+Después de cambiar el `.env`, recree el backend con
+`docker compose up -d --force-recreate --no-deps backend` (o el Compose de producción).
+CORS y la validación usan la misma configuración. Los clientes de API fuera del
+navegador también deben enviar un origen permitido, pero pueden falsificarlo:
+esta lista no reemplaza autenticación, identidad firmada ni límites de consumo.
+
 El código generado incluye `data-context-selector="main"`. Al enviar cada
 pregunta, el widget extrae hasta 6000 caracteres de texto visible del primer
 elemento que coincida con ese selector y los envía como `page_context` a la
@@ -43,3 +57,9 @@ presenta una atribución de fuente sin datos verificables.
 La apariencia usa `data-primary-color` (color hexadecimal) y `data-icon`.
 Los iconos admitidos son `bot`, `chat`, `chart`, `book`, `sparkles` y `headset`.
 El editor genera estos atributos a partir de la selección guardada.
+
+## Memoria e identidad del sitio
+
+El widget ofrece **Nueva conversación** y reinicia por inactividad; el valor inicial es 30 minutos y se ajusta con `data-idle-minutes` (1–1440). La integración opcional con sitios que autentican visitantes se configura con `data-identity-endpoint`. Consulte la [guía de memoria e identidad](../docs/conversation-memory.md) antes de activar esta opción.
+
+Después de una respuesta completada, **Finalizar conversación** registra una oferta y abre un cuestionario voluntario. La puntuación de satisfacción (1–5) es obligatoria solo si se envía; resolución, claridad y comentario son opcionales. **Omitir** inicia una nueva conversación sin valoración. Un error de red mantiene los datos seleccionados para reintentar. **Cerrar asistente** oculta el panel y mantiene el formulario. La vista de apariencia del editor no envía encuestas. El flujo usa las rutas REST `survey-offers` y `survey-responses` con el mismo origen e identidad de la conversación; consulta la [guía de satisfacción](../docs/conversation-satisfaction.md).

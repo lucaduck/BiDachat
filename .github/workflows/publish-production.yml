@@ -67,9 +67,20 @@ jobs:
           POSTGRES_PASSWORD: ci_placeholder
           EMBEDDING_DIMENSIONS: "768"
           IMAGE_TAG: ${{ steps.revision.outputs.value }}
+          OLLAMA_CPU_LIMIT: "1"
+          OLLAMA_MEMORY_LIMIT: 1g
+          BACKEND_CPU_LIMIT: "1"
+          BACKEND_MEMORY_LIMIT: 1g
+          FRONTEND_CPU_LIMIT: "1"
+          FRONTEND_MEMORY_LIMIT: 1g
+          NGINX_CPU_LIMIT: "1"
+          NGINX_MEMORY_LIMIT: 1g
+          DATABASE_CPU_LIMIT: "1"
+          DATABASE_MEMORY_LIMIT: 1g
         run: |
           docker compose -f docker-compose.production.yml config --quiet
           docker compose -f docker-compose.production.yml -f docker-compose.gpu.yml config --quiet
+          docker compose -f docker-compose.production.yml --profile ai-gateway config --quiet
 
       - name: Sign in to GitHub Container Registry
         uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.5.0
@@ -128,6 +139,11 @@ jobs:
       DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
       RELEASE_SHA: ${{ needs.publish.outputs.revision }}
     steps:
+      - name: Check out the approved release
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ needs.publish.outputs.revision }}
+
       - name: Validate deployment configuration
         run: |
           test -n "$DEPLOY_HOST"
@@ -146,5 +162,13 @@ jobs:
 
       - name: Update the server and verify its health
         run: |
-          ssh -i ~/.ssh/id_ed25519 -o BatchMode=yes "$DEPLOY_USER@$DEPLOY_HOST" \
-            "cd '$DEPLOY_PATH' && git fetch origin production && git checkout production && git pull --ff-only origin production && test \"\$(git rev-parse HEAD)\" = '$RELEASE_SHA' && IMAGE_TAG='$RELEASE_SHA' sh docker/deploy-production.sh"
+          set -euo pipefail
+          tar -czf - \
+            docker-compose.production.yml docker-compose.gpu.yml \
+            docker/deploy-production.sh docker/backup-production.sh \
+            docker/verify-production-backup.sh docker/nginx/default.conf \
+            docker/litellm \
+            docker/postgres/init-database.sh docker/postgres/migrate-database.sh \
+            database/migrations \
+            | ssh -i ~/.ssh/id_ed25519 -o BatchMode=yes "$DEPLOY_USER@$DEPLOY_HOST" \
+                "cd '$DEPLOY_PATH' && test -f .env && tar --no-same-owner -xzf - && IMAGE_TAG='$RELEASE_SHA' sh docker/deploy-production.sh && printf '%s\\n' '$RELEASE_SHA' > .release-sha"

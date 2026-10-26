@@ -37,11 +37,18 @@ test("external host sends only current selected visible page context", async ({
       return;
     }
     requests.push(route.request().postDataJSON());
+    const payload = requests.at(-1)!;
     await route.fulfill({
       status: 200,
       contentType: "application/json",
       headers: { "access-control-allow-origin": "http://127.0.0.1:4173" },
-      body: JSON.stringify({ answer: "Respuesta", response_time_ms: 10 }),
+      body: JSON.stringify({
+        answer: "Respuesta",
+        id: "66666666-6666-4666-8666-666666666666",
+        conversation_id: payload.conversation_id,
+        completed_at: "2026-10-01T12:00:01Z",
+        response_time_ms: 10,
+      }),
     });
   });
   await page.route("http://127.0.0.1:4173/", (route) =>
@@ -58,6 +65,9 @@ test("external host sends only current selected visible page context", async ({
   await expect.poll(() => requests.length).toBe(1);
   expect(requests[0].page_context).toContain("Ventas 42");
   expect(requests[0].page_context).not.toMatch(/oculto|excluido|privada|secreto/i);
+  expect(requests[0].conversation_id).toMatch(
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+  );
   await page.locator("#metric").evaluate((element) => {
     element.textContent = "Ventas 57";
   });
@@ -66,6 +76,7 @@ test("external host sends only current selected visible page context", async ({
   await expect.poll(() => requests.length).toBe(2);
   expect(requests[1].page_context).toContain("Ventas 57");
   expect(requests[1].page_context).not.toContain("Ventas 42");
+  expect(requests[1].conversation_id).toBe(requests[0].conversation_id);
   await page.locator("#metric").evaluate((element) => {
     element.textContent = "Valor " + "7".repeat(7000);
   });
@@ -82,6 +93,61 @@ test("external host sends only current selected visible page context", async ({
   await page.locator("bidachat-widget .send").click();
   await expect.poll(() => requests.length).toBe(4);
   expect(requests[3].page_context).toBeUndefined();
+  expect(requests[3].conversation_id).toBe(requests[0].conversation_id);
+});
+
+test("preview sends only its dashboard context and keeps its conversation", async ({
+  page,
+}) => {
+  const requests: Array<Record<string, string>> = [];
+  await page.route("**/queries", async (route) => {
+    const payload = route.request().postDataJSON();
+    requests.push(payload);
+    await route.fulfill({
+      json: {
+        answer: "Respuesta del tablero",
+        id: "66666666-6666-4666-8666-666666666666",
+        conversation_id: payload.conversation_id,
+        completed_at: "2026-10-01T12:00:01Z",
+        response_time_ms: 12,
+      },
+    });
+  });
+  await page.goto(`/preview?chatbot_id=${ids[0]}`);
+  await page.getByRole("button", { name: "Abrir asistente BIDACHAT" }).click();
+  await page.getByRole("textbox", { name: "Pregunta" }).fill("¿Qué rendimiento hay?");
+  await page.getByRole("button", { name: "Enviar consulta" }).click();
+  await expect.poll(() => requests.length).toBe(1);
+  expect(requests[0].page_context).toContain("Rendimiento operativo");
+  expect(requests[0].page_context).toContain("89,4 %");
+  expect(requests[0].page_context).not.toContain("Prueba de integración");
+
+  await page
+    .locator(".preview-kpis strong")
+    .first()
+    .evaluate((element) => {
+      element.textContent = "91,7 %";
+    });
+  await page.getByRole("textbox", { name: "Pregunta" }).fill("¿Y ahora?");
+  await page.getByRole("button", { name: "Enviar consulta" }).click();
+  await expect.poll(() => requests.length).toBe(2);
+  expect(requests[1].page_context).toContain("91,7 %");
+  expect(requests[1].page_context).not.toContain("89,4 %");
+  expect(requests[1].conversation_id).toBe(requests[0].conversation_id);
+
+  await page.reload();
+  await page.getByRole("button", { name: "Abrir asistente BIDACHAT" }).click();
+  await page.getByRole("textbox", { name: "Pregunta" }).fill("¿Recuerdas el turno?");
+  await page.getByRole("button", { name: "Enviar consulta" }).click();
+  await expect.poll(() => requests.length).toBe(3);
+  expect(requests[2].conversation_id).toBe(requests[0].conversation_id);
+
+  await page.goto(`/preview?chatbot_id=${ids[1]}`);
+  await page.getByRole("button", { name: "Abrir asistente BIDACHAT" }).click();
+  await page.getByRole("textbox", { name: "Pregunta" }).fill("Nueva conversación");
+  await page.getByRole("button", { name: "Enviar consulta" }).click();
+  await expect.poll(() => requests.length).toBe(4);
+  expect(requests[3].conversation_id).not.toBe(requests[0].conversation_id);
 });
 test("navigation, history, deep link, refresh, editor close and preview return", async ({
   page,
@@ -188,6 +254,16 @@ test("provider filters models and changing it requires a new model", async ({
   await expect(page.getByLabel("Modelo de lenguaje")).toHaveValue("");
   await expect(page.locator("#wizard-model option")).toHaveCount(2);
   await expect(page.locator("#wizard-model option").last()).toHaveText("gpt-5.6-luna");
+  await page.getByLabel("Proveedor de IA").selectOption("vertex");
+  await expect(page.getByLabel("Modelo de lenguaje")).toHaveValue("");
+  await expect(page.locator("#wizard-model option")).toHaveCount(3);
+  await expect(page.locator("#wizard-model option").nth(1)).toHaveText(
+    "gemini-3.1-flash-lite",
+  );
+  await expect(page.locator("#wizard-model option").nth(2)).toHaveText(
+    "gemini-3.5-flash",
+  );
+  await page.getByLabel("Proveedor de IA").selectOption("openai");
   await page.getByRole("button", { name: "Guardar y continuar" }).click();
   await expect(page).toHaveURL(/step=2/);
   await page
@@ -226,10 +302,10 @@ test("documents and metrics filters keep their URL and avoid stale data", async 
   await page.reload();
   await expect(page.getByLabel("Chatbot", { exact: true })).toHaveValue(ids[1]);
   await page.goto("/?view=M%C3%A9tricas");
-  await page.getByLabel("Periodo").selectOption("7");
+  await page.getByLabel("Periodo", { exact: true }).selectOption("7");
   await page.getByLabel("Chatbot", { exact: true }).selectOption(ids[1]);
   await page.reload();
-  await expect(page.getByLabel("Periodo")).toHaveValue("7");
+  await expect(page.getByLabel("Periodo", { exact: true })).toHaveValue("7");
   await expect(page.getByLabel("Chatbot", { exact: true })).toHaveValue(ids[1]);
   await expect(page.locator(".metric-card").first().locator("dd")).toHaveText("8");
 });

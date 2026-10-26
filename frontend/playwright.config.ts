@@ -16,4 +16,13 @@ export default defineConfig({
     ["html", { outputFolder: "../docs/qa/frontend/playwright-report", open: "never" }],
   ],
   outputDir: "../docs/qa/frontend/test-results",
+  webServer:
+    process.env.QA_MANAGE_SERVER === "true"
+      ? {
+          command: "npm run dev -- --hostname 127.0.0.1 --port 3001",
+          url: "http://127.0.0.1:3001",
+          reuseExistingServer: false,
+          timeout: 120000,
+        }
+      : undefined,
 });

@@ -5,6 +5,7 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import Settings, get_settings
 from app.models import Chatbot, LlmModel
 
 
@@ -23,6 +24,16 @@ class ChatbotDetails:
 
 
 class ChatbotService:
+    def __init__(self, settings: Settings | None = None) -> None:
+        self.settings = settings if settings is not None else get_settings()
+
+    def model_available(self, model: LlmModel) -> bool:
+        if model.provider == "vertex":
+            return self.settings.vertex_model_available(model.model)
+        if self.settings.provider_uses_gateway(model.provider):
+            return self.settings.gateway_model_available(model.provider, model.model)
+        return True
+
     async def list_chatbots(self, session: AsyncSession) -> list[ChatbotDetails]:
         result = await session.execute(
             select(Chatbot, LlmModel)
@@ -38,7 +49,7 @@ class ChatbotService:
         result = await session.scalars(
             select(LlmModel).order_by(LlmModel.provider, LlmModel.model)
         )
-        return list(result.all())
+        return [model for model in result.all() if self.model_available(model)]
 
     async def get_chatbot(
         self,
@@ -123,7 +134,7 @@ class ChatbotService:
         llm_model_id: UUID,
     ) -> LlmModel:
         llm_model = await session.get(LlmModel, llm_model_id)
-        if llm_model is None:
+        if llm_model is None or not self.model_available(llm_model):
             raise LlmModelNotFoundError
         return llm_model
 

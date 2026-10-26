@@ -1,8 +1,8 @@
 # Backend
 
-API FastAPI ejecutable con conexión asíncrona a PostgreSQL y modelos SQLAlchemy para las siete tablas del esquema inicial. Antes de crear servicios o migraciones adicionales, revisar [el diseño de datos](../docs/database-design.md).
+API FastAPI con conexión asíncrona a PostgreSQL y modelos SQLAlchemy. Las [migraciones SQL](../database/migrations/) definen el esquema vigente; [el diseño de datos](../docs/database-design.md) explica sus decisiones y antecedentes.
 
-`api/` delega en `services/`; `rag/` y `llm/` aíslan procesamiento y proveedor. Las pruebas se ubicarán en `tests/` y se relacionarán con RF, RNF, RS y criterios CA del SRS.
+`api/` delega en `services/`, donde reside el procesamiento RAG; `llm/` aísla los proveedores. Las pruebas están en `tests/` y se relacionan con RF, RNF, RS y criterios CA del SRS.
 
 ## Ejecutar con Docker
 
@@ -40,7 +40,7 @@ El endpoint público `POST /api/v1/chatbots/{chatbot_id}/queries` admite
 token administrativo; limita las solicitudes por cliente y usa el modelo
 configurado en el chatbot. La respuesta incluye texto y tiempo medido.
 
-Todas estas rutas requieren una sesión Bearer válida. `PUT` conserva el identificador del chatbot y permite cambiar nombre, descripción, instrucciones y una combinación ya registrada en `llm_models`. `created_by` conserva trazabilidad; no representa permiso exclusivo. La carga acepta PDF, DOCX, TXT y CSV de hasta 20 MiB, o PNG, JPEG y WebP de hasta 4 MiB. `DELETE /api/v1/chatbots/{chatbot_id}/documents/{document_id}` quita la asociación RAG sin borrar el archivo, que puede volver a asociarse. El original se guarda en un volumen privado con un nombre generado; no se entrega mediante rutas públicas.
+Las rutas administrativas enumeradas requieren una sesión Bearer válida; la consulta pública descrita arriba no la requiere. `PUT` conserva el identificador del chatbot y permite cambiar nombre, descripción, instrucciones y una combinación ya registrada en `llm_models`. `created_by` conserva trazabilidad; no representa permiso exclusivo. La carga acepta PDF, DOCX, TXT y CSV de hasta 20 MiB, o PNG, JPEG y WebP de hasta 4 MiB. `DELETE /api/v1/chatbots/{chatbot_id}/documents/{document_id}` quita la asociación RAG sin borrar el archivo, que puede volver a asociarse. El original se guarda en un volumen privado con un nombre generado; no se entrega mediante rutas públicas.
 
 Si cambias `BACKEND_PORT`, el puerto de diagnóstico local cambia, pero la ruta del navegador continúa en Nginx mediante `FRONTEND_PORT`. En producción el backend no publica un puerto al host.
 
@@ -52,9 +52,10 @@ Compose pasa explícitamente `APP_ENV` al backend y usa `BACKEND_PORT` para diag
 
 ### Proveedor OpenAI
 
-Configurar `OPENAI_API_KEY` y `OPENAI_MODEL` en el `.env` de la raíz. Elegir un
-modelo disponible en la cuenta que admita Responses API; las consultas con
-capturas requieren soporte de imágenes. La clave solo se entrega al backend.
+Para una instalación nueva, configura `OPENAI_API_KEY`, `OPENAI_MODEL` y añade
+`openai` a `EXTERNAL_AI_GATEWAY_PROVIDERS`. LiteLLM recibe la clave dentro de la
+red Docker y FastAPI solo conserva la clave interna del gateway. Elegir un modelo
+de Responses API; las consultas con capturas requieren soporte de imágenes.
 Al arrancar, `app.bootstrap` registra la combinación `openai`/modelo y el
 selector administrativo permite asignarla a un chatbot (RF-08, CA-UC03-01).
 
@@ -70,23 +71,34 @@ Referencia: [Responses e imágenes](https://developers.openai.com/api/docs/guide
 
 ### Proveedor OpenRouter
 
-Configurar `OPENROUTER_API_KEY` y `OPENROUTER_MODEL` en el `.env` de la raíz.
-El modelo usa el *slug* de OpenRouter, por ejemplo el que se haya habilitado en
-la cuenta de consumo. Para enviar capturas, escoger un modelo que acepte
-imágenes. `OPENROUTER_SITE_URL` es opcional y se envía como referencia del sitio
-en la solicitud. La clave solo se monta en el backend; el navegador y el widget
-nunca la reciben.
+Configura `OPENROUTER_API_KEY`, `OPENROUTER_MODEL` y añade `openrouter` a
+`EXTERNAL_AI_GATEWAY_PROVIDERS`. LiteLLM recibe la clave dentro de la red Docker;
+el navegador, el widget y las solicitudes de FastAPI no la reciben. El modelo
+usa el _slug_ completo de OpenRouter, por ejemplo el habilitado en la cuenta de
+consumo. Para enviar capturas, escoger un modelo que acepte imágenes.
+`OPENROUTER_SITE_URL` es opcional y se envía como referencia del sitio en la
+solicitud.
 
 Al arrancar, `app.bootstrap` registra la combinación `openrouter`/modelo para
 seleccionarla en el asistente de cada chatbot. El proveedor usa Chat Completions
 con instrucciones, contexto RAG y una imagen opcional. Consulta la
 [referencia oficial de Chat Completions](https://openrouter.ai/docs/api/api-reference/chat/send-chat-completion-request?explorer=true).
 
+### Gateway de proveedores externos
+
+`EXTERNAL_AI_GATEWAY_PROVIDERS` declara los proveedores de generación que se
+enrutan por LiteLLM: `gemini`, `openai`, `openrouter` y `vertex`. Cada uno exige
+un catálogo explícito mediante su variable `*_MODEL` o `*_MODELS`; LiteLLM usa
+un alias por proveedor, por lo que un mismo identificador de modelo no puede
+redirigirse accidentalmente a otro proveedor. Ollama y los embeddings no pasan
+por el gateway. Consulta la [guía operativa](../docs/external-ai-gateway.md)
+antes de activar un proveedor.
+
 ## Persistencia
 
 `app/database/` crea el motor y las sesiones asíncronas. Cada servicio debe delimitar su transacción y confirmar con `commit()` solo cuando la operación completa haya terminado; una excepción dentro del contexto de sesión ejecuta `rollback()`.
 
-`app/models/` representa `users`, `auth_sessions`, `llm_models`, `chatbots`, `documents`, `document_chunks` y `queries`. Las migraciones SQL continúan siendo la fuente del esquema; los modelos no crean ni alteran tablas durante el arranque. La dimensión actual de `document_chunks.embedding` es 768 y solo debe migrarse si cambia la dimensión; cambiar el modelo requiere reprocesar documentos.
+`app/models/` representa las entidades persistentes, incluidas `chatbots`, `queries`, `conversations` y `conversation_feedback`. Las migraciones SQL continúan siendo la fuente del esquema; los modelos no crean ni alteran tablas durante el arranque. La dimensión actual de `document_chunks.embedding` es 768 y solo debe migrarse si cambia la dimensión; cambiar el modelo requiere reprocesar documentos.
 
 `app/services/authentication_service.py` valida credenciales, emite sesiones, comprueba expiración y actividad del usuario, y revoca sesiones. Las contraseñas se almacenan con scrypt y una sal aleatoria; los tokens de sesión se generan con entropía criptográfica y PostgreSQL conserva únicamente su digest SHA-256. BIDACHAT no ofrece registro público de investigadores.
 
@@ -101,6 +113,8 @@ de forma aislada por chatbot. La carga devuelve `ready` o `failed` una vez
 terminado el procesamiento. Los originales se mantienen en volumen privado.
 
 `app/services/query_service.py` crea el registro al admitir una consulta y conserva el modelo configurado en ese instante. Después marca éxito, fallo con duración observada o interrupción sin duración. `app/services/metrics_service.py` agrupa esos registros por chatbot; `GET /api/v1/chatbots/{chatbot_id}/metrics` exige sesión administrativa y acepta opcionalmente un periodo UTC semiabierto mediante `started_at` y `ended_at`, que deben enviarse juntos. El resumen separa estados y reporta la media de respuestas exitosas junto con su número de muestras; si no hay muestras devuelve `null`, no `0`.
+
+`app/services/satisfaction_service.py` registra una oferta voluntaria y una respuesta por conversación vigente y completada, conservando el aislamiento por chatbot, origen e identidad firmada. Los POST públicos `survey-offers` y `survey-responses` no exponen lecturas. `app/services/satisfaction_metrics_service.py` entrega agregados por fecha UTC de oferta y comentarios paginados solo al panel autenticado. La migración `007_conversation_feedback` mantiene puntuaciones tras limpiar la memoria; la limpieza periódica borra únicamente el texto del comentario a los 90 días. Contrato y denominadores: [guía de satisfacción](../docs/conversation-satisfaction.md).
 
 `app/services/chatbot_deletion_service.py` bloquea el chatbot, obtiene las claves privadas de sus documentos y elimina la fila en la transacción. Las cascadas eliminan documentos, fragmentos y consultas. Solo tras el `commit` el endpoint elimina los originales del volumen; un rollback conserva los archivos. Las admisiones de carga y consulta toman un bloqueo compatible, por lo que no pueden crear trabajo durante el borrado. Una limpieza física fallida queda registrada internamente y nunca expone el archivo mediante la API.
 
@@ -139,9 +153,20 @@ La prueba marcada `integration` usa `DATABASE_URL` y escribe datos temporales en
 .\.venv\Scripts\python.exe -m pytest -m integration -vv
 ```
 
-Las veintiuna pruebas comprueban salud/esquema API (RNF-01/RNF-04), configuración por entorno y secretos (RS-04), documentación desactivada en producción, errores sin detalles privados (RS-09), correspondencia de las siete tablas, persistencia y rollback, hashing de credenciales, sesiones revocables, CRUD/configuración de chatbots, carga documental autenticada, formatos y tamaño permitidos, aislamiento por chatbot, publicación RAG atómica, reintento, rechazo de perfiles incompatibles, aislamiento A/B, registros/agrupación de métricas con fallos e interrupciones y borrado con cascadas, rollback, limpieza privada y admisiones concurrentes. La ejecución y salud del contenedor verifican el arranque Docker (RNF-03); no validan todavía el despliegue completo del MVP.
+Las pruebas marcadas `external` son optativas y consultan un runtime o proveedor
+LLM real. No forman parte de cada pull request y solo deben ejecutarse en un
+entorno aislado, con sus variables explícitas y un límite de consumo aprobado:
 
-Verificado el 2026-09-22: veintiuna pruebas aprobadas con Python 3.14.6, incluidas las integraciones PostgreSQL de autenticación, chatbots, documentos, RAG, métricas y borrado; Ruff sin errores y formato correcto. TestClient emitió dos avisos de deprecación de sus dependencias; las pruebas no fallaron. La imagen base Docker está fijada por digest y las dependencias de ejecución por versión y hash.
+```powershell
+.\.venv\Scripts\python.exe -m pytest -m external -vv
+```
+
+El CI usa `-m "not external"`. Las pruebas unitarias de proveedores usan
+transportes simulados y sí se ejecutan en cada PR. Los recorridos reales emplean
+fixtures dedicados y su limpieza se ejecuta aunque falle una aserción; las
+credenciales y salidas privadas no se guardan como artefactos.
+
+Las pruebas de `tests/` cubren contratos API, autenticación, persistencia, chatbots, documentos, aislamiento RAG, consultas, métricas y borrado. Para un resultado vigente hay que ejecutar la suite en el entorno correspondiente; los resultados fechados se conservan como [evidencia histórica](../docs/qa/README.md). La salud del contenedor verifica el arranque Docker (RNF-03), pero no sustituye una prueba de despliegue de extremo a extremo.
 
 Referencias oficiales: [configuración FastAPI](https://fastapi.tiangolo.com/advanced/settings/) y [pruebas FastAPI](https://fastapi.tiangolo.com/tutorial/testing/).
 

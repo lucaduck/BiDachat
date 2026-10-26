@@ -55,10 +55,9 @@ def test_openrouter_sends_private_multimodal_chat_request(monkeypatch):
         payload = json.loads(request.content)
         assert payload["model"] == "openai/gpt-4.1-mini"
         assert payload["temperature"] == 0.2
-        assert payload["messages"][0] == {
-            "role": "system",
-            "content": "Answer in Spanish.",
-        }
+        assert payload["messages"][0]["role"] == "system"
+        assert payload["messages"][0]["content"].startswith("Answer in Spanish.")
+        assert "untrusted evidence" in payload["messages"][0]["content"]
         content = payload["messages"][1]["content"]
         assert "Total: 42" in content[0]["text"]
         assert content[1] == {

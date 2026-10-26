@@ -1,6 +1,9 @@
 from app.models.auth_session import AuthSession
 from app.models.chatbot import Chatbot
 from app.models.chatbot_document import ChatbotDocument
+from app.models.conversation import Conversation
+from app.models.conversation_feedback import ConversationFeedback
+from app.models.conversation_message import ConversationMessage
 from app.models.document import Document
 from app.models.document_chunk import DocumentChunk
 from app.models.llm_model import LlmModel
@@ -12,6 +15,9 @@ __all__ = [
     "AuthSession",
     "Chatbot",
     "ChatbotDocument",
+    "Conversation",
+    "ConversationFeedback",
+    "ConversationMessage",
     "Document",
     "DocumentChunk",
     "LlmModel",

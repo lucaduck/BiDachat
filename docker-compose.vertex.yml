@@ -1,0 +1,11 @@
+services:
+  litellm:
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/vertex-service-account.json
+    volumes:
+      - type: bind
+        source: ${VERTEX_CREDENTIALS_FILE:?Set VERTEX_CREDENTIALS_FILE for Vertex AI}
+        target: /run/secrets/vertex-service-account.json
+        read_only: true
+        bind:
+          create_host_path: false

@@ -65,12 +65,9 @@
   place-items: center;
   align-self: stretch;
   min-width: 0;
-  background: var(--canvas);
+  background: #fff;
   border-radius: 8px 160px 8px 8px;
   overflow: hidden;
-}
-:root[data-theme="dark"] .login-identity {
-  background: #fff;
 }
 .login-logo {
   display: block;
@@ -78,9 +75,6 @@
   max-width: 480px;
   height: auto;
   object-fit: contain;
-}
-:root:not([data-theme="dark"]) .login-logo {
-  mix-blend-mode: multiply;
 }
 .login-form-panel {
   align-self: center;

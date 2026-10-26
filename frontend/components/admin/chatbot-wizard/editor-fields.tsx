@@ -16,6 +16,7 @@ const PROVIDER_LABELS: Record<string, string> = {
   openrouter: "OpenRouter",
   ollama: "Ollama",
   gemini: "Gemini",
+  vertex: "Vertex AI",
 };
 export function GeneralFields({
   draft,
@@ -103,6 +104,12 @@ export function BehaviorFields({
       <div className="wizard-columns">
         <div className="wizard-card">
           <div className="wizard-model-fields">
+            {draft.configured_llm_model_id && !selectedModel && (
+              <p role="alert">
+                El modelo guardado ya no está disponible. Selecciona un proveedor y
+                modelo habilitados.
+              </p>
+            )}
             <SelectField
               id="wizard-provider"
               label="Proveedor de IA"

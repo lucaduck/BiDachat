@@ -64,14 +64,10 @@ export function LoginScreen() {
           <div className="login-identity">
             <Image
               className="login-logo"
-              src={
-                theme === "dark"
-                  ? "/brand/login-logo-dark.png"
-                  : "/brand/logo-bidachat-light.png"
-              }
+              src="/brand/login-logo-dark.png"
               alt="BIDACHAT · Gestor de chatbots · Plataforma inteligente"
-              width={theme === "dark" ? 1536 : 1254}
-              height={theme === "dark" ? 1024 : 1254}
+              width={1536}
+              height={1024}
               sizes="(max-width: 760px) 280px, (max-width: 1100px) 45vw, 480px"
               priority
             />

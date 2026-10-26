@@ -28,19 +28,53 @@ desarrollo. El widget envía sus consultas a la API REST por HTTP `POST`.
 
 ## Puertos y seguridad
 
-`FRONTEND_PORT` conserva el puerto público local actual (3000 por defecto), pero
-ahora lo publica el contenedor Nginx, limitado a `127.0.0.1`. En desarrollo,
+`FRONTEND_PORT` conserva el puerto local actual (3000 por defecto), pero
+ahora lo publica el contenedor Nginx, limitado a `127.0.0.1`. En un VPS
+compartido puede elegirse otro puerto libre, por ejemplo 3005, y cambiar
+el destino del proxy HTTPS del host para que coincida. En desarrollo,
 FastAPI y PostgreSQL mantienen sus puertos locales de diagnóstico. En
 producción, frontend, backend, PostgreSQL y Ollama permanecen dentro de la red
 de Compose; solo Nginx publica el puerto local.
 
 El contenedor recibe HTTP del propio servidor. En producción, Apache puede
 terminar HTTPS y reenviar las solicitudes a `http://127.0.0.1:3000`, conservando
-el encabezado `Host` y enviando `X-Forwarded-Proto: https`. Apache debe
+el encabezado `Host` y enviando `X-Forwarded-Proto: https`. Si se cambia
+`FRONTEND_PORT`, también se cambia ese destino. Apache debe
 reemplazar cualquier `X-Forwarded-For` aportado por clientes externos antes de
 añadir la IP real. El TLS, el certificado y la redirección de HTTP a HTTPS se
 configuran en ese punto de entrada público para cumplir `RS-03`. Si se usa otro
 terminador TLS, debe cumplir las mismas condiciones.
+
+En el inventario del 15 de octubre, el VirtualHost de
+`bidachat.lucaduck.com` todavía servía `public_html`: no tenía reglas
+`ProxyPass` hacia BIDACHAT. Al habilitar la aplicación, conservar la excepción
+de `/.well-known` para certificados y configurar en el VirtualHost HTTPS las
+directivas de proxy siguientes, adaptando el puerto si cambia `FRONTEND_PORT`:
+
+```apache
+ProxyRequests Off
+ProxyPreserveHost On
+ProxyAddHeaders Off
+RequestHeader set X-Forwarded-For "expr=%{REMOTE_ADDR}"
+RequestHeader set X-Forwarded-Proto "https"
+ProxyPass /.well-known !
+ProxyPass / http://127.0.0.1:3000/ timeout=660
+ProxyPassReverse / http://127.0.0.1:3000/
+```
+
+`ProxyAddHeaders Off` evita agregar una cadena de direcciones recibida del
+cliente; `RequestHeader set` entrega una sola dirección que Apache considera
+cliente. Si Cloudflare precede al VPS, Apache debe determinar esa dirección
+mediante `mod_remoteip` con proxies expresamente confiables; de otra manera
+el límite por IP agruparía usuarios bajo la dirección de Cloudflare. Probar con
+`X-Forwarded-For` falsificado antes de habilitar el sitio. El módulo
+`remoteip` no estaba activo en el inventario del VPS; configurarlo con
+`CF-Connecting-IP` y las redes de Cloudflare confiables si se mantiene ese
+proxy. La [documentación de Cloudflare](https://developers.cloudflare.com/fundamentals/reference/http-headers/)
+explica por qué su cabecera de cliente es preferible a una cadena
+`X-Forwarded-For` recibida. Véanse las
+[cabeceras de proxy de Apache](https://httpd.apache.org/docs/2.4/mod/mod_proxy.html)
+y [mod_remoteip](https://httpd.apache.org/docs/2.4/mod/mod_remoteip.html).
 
 Nginx permite cuerpos de hasta 25 MiB para que el límite documental de 20 MiB
 y la codificación de las imágenes lleguen a la validación de FastAPI. Para la

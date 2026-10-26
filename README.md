@@ -1,156 +1,72 @@
 # BIDACHAT
 
-Aplicación web para gestionar chatbots que ayudan a interpretar dashboards de BI-DATA.
+BIDACHAT permite a investigadores de BI-DATA crear, configurar e integrar asistentes conversacionales en dashboards. El panel administra chatbots, fuentes de conocimiento y métricas. Un widget JavaScript envía preguntas y capturas a una API REST; el backend recupera contexto y consulta el modelo configurado.
 
-## Estado actual
+La aplicación usa Next.js, FastAPI, PostgreSQL con pgvector y Ollama en Docker. Puede utilizar API externas de IA configuradas; backend, base de datos y archivos documentales permanecen en infraestructura controlada. La [arquitectura](docs/architecture.md) explica los límites entre componentes.
 
-El repositorio contiene Nginx, frontend Next.js, backend FastAPI y PostgreSQL + pgvector
-en Docker Compose. El panel administra chatbots y documentos; el widget público
-envía consultas de texto o captura, recupera contexto por chatbot y responde
-mediante Gemini, Ollama, OpenAI u OpenRouter configurado. Los documentos se procesan al cargarlos.
-Para usarlo hay que configurar credenciales de administrador y al menos un
-proveedor en `.env`. La integración Docker completa requiere Docker Desktop
-activo para verificarse en este equipo.
+## Arranque local
 
-El documento principal para revisar es [Diseño de base de datos](docs/database-design.md): contiene siete tablas, diagrama de relaciones, diccionario de datos, justificaciones, aislamiento, borrado, métricas y decisiones pendientes.
+Se necesitan Docker Engine con Compose y capacidad para ejecutar los modelos configurados. Desde la raíz del repositorio:
 
-## Estructura
-
-```text
-BIDACHAT/
-├── frontend/
-│   ├── app/
-│   ├── components/
-│   ├── services/
-│   ├── types/
-│   ├── lib/
-│   └── public/
-├── backend/
-│   ├── app/
-│   │   ├── api/
-│   │   ├── services/
-│   │   ├── models/
-│   │   ├── schemas/
-│   │   ├── rag/
-│   │   ├── llm/
-│   │   ├── database/
-│   │   └── core/
-│   └── tests/
-├── widget/
-│   ├── src/
-│   └── dist/
-├── database/
-│   ├── migrations/
-│   └── seeds/
-├── docs/
-├── docker/
-├── openspec/
-│   ├── config.yaml
-│   ├── specs/
-│   └── changes/
-└── .agents/skills/openspec-*/
+```bash
+cp .env.example .env
 ```
 
-Consulta [la responsabilidad de cada carpeta](docs/project-structure.md). `docker-compose.yml` levanta la base de datos, FastAPI, Next.js, Ollama y Nginx como punto de entrada. En producción, Ollama puede usar CPU o una GPU NVIDIA seleccionada en `.env`; su flujo y puertos están en [la guía del proxy inverso](docs/deployment/reverse-proxy.md).
+Edita `.env`: establece `POSTGRES_PASSWORD`, `ADMIN_EMAIL` y `ADMIN_PASSWORD`; revisa los límites de CPU y memoria para tu equipo y los modelos de Ollama. Los valores iniciales del ejemplo corresponden al entorno de desarrollo de referencia, donde Docker ve 7,7 GiB de RAM. `.env` contiene secretos y está excluido de Git.
 
-## API local
-
-Para probar el sistema completo, copia `.env.example` a `.env`, configura
-`POSTGRES_PASSWORD`, `ADMIN_EMAIL` y `ADMIN_PASSWORD`. Para el perfil local,
-descarga primero los modelos de Ollama y arranca:
-
-```powershell
-docker compose up -d ollama
+```bash
+docker compose config --quiet
+docker compose up -d database ollama
 docker compose exec ollama ollama pull embeddinggemma:300m
 docker compose exec ollama ollama pull qwen3:1.7b
 docker compose up -d --build
-```
-
-En un equipo sin GPU, usar `OLLAMA_ACCELERATION=cpu` y descargar
-`qwen3:1.7b`. Para GPU NVIDIA, establecer `OLLAMA_ACCELERATION=gpu` y ejecutar
-Compose con `-f docker-compose.gpu.yml`; la guía de Ollama describe ambos
-perfiles.
-
-Abre `http://localhost:3000` a través de Nginx, inicia sesión, crea un chatbot y copia su script
-de integración. Prueba visualmente el widget en
-`http://localhost:3000/widget-example.html?chatbot_id=UUID` con el UUID creado.
-Si cambias `FRONTEND_PORT`, usa ese puerto. El perfil `EMBEDDING_PROVIDER=ollama` permite documentos y búsqueda semántica
-sin clave Gemini. Consulta [la guía del frontend](frontend/README.md).
-
-Para usar un modelo de consumo mediante OpenRouter, añadir en `.env`:
-
-```text
-OPENROUTER_API_KEY=clave_privada
-OPENROUTER_MODEL=proveedor/modelo
-OPENROUTER_SITE_URL=http://localhost:3000
-```
-
-Después ejecutar `docker compose up -d --build backend`, abrir **Configuración**
-y seleccionar el modelo `openrouter` al crear o editar el chatbot. La clave se
-queda dentro del backend.
-
-```powershell
-docker compose up -d --build backend
-```
-
-API: <http://localhost:8000/api/v1/health>. Documentación: <http://localhost:8000/api/v1/docs>. Consulta [configuración, desarrollo y pruebas del backend](backend/README.md).
-El catálogo de rutas está en [docs/api-routes.md](docs/api-routes.md).
-
-En el equipo actual, el `.env` selecciona el puerto **8001** porque 8000 está ocupado: [salud](http://localhost:8001/api/v1/health) y [documentación](http://localhost:8001/api/v1/docs).
-
-## Base de datos local
-
-```powershell
-docker compose up -d database
 docker compose ps
 ```
 
-La base se encuentra en `localhost:5433` y conserva sus datos en un volumen Docker. Requiere las variables del `.env` local. Consulta [la guía de ejecución y pruebas](database/README.md) antes de inicializar otro equipo.
+Abre `http://127.0.0.1:3000` y entra con el administrador configurado. Si cambias `FRONTEND_PORT`, usa ese puerto. Comprueba la API en `http://127.0.0.1:3000/api/v1/health` y, en desarrollo, su documentación en `/api/v1/docs`. Los puertos locales de diagnóstico de FastAPI y PostgreSQL se configuran con `BACKEND_PORT` y `POSTGRES_PORT`; en producción solo Nginx publica un puerto ligado a `127.0.0.1`.
 
-## Herramientas de especificación
+El modelo inicial `qwen3:1.7b` responde consultas de texto. Las **imágenes como fuentes de conocimiento** requieren configurar `VISION_PROVIDER` y un modelo visual compatible en `VISION_MODEL` (Ollama, Gemini, OpenAI, OpenRouter o Vertex); la imagen adjunta en una conversación también requiere que el modelo de respuesta seleccionado admita visión. Consulta [Ollama local](docs/local-ollama.md) antes de probar esos casos.
 
-OpenSpec 1.13.0 y Prettier están fijados como dependencias de desarrollo en el manifiesto raíz. Este manifiesto administra documentación, no sustituye los futuros manifiestos del frontend y backend. Se verificó con Node.js 24.18.0 y npm 11.16.0.
+El widget conserva memoria textual anónima por chatbot y origen durante la sesión del navegador. El backend limita la ventana mediante `CONVERSATION_TTL_HOURS`, `CONVERSATION_MAX_TURNS` y `CONVERSATION_MAX_CHARS`; no guarda las imágenes como memoria. La limpieza de conversaciones vencidas se ejecuta al iniciar el backend y cada `CONVERSATION_CLEANUP_INTERVAL_MINUTES` (60 minutos por defecto). Conserva las consultas y métricas. La misma tarea elimina comentarios de satisfacción después de 90 días, manteniendo ofertas y puntuaciones. También puede ejecutarse manualmente:
 
-```powershell
-npm.cmd ci
-npm.cmd run spec:list
-npm.cmd run spec:validate
-npm.cmd run format:check
+```bash
+docker compose exec -T backend python -m app.cleanup_conversations
 ```
 
-En shells que no sean PowerShell puede utilizarse `npm` en lugar de `npm.cmd`.
+La [guía de memoria conversacional](docs/conversation-memory.md) explica los límites, el reinicio de conversación y la identidad firmada opcional. Una sesión anónima identifica una conversación del navegador; no acredita la identidad de una persona.
 
-OpenSpec se inicializó mediante su CLI oficial con `init --tools codex`; las habilidades generadas están en `.agents/skills/`. [Documentación oficial de OpenSpec](https://github.com/Fission-AI/OpenSpec/blob/main/docs/cli.md).
+Vertex admite un catálogo explícito mediante `VERTEX_MODELS` y usa `VERTEX_MODEL` como selección predeterminada. Cada modelo debe comprobarse en el proyecto de Google antes de exponerlo en el editor; consulta la [guía de Vertex AI](docs/vertex-ai.md).
 
-## Flujo de trabajo
+Los proveedores externos de generación pueden pasar por el gateway LiteLLM
+privado mediante `EXTERNAL_AI_GATEWAY_PROVIDERS`. Ollama y embeddings siguen
+directos; consulta la [guía del gateway](docs/external-ai-gateway.md) antes de
+activar proveedores o trasladar credenciales.
 
-1. Leer [SRS.md](SRS.md) y [AGENTS.md](AGENTS.md).
-2. Revisar [la propuesta de datos](docs/database-design.md) y sus decisiones de aprobación.
-3. Consultar el cambio `design-mvp-database` en `openspec/changes/`.
-4. Registrar las decisiones pendientes y ajustar los documentos antes de implementar servicios o nuevas migraciones.
-5. Implementar tareas aprobadas, comprobar criterios de aceptación y ejecutar pruebas reales.
-6. Sincronizar y archivar el cambio solo cuando se haya completado; `openspec/specs/` se reserva para especificaciones consolidadas.
+Para comprobar el widget en la instalación local, crea un chatbot y abre `/widget-example.html?chatbot_id=UUID`. Para probarlo en otro sitio, sigue la [guía del widget](widget/README.md) y configura `WIDGET_ALLOWED_ORIGINS` con los orígenes exactos autorizados, incluido el panel para la vista previa (esquema, dominio y puerto). La API rechaza consultas sin `Origin`, con un origen no autorizado o con la lista vacía. Esta comprobación no sustituye la autenticación. `widget/example/` contiene la página de prueba; el build copia una versión a `frontend/public/` para la integración local.
 
-La existencia de artefactos o una validación exitosa de OpenSpec verifica estructura documental, no aprobación del diseño ni funcionamiento del MVP.
+Tras una respuesta, «Finalizar conversación» ofrece una encuesta voluntaria. El panel Métricas muestra participación y satisfacción filtradas por chatbot y periodo; los comentarios solo son visibles con sesión administrativa. La [guía de satisfacción](docs/conversation-satisfaction.md) explica el contrato, denominadores, retención y pruebas.
 
-## Configuración
+## Mapa del repositorio
 
-[.env.example](.env.example) enumera variables previstas con secretos vacíos. Al implementar los servicios, copiarlo a `.env` y completar valores locales. `.env`, archivos privados y salidas de compilación se excluyen del repositorio. La única variable `NEXT_PUBLIC_*` propuesta es la URL pública de la API.
+| Ruta                                         | Responsabilidad                                                |
+| -------------------------------------------- | -------------------------------------------------------------- |
+| [`frontend/`](frontend/)                     | Panel Next.js, componentes, cliente API y pruebas de interfaz. |
+| [`backend/`](backend/)                       | FastAPI, lógica, RAG, proveedores y pruebas.                   |
+| [`widget/`](widget/)                         | Script embebible y página de ejemplo.                          |
+| [`database/`](database/)                     | Migraciones SQL y comprobaciones de esquema.                   |
+| [`docker/`](docker/) y `docker-compose*.yml` | Imágenes, Nginx y despliegue.                                  |
+| [`docs/`](docs/README.md)                    | Guías, referencias, arquitectura y evidencia de pruebas.       |
+| [`openspec/`](openspec/)                     | Propuestas y tareas de cambios.                                |
 
-## Fuentes del proyecto
+El [mapa detallado](docs/project-structure.md) distingue código fuente, documentos de decisión, datos privados y artefactos generados.
 
-- [SRS.md](SRS.md): requisitos y criterios de aceptación, borrador 0.1.
-- [AGENTS.md](AGENTS.md): reglas de implementación.
-- [Historial de diseño](docs/design-history/desing-before-professionalization.md): guía visual anterior, conservada como referencia histórica.
-- [Diseño de base de datos](docs/database-design.md): propuesta técnica pendiente de aprobación.
-- [Revisión de inicialización](docs/initialization-review.md): comprobaciones y límites de esta entrega.
+## Documentación y colaboración
 
-### IA local
+- [Índice de documentación](docs/README.md): guías por tarea, referencias, explicaciones y evidencia.
+- [SRS](SRS.md): requisitos y criterios de aceptación.
+- [Reglas de implementación](AGENTS.md) y [guía de contribución](CONTRIBUTING.md).
+- [Rutas de la API](docs/api-routes.md) y [diseño de datos](docs/database-design.md).
+- [Despliegue con GitHub Actions](docs/deployment/github-actions.md) y [proxy inverso](docs/deployment/reverse-proxy.md).
+- [Matriz de decisión documental](docs/documentation-decision.md): criterios de organización aplicados aquí.
 
-Configuración y operación: [Ollama local](docs/local-ollama.md).
-
-### Integración y despliegue
-
-El flujo de GitHub usa `develop` para integración y `production` para publicar
-las imágenes y desplegar una versión aprobada. La configuración del servidor,
-las ramas y los secretos necesarios está en [la guía de GitHub Actions](docs/deployment/github-actions.md).
+El código y las migraciones muestran la implementación; `SRS.md` mantiene los requisitos. Las [evidencias de prueba](docs/qa/README.md) registran resultados de versiones y entornos concretos. No se presentan como garantía de un despliegue posterior.

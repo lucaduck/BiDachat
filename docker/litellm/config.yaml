@@ -1,0 +1,19 @@
+model_list: []
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY
+  disable_spend_logs: true
+  disable_error_logs: true
+litellm_settings:
+  telemetry: false
+  turn_off_message_logging: true
+  num_retries: 0
+  request_timeout: 40
+  callbacks: []
+  success_callback: []
+  failure_callback: []
+router_settings:
+  num_retries: 0
+  timeout: 40
+  fallbacks: []
+  context_window_fallbacks: []
+  content_policy_fallbacks: []

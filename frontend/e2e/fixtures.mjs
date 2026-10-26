@@ -77,6 +77,24 @@ export const metrics = (id) => ({
     },
   ],
 });
+export const satisfaction = (id) => ({
+  chatbot_id: id,
+  started_at: null,
+  ended_at: null,
+  interval: "day",
+  offers: 0,
+  responses: 0,
+  satisfied: 0,
+  participation_rate: null,
+  csat_rate: null,
+  clarity_count: 0,
+  average_clarity: null,
+  resolution_count: 0,
+  resolved: 0,
+  resolution_rate: null,
+  scores: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+  series: [],
+});
 export async function prepare(
   page,
   { theme = "light", empty = false, authenticated = true } = {},
@@ -125,12 +143,23 @@ export async function prepare(
           provider: "openai",
           model: "gpt-5.6-luna",
         },
+        {
+          id: "88888888-8888-4888-8888-888888888888",
+          provider: "vertex",
+          model: "gemini-3.1-flash-lite",
+        },
+        {
+          id: "99999999-9999-4999-8999-999999999999",
+          provider: "vertex",
+          model: "gemini-3.5-flash",
+        },
       ];
     else if (path === "/settings")
       body = {
         gemini_configured: false,
         openai_configured: false,
         openrouter_configured: false,
+        vertex_configured: false,
         embedding_provider: "ollama",
         embedding_model: "nomic-embed-text",
         embedding_dimensions: 768,
@@ -150,13 +179,18 @@ export async function prepare(
       const [, id, resource, docId] = path.split("/").slice(1);
       const b = state.bots.find((b) => b.id === id);
       if (resource === "metrics") body = metrics(id);
+      else if (resource === "satisfaction-metrics") body = satisfaction(id);
+      else if (resource === "survey-responses")
+        body = { items: [], total: 0, limit: 10, offset: 0 };
       else if (resource === "queries") {
         state.queries++;
+        const payload = req.postDataJSON();
         body = {
           answer:
             "El rendimiento operativo es 89,4 %. Revisa la fuente para el periodo consultado.",
-          query_id: "66666666-6666-4666-8666-666666666666",
-          status: "completed",
+          id: "66666666-6666-4666-8666-666666666666",
+          conversation_id: payload.conversation_id,
+          completed_at: "2026-10-01T12:00:01Z",
           response_time_ms: 1200,
         };
       } else if (resource === "documents") {

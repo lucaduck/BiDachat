@@ -24,6 +24,22 @@ venv/
 htmlcov/
 
 # Private runtime data
+secrets/
+*service-account*.json
+# Private authentication material and database exports
+security-google/
+*.pem
+*.key
+*.p12
+*.pfx
+*.dump
+*.sql.gz
+*.sql.gzip
+id_rsa
+id_ed25519
+# Local browser authentication state
+playwright/.auth/
+.auth/
 storage/
 backups/
 *.log

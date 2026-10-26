@@ -1,8 +1,61 @@
 name: bidachat
 
 services:
+  litellm:
+    image: ghcr.io/berriai/litellm:v1.105.1@sha256:b7b9e2c306343721802253d0dd9436b9634a2eb4e14da7c7cf06c5c7b7530802
+    profiles: ["ai-gateway", "vertex"]
+    deploy:
+      resources:
+        limits:
+          cpus: ${LITELLM_CPUS:-1}
+          memory: ${LITELLM_MEMORY_LIMIT:-1g}
+    environment:
+      VERTEX_PROJECT: ${VERTEX_PROJECT:-}
+      VERTEX_LOCATION: ${VERTEX_LOCATION:-}
+      VERTEX_MODEL: ${VERTEX_MODEL:-}
+      VERTEX_MODELS: ${VERTEX_MODELS:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-}
+      GEMINI_MODELS: ${GEMINI_MODELS:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-}
+      OPENAI_MODELS: ${OPENAI_MODELS:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENROUTER_MODEL: ${OPENROUTER_MODEL:-}
+      OPENROUTER_MODELS: ${OPENROUTER_MODELS:-}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OR_SITE_URL: ${OPENROUTER_SITE_URL:-}
+      OR_APP_NAME: BIDACHAT
+      EXTERNAL_AI_GATEWAY_PROVIDERS: ${EXTERNAL_AI_GATEWAY_PROVIDERS:-}
+      LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY:-}
+      LITELLM_CPUS: ${LITELLM_CPUS:-}
+      LITELLM_MEMORY_LIMIT: ${LITELLM_MEMORY_LIMIT:-}
+      LITELLM_LOCAL_MODEL_COST_MAP: "True"
+      LITELLM_LOG: ERROR
+      DISABLE_ADMIN_UI: "True"
+    entrypoint: ["python", "/app/bidachat/start.py"]
+    volumes:
+      - ./docker/litellm:/app/bidachat:ro
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:4000/health/liveliness', timeout=3)",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 45s
+    restart: unless-stopped
+
   ollama:
     image: ollama/ollama:0.35.0@sha256:2a6e883b917fc543389599dae79918f5cac9e1438890506982f44aa4f5625d01
+    deploy:
+      resources:
+        limits:
+          cpus: ${OLLAMA_CPU_LIMIT:?Set OLLAMA_CPU_LIMIT in .env}
+          memory: ${OLLAMA_MEMORY_LIMIT:?Set OLLAMA_MEMORY_LIMIT in .env}
     environment:
       OLLAMA_HOST: 0.0.0.0:11434
       OLLAMA_MAX_LOADED_MODELS: ${OLLAMA_MAX_LOADED_MODELS:-1}
@@ -23,6 +76,11 @@ services:
     build:
       context: .
       dockerfile: docker/backend.Dockerfile
+    deploy:
+      resources:
+        limits:
+          cpus: ${BACKEND_CPU_LIMIT:?Set BACKEND_CPU_LIMIT in .env}
+          memory: ${BACKEND_MEMORY_LIMIT:?Set BACKEND_MEMORY_LIMIT in .env}
     environment:
       APP_ENV: ${APP_ENV:-development}
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:?Set POSTGRES_USER in .env}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@database:5432/${POSTGRES_DB:?Set POSTGRES_DB in .env}
@@ -33,19 +91,38 @@ services:
       DOCUMENT_MAX_SIZE_BYTES: ${DOCUMENT_MAX_SIZE_BYTES:-20971520}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       GEMINI_MODEL: ${GEMINI_MODEL:-}
+      GEMINI_MODELS: ${GEMINI_MODELS:-}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       OPENAI_MODEL: ${OPENAI_MODEL:-}
+      OPENAI_MODELS: ${OPENAI_MODELS:-}
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
       OPENROUTER_MODEL: ${OPENROUTER_MODEL:-}
+      OPENROUTER_MODELS: ${OPENROUTER_MODELS:-}
       OPENROUTER_SITE_URL: ${OPENROUTER_SITE_URL:-}
+      VERTEX_ENABLED: ${VERTEX_ENABLED:-false}
+      VERTEX_MODEL: ${VERTEX_MODEL:-}
+      VERTEX_MODELS: ${VERTEX_MODELS:-}
+      LITELLM_BASE_URL: http://litellm:4000
+      LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY:-}
+      EXTERNAL_AI_GATEWAY_PROVIDERS: ${EXTERNAL_AI_GATEWAY_PROVIDERS:-}
+      CONVERSATION_TTL_HOURS: ${CONVERSATION_TTL_HOURS:-24}
+      CONVERSATION_MAX_TURNS: ${CONVERSATION_MAX_TURNS:-12}
+      CONVERSATION_MAX_CHARS: ${CONVERSATION_MAX_CHARS:-12000}
+      CONVERSATION_CLEANUP_INTERVAL_MINUTES: ${CONVERSATION_CLEANUP_INTERVAL_MINUTES:-60}
+      WIDGET_IDENTITY_MASTER_KEY: ${WIDGET_IDENTITY_MASTER_KEY:-}
       OLLAMA_CONTEXT_LENGTH: ${OLLAMA_CONTEXT_LENGTH:-2048}
       OLLAMA_TIMEOUT_SECONDS: ${OLLAMA_TIMEOUT_SECONDS:-600}
       OLLAMA_MODEL: ${OLLAMA_MODEL:-}
+      VISION_PROVIDER: ${VISION_PROVIDER:-ollama}
+      VISION_MODEL: ${VISION_MODEL:-}
       OLLAMA_BASE_URL: http://ollama:11434
       WIDGET_ALLOWED_ORIGINS: ${WIDGET_ALLOWED_ORIGINS:-}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
     depends_on:
+      litellm:
+        condition: service_healthy
+        required: false
       ollama:
         condition: service_healthy
       database:
@@ -65,7 +142,12 @@ services:
       retries: 3
       start_period: 10s
     restart: unless-stopped
-    command: ["sh", "-c", "python -m app.bootstrap && exec uvicorn app.main:app --host 0.0.0.0 --port 8000 --proxy-headers --forwarded-allow-ips='*'"]
+    command:
+      [
+        "sh",
+        "-c",
+        "python -m app.bootstrap && exec uvicorn app.main:app --host 0.0.0.0 --port 8000 --proxy-headers --forwarded-allow-ips='*'",
+      ]
     volumes:
       - bidachat_document_storage:/app/storage/documents
 
@@ -73,6 +155,11 @@ services:
     build:
       context: .
       dockerfile: docker/frontend.Dockerfile
+    deploy:
+      resources:
+        limits:
+          cpus: ${FRONTEND_CPU_LIMIT:?Set FRONTEND_CPU_LIMIT in .env}
+          memory: ${FRONTEND_MEMORY_LIMIT:?Set FRONTEND_MEMORY_LIMIT in .env}
     environment:
       BACKEND_API_ORIGIN: http://backend:8000
     depends_on:
@@ -84,6 +171,11 @@ services:
 
   nginx:
     image: nginx:1.30.5-alpine3.24@sha256:0985e772fb9f729e6fa0980da05fca5d9c468e870eed43071545afa9d2e27d94
+    deploy:
+      resources:
+        limits:
+          cpus: ${NGINX_CPU_LIMIT:?Set NGINX_CPU_LIMIT in .env}
+          memory: ${NGINX_MEMORY_LIMIT:?Set NGINX_MEMORY_LIMIT in .env}
     depends_on:
       backend:
         condition: service_healthy
@@ -102,6 +194,11 @@ services:
     restart: unless-stopped
   database:
     image: pgvector/pgvector:pg16@sha256:ccc6e83d6e35e931dc7c5def2022729d5a6c370318d099181995567ff1fb4d6b
+    deploy:
+      resources:
+        limits:
+          cpus: ${DATABASE_CPU_LIMIT:?Set DATABASE_CPU_LIMIT in .env}
+          memory: ${DATABASE_MEMORY_LIMIT:?Set DATABASE_MEMORY_LIMIT in .env}
     environment:
       POSTGRES_DB: ${POSTGRES_DB:?Set POSTGRES_DB in .env}
       POSTGRES_USER: ${POSTGRES_USER:?Set POSTGRES_USER in .env}

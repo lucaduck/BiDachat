@@ -1,10 +1,12 @@
-from io import BytesIO
+import csv
+from io import BytesIO, StringIO
 from pathlib import Path
 from uuid import UUID
 from zipfile import BadZipFile
 
 from docx import Document as WordDocument
 from docx.opc.exceptions import PackageNotFoundError
+from docx.table import Table
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from pypdf import PdfReader
 from pypdf.errors import PdfReadError
@@ -19,6 +21,7 @@ DOCX_MEDIA_TYPE = (
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 )
 IMAGE_MEDIA_TYPES = {"image/png", "image/jpeg", "image/webp"}
+CSV_MEDIA_TYPES = {"text/csv", "application/csv", "application/vnd.ms-excel"}
 
 
 class DocumentProcessingService:
@@ -92,13 +95,14 @@ class DocumentProcessingService:
     async def _extract_content(self, path: Path, media_type: str) -> str:
         if media_type not in IMAGE_MEDIA_TYPES:
             return self._extract_text(path, media_type)
-        if not self.settings.ollama_model:
+        model = self.settings.effective_vision_model
+        if not model:
             raise ProviderConfigurationError(
-                "OLLAMA_MODEL is required for image sources"
+                "VISION_MODEL is required for image sources"
             )
         description = await self.provider.answer(
-            provider="ollama",
-            model=self.settings.ollama_model,
+            provider=self.settings.vision_provider,
+            model=model,
             question=(
                 "Transcribe all legible text and describe only visible facts in this "
                 "image. Include chart titles, axis labels, legends, values, and "
@@ -123,10 +127,50 @@ class DocumentProcessingService:
                     for page in PdfReader(BytesIO(content)).pages
                 )
             elif media_type == DOCX_MEDIA_TYPE:
-                text = "\n".join(
-                    paragraph.text
-                    for paragraph in WordDocument(BytesIO(content)).paragraphs
-                )
+                lines = []
+                for item in WordDocument(BytesIO(content)).iter_inner_content():
+                    if isinstance(item, Table):
+                        rows = [
+                            [cell.text.strip() for cell in row.cells]
+                            for row in item.rows
+                        ]
+                        if rows:
+                            headers = rows[0]
+                            lines.append(" | ".join(headers))
+                            for row in rows[1:]:
+                                lines.append(
+                                    " | ".join(
+                                        f"{headers[index]}: {value}"
+                                        if index < len(headers) and headers[index]
+                                        else value
+                                        for index, value in enumerate(row)
+                                    )
+                                )
+                    elif item.text.strip():
+                        lines.append(item.text.strip())
+                text = "\n".join(lines)
+            elif media_type in CSV_MEDIA_TYPES:
+                decoded = content.decode("utf-8-sig")
+                try:
+                    dialect = csv.Sniffer().sniff(decoded[:4096], delimiters=",;\t")
+                except csv.Error:
+                    dialect = csv.excel
+                reader = csv.reader(StringIO(decoded, newline=""), dialect=dialect)
+                headers = next(reader, [])
+                lines = []
+                for row in reader:
+                    if not any(value.strip() for value in row):
+                        continue
+                    cells = []
+                    for index, value in enumerate(row):
+                        column_name = (
+                            headers[index].strip()
+                            if index < len(headers) and headers[index].strip()
+                            else f"column_{index + 1}"
+                        )
+                        cells.append(f"{column_name}: {value.strip()}")
+                    lines.append(" | ".join(cells))
+                text = "\n".join(lines)
             else:
                 text = content.decode("utf-8")
         except (
@@ -134,6 +178,7 @@ class DocumentProcessingService:
             PackageNotFoundError,
             BadZipFile,
             UnicodeDecodeError,
+            csv.Error,
         ) as exc:
             raise ValueError("Document text cannot be extracted") from exc
         if not text.strip():

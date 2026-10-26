@@ -3,11 +3,38 @@ set -eu
 
 : "${IMAGE_TAG:?Set IMAGE_TAG to the validated commit SHA}"
 
-acceleration=${OLLAMA_ACCELERATION:-}
-if [ -z "$acceleration" ] && [ -f .env ]; then
-    acceleration=$(awk -F= '$1 == "OLLAMA_ACCELERATION" { gsub(/\r/, "", $2); print $2; exit }' .env)
+env_value() {
+    key=$1
+    default=$2
+    value=""
+
+    if [ -f .env ]; then
+        value=$(awk -F= -v key="$key" '$1 == key { gsub(/\r/, "", $2); print $2; exit }' .env)
+    fi
+
+    printf '%s' "${value:-$default}"
+}
+
+acceleration=$(env_value "OLLAMA_ACCELERATION" "cpu")
+vertex_enabled=$(env_value "VERTEX_ENABLED" "false")
+gateway_providers=$(env_value "EXTERNAL_AI_GATEWAY_PROVIDERS" "")
+case "$vertex_enabled" in
+    true|false) ;;
+    *) printf 'VERTEX_ENABLED must be true or false\n' >&2; exit 1 ;;
+esac
+if [ -n "$gateway_providers" ] || [ "$vertex_enabled" = "true" ]; then
+    case ",$gateway_providers," in
+        *,vertex,*)
+            [ "$vertex_enabled" = "true" ] || { printf 'Vertex gateway routing requires VERTEX_ENABLED=true\n' >&2; exit 1; }
+            ;;
+    esac
 fi
-acceleration=${acceleration:-cpu}
+if [ "$vertex_enabled" = "true" ]; then
+    for key in VERTEX_PROJECT VERTEX_LOCATION VERTEX_MODEL VERTEX_CREDENTIALS_FILE LITELLM_MASTER_KEY LITELLM_CPUS LITELLM_MEMORY_LIMIT; do
+        test -n "$(env_value "$key" "")" || { printf 'Set %s in .env\n' "$key" >&2; exit 1; }
+    done
+    test -f "$(env_value VERTEX_CREDENTIALS_FILE "")" || { printf 'Vertex credential file not found\n' >&2; exit 1; }
+fi
 
 case "$acceleration" in
     cpu)
@@ -21,6 +48,17 @@ case "$acceleration" in
 esac
 
 compose() {
+    if [ -n "$gateway_providers" ]; then
+        set -- --profile ai-gateway "$@"
+    fi
+    case ",$gateway_providers," in
+        *,vertex,*)
+            set -- -f docker-compose.vertex.yml "$@"
+            ;;
+    esac
+    if [ "$vertex_enabled" = "true" ] && [ -z "$gateway_providers" ]; then
+        set -- --profile vertex -f docker-compose.vertex.yml "$@"
+    fi
     if [ "$acceleration" = "gpu" ]; then
         docker compose -f docker-compose.production.yml -f docker-compose.gpu.yml "$@"
     else
@@ -28,8 +66,41 @@ compose() {
     fi
 }
 
+ensure_ollama_model() {
+    model=$1
+    if compose exec -T ollama ollama list | awk 'NR > 1 { print $1 }' | grep -Fx "$model" > /dev/null; then
+        return
+    fi
+    printf 'Downloading Ollama model %s\n' "$model"
+    compose exec -T ollama ollama pull "$model"
+}
+
 printf 'Deploying Ollama with %s acceleration\n' "$acceleration"
+compose config --quiet
 compose pull backend frontend nginx
+compose up -d --wait database ollama
+compose exec -T database sh -s < docker/postgres/migrate-database.sh
+if [ -n "$gateway_providers" ] || [ "$vertex_enabled" = "true" ]; then
+    compose pull litellm
+    compose up -d --wait litellm
+fi
+
+ollama_model=$(env_value "OLLAMA_MODEL" "")
+embedding_provider=$(env_value "EMBEDDING_PROVIDER" "ollama")
+embedding_model=$(env_value "EMBEDDING_MODEL" "embeddinggemma:300m")
+vision_provider=$(env_value "VISION_PROVIDER" "ollama")
+vision_model=$(env_value "VISION_MODEL" "")
+
+if [ -n "$ollama_model" ]; then
+    ensure_ollama_model "$ollama_model"
+fi
+if [ "$embedding_provider" = "ollama" ] && [ -n "$embedding_model" ]; then
+    ensure_ollama_model "$embedding_model"
+fi
+if [ "$vision_provider" = "ollama" ] && [ -n "$vision_model" ]; then
+    ensure_ollama_model "$vision_model"
+fi
+
 compose up -d --remove-orphans
 compose exec -T nginx nginx -t
 compose exec -T nginx nginx -s reload

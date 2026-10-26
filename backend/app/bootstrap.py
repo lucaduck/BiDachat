@@ -19,15 +19,30 @@ async def bootstrap() -> None:
     try:
         async with database.session() as session:
             models = []
-            if os.getenv("GEMINI_API_KEY", "").strip():
-                models.append(("gemini", os.getenv("GEMINI_MODEL", "gemini-2.5-flash")))
+            if settings.vertex_enabled:
+                models.extend(
+                    ("vertex", model) for model in settings.configured_vertex_models
+                )
+            if settings.provider_uses_gateway("gemini"):
+                models.extend(
+                    ("gemini", model)
+                    for model in settings.configured_models_for_provider("gemini")
+                )
+            elif os.getenv("GEMINI_API_KEY", "").strip():
+                gemini_model = settings.gemini_model.strip() or "gemini-2.5-flash"
+                models.append(("gemini", gemini_model))
             ollama_model = os.getenv("OLLAMA_MODEL", "").strip()
             if ollama_model:
                 await LlmProvider(settings).validate_ollama_model(
                     ollama_model, has_image=False
                 )
                 models.append(("ollama", ollama_model))
-            if (
+            if settings.provider_uses_gateway("openai"):
+                models.extend(
+                    ("openai", model)
+                    for model in settings.configured_models_for_provider("openai")
+                )
+            elif (
                 settings.openai_api_key is not None
                 and settings.openai_api_key.get_secret_value().strip()
             ):
@@ -35,7 +50,12 @@ async def bootstrap() -> None:
                 if not openai_model:
                     raise RuntimeError("Configure OPENAI_MODEL with OPENAI_API_KEY")
                 models.append(("openai", openai_model))
-            if (
+            if settings.provider_uses_gateway("openrouter"):
+                models.extend(
+                    ("openrouter", model)
+                    for model in settings.configured_models_for_provider("openrouter")
+                )
+            elif (
                 settings.openrouter_api_key is not None
                 and settings.openrouter_api_key.get_secret_value().strip()
             ):

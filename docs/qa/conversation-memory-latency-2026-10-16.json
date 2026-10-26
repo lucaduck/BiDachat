@@ -1,0 +1,41 @@
+{
+  "measured_at": "2026-10-16T15:49:31.412061+00:00",
+  "layer": "LLM generation through FastAPI provider and LiteLLM; excludes database, embeddings and HTTP transport",
+  "model": "gemini-3.1-flash-lite",
+  "method": "30 alternating paired observations after one excluded warm-up",
+  "question_chars": 37,
+  "retained_history_chars": {
+    "without_memory": 0,
+    "with_memory": 42
+  },
+  "groups": {
+    "without_memory": {
+      "successful_samples": 30,
+      "median_ms": 830.66,
+      "p95_ms": 1375.24,
+      "min_ms": 664.75,
+      "max_ms": 1983.45,
+      "prompt_chars": 1291,
+      "latencies_ms": [
+        1092.72, 771.73, 801.24, 790.8, 879.46, 809.19, 841.28, 698.14, 974.82, 820.04, 778.64,
+        707.66, 965.64, 898.81, 1983.45, 664.75, 983.16, 850.46, 734.79, 746.58, 933.9, 794.61,
+        889.52, 775.65, 991.89, 791.28, 812.31, 1375.24, 1002.56, 844.86
+      ]
+    },
+    "with_memory": {
+      "successful_samples": 30,
+      "median_ms": 781.75,
+      "p95_ms": 1291.95,
+      "min_ms": 600.59,
+      "max_ms": 1613.32,
+      "prompt_chars": 1377,
+      "latencies_ms": [
+        717.96, 770.63, 763.87, 985.11, 838.44, 690.03, 738.85, 877.99, 868.87, 694.3, 740.11,
+        1032.35, 773.21, 762.04, 889.27, 686.81, 632.62, 744.04, 675.82, 600.59, 1198.33, 1136.64,
+        710.09, 935.35, 1220.25, 1291.95, 837.59, 1613.32, 900.35, 790.28
+      ]
+    }
+  },
+  "failures": [],
+  "interpretation_limit": "Exploratory local measurement; it is not a production SLA and does not prove a performance improvement."
+}

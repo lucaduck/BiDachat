@@ -56,8 +56,11 @@ def test_embedding_request_uses_embedding_two_task_prefix(monkeypatch):
 
 def test_public_query_endpoint_returns_answer_without_admin_token(monkeypatch):
     _requests.clear()
-    app = create_app(Settings(database_url=None))
+    app = create_app(
+        Settings(database_url=None, widget_allowed_origins="https://dashboard.example")
+    )
     chatbot_id = uuid4()
+    conversation_id = uuid4()
 
     async def fake_session():
         yield object()
@@ -66,11 +69,14 @@ def test_public_query_endpoint_returns_answer_without_admin_token(monkeypatch):
         assert kwargs["chatbot_id"] == chatbot_id
         assert kwargs["question"] == "Hola"
         assert kwargs["page_context"] == "Ventas 42"
+        assert kwargs["conversation_id"] == conversation_id
+        assert kwargs["origin"] == "https://dashboard.example"
         return SimpleNamespace(
             id=uuid4(),
             answer="Respuesta de prueba",
             response_time_ms=12,
             completed_at=datetime.now(UTC),
+            conversation_id=conversation_id,
         )
 
     app.dependency_overrides[get_database_session] = fake_session
@@ -78,15 +84,28 @@ def test_public_query_endpoint_returns_answer_without_admin_token(monkeypatch):
     with TestClient(app) as client:
         response = client.post(
             f"/api/v1/chatbots/{chatbot_id}/queries",
-            json={"question": "Hola", "page_context": "Ventas\n42"},
+            headers={"Origin": "https://dashboard.example"},
+            json={
+                "question": "Hola",
+                "page_context": "Ventas\n42",
+                "conversation_id": str(conversation_id),
+            },
         )
     assert response.status_code == 200
     assert response.json()["answer"] == "Respuesta de prueba"
+    assert response.json()["conversation_id"] == str(conversation_id)
+
+
+def test_query_request_rejects_invalid_conversation_identifier() -> None:
+    with pytest.raises(ValueError):
+        QueryRequest(question="Hola", conversation_id="not-a-uuid")
 
 
 def test_public_query_endpoint_limits_repeated_requests(monkeypatch):
     _requests.clear()
-    app = create_app(Settings(database_url=None))
+    app = create_app(
+        Settings(database_url=None, widget_allowed_origins="https://dashboard.example")
+    )
 
     async def fake_session():
         yield object()
@@ -101,8 +120,21 @@ def test_public_query_endpoint_limits_repeated_requests(monkeypatch):
     with TestClient(app) as client:
         url = f"/api/v1/chatbots/{uuid4()}/queries"
         for _ in range(10):
-            assert client.post(url, json={"question": "Hola"}).status_code == 200
-        assert client.post(url, json={"question": "Hola"}).status_code == 429
+            assert (
+                client.post(
+                    url,
+                    headers={"Origin": "https://dashboard.example"},
+                    json={"question": "Hola"},
+                ).status_code
+                == 200
+            )
+        limited = client.post(
+            url,
+            headers={"Origin": "https://dashboard.example"},
+            json={"question": "Hola"},
+        )
+        assert limited.status_code == 429
+        assert limited.headers["Retry-After"] == "60"
     _requests.clear()
 
 

@@ -38,7 +38,7 @@ El cambio `design-mvp-database` conserva tareas de aprobación e implementación
 
 ## Aprobación solicitada
 
-La [sección 11 del diseño de datos](database-design.md#11-aprobación-y-siguiente-paso) reúne las decisiones que el usuario pidió revisar antes de implementar la base. La estructura del proyecto y la inicialización de herramientas ya están realizadas.
+La [sección 11 del diseño de datos](database-design.md#11-historial-de-decisiones-iniciales) conserva las decisiones que el usuario pidió revisar antes de implementar la base. La estructura del proyecto y la inicialización de herramientas ya estaban realizadas en esa etapa.
 
 ## Actualización de base local — 2026-09-16
 

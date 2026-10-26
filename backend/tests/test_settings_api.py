@@ -23,6 +23,8 @@ def test_settings_return_configuration_without_secrets():
             gemini_api_key="private-gemini-key",
             openai_api_key=" ",
             openrouter_api_key="private-openrouter-key",
+            vision_provider="openrouter",
+            vision_model="visual-fixture",
             widget_allowed_origins=" https://dashboard.example, ",
         )
     )
@@ -33,16 +35,23 @@ def test_settings_return_configuration_without_secrets():
     assert response.json()["gemini_configured"] is True
     assert response.json()["openai_configured"] is False
     assert response.json()["openrouter_configured"] is True
+    assert response.json()["external_ai_gateway_providers"] == []
     assert response.json()["widget_allowed_origins"] == ["https://dashboard.example"]
+    assert response.json()["vision_provider"] == "openrouter"
+    assert response.json()["vision_model"] == "visual-fixture"
     assert "private-gemini-key" not in response.text
     assert "private-openrouter-key" not in response.text
     assert set(response.json()) == {
         "gemini_configured",
         "openai_configured",
         "openrouter_configured",
+        "vertex_configured",
+        "external_ai_gateway_providers",
         "embedding_provider",
         "embedding_model",
         "embedding_dimensions",
+        "vision_provider",
+        "vision_model",
         "document_max_size_bytes",
         "session_ttl_minutes",
         "widget_allowed_origins",

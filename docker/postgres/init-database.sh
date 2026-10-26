@@ -33,3 +33,18 @@ psql --set ON_ERROR_STOP=1 \
   --username "$POSTGRES_USER" \
   --dbname "$POSTGRES_DB" \
   --file /migrations/004_chatbot_document_associations.up.sql
+
+psql --set ON_ERROR_STOP=1 \
+  --username "$POSTGRES_USER" \
+  --dbname "$POSTGRES_DB" \
+  --file /migrations/005_conversation_memory.up.sql
+
+psql --set ON_ERROR_STOP=1 \
+  --username "$POSTGRES_USER" \
+  --dbname "$POSTGRES_DB" \
+  --file /migrations/006_conversation_identity.up.sql
+
+psql --set ON_ERROR_STOP=1 \
+  --username "$POSTGRES_USER" \
+  --dbname "$POSTGRES_DB" \
+  --file /migrations/007_conversation_feedback.up.sql

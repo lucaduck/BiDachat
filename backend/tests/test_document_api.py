@@ -187,6 +187,32 @@ async def _exercise_document_api(settings: Settings, storage_path: Path) -> None
                     headers=headers,
                 )
                 assert wrong_chatbot_retry.status_code == 404
+                associated_with_b = await client.post(
+                    f"/api/v1/chatbots/{chatbot_b_id}/documents/associations",
+                    headers=headers,
+                    json={"document_ids": [uploaded["id"]]},
+                )
+                assert associated_with_b.status_code == 200
+                shared_retry = await client.post(
+                    f"/api/v1/chatbots/{chatbot_b_id}/documents/"
+                    f"{uploaded['id']}/processing",
+                    headers=headers,
+                )
+                assert shared_retry.status_code == 200
+                assert shared_retry.json()["error_code"] == "embedding_not_configured"
+                assert (
+                    await client.delete(
+                        f"/api/v1/chatbots/{chatbot_b_id}/documents/{uploaded['id']}",
+                        headers=headers,
+                    )
+                ).status_code == 204
+                assert (
+                    await client.post(
+                        f"/api/v1/chatbots/{chatbot_b_id}/documents/"
+                        f"{uploaded['id']}/processing",
+                        headers=headers,
+                    )
+                ).status_code == 404
                 retried = await client.post(retry_url, headers=headers)
                 assert retried.status_code == 200
                 assert retried.json()["error_code"] == "embedding_not_configured"

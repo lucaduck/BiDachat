@@ -32,6 +32,10 @@ el documento OpenAPI.
 | `POST /api/v1/chatbots/{chatbot_id}/documents/{document_id}/processing` | Administrativo | Reintenta procesar una fuente fallida o pendiente. |
 | `GET /api/v1/chatbots/{chatbot_id}/metrics` | Administrativo | Consulta consultas, tiempos y estados, con filtros y agrupación. |
 | `POST /api/v1/chatbots/{chatbot_id}/queries` | Público, con límite | Recibe la pregunta y una imagen opcional del widget; recupera contexto y devuelve la respuesta. |
+| `POST /api/v1/chatbots/{chatbot_id}/survey-offers` | Público, con origen e identidad verificados y límite | Registra una oferta voluntaria tras una respuesta completada. |
+| `POST /api/v1/chatbots/{chatbot_id}/survey-responses` | Público, con origen e identidad verificados y límite | Registra una única valoración por conversación. |
+| `GET /api/v1/chatbots/{chatbot_id}/satisfaction-metrics` | Administrativo | Agrega ofertas y valoraciones por fecha UTC de oferta. |
+| `GET /api/v1/chatbots/{chatbot_id}/survey-responses` | Administrativo | Lista comentarios con paginación, sin datos de conversación o identidad. |
 
 El widget envía cada consulta por HTTP `POST` a la API REST. No mantiene una
 conexión WebSocket.
@@ -43,7 +47,7 @@ Se procesa solo para la respuesta actual y no se guarda en las métricas.
 
 Las rutas se registran en [backend/app/api/router.py](../backend/app/api/router.py).
 Los grupos visibles en Swagger se declaran en `auth.py`, `chatbots.py`,
-`queries.py` y `settings.py`. Las reglas visibles para los datos de entrada,
+`queries.py`, `satisfaction.py` y `settings.py`. Las reglas visibles para los datos de entrada,
 como tamaños máximos, tipos de imagen y campos obligatorios, provienen de
 `backend/app/schemas/`.
 
